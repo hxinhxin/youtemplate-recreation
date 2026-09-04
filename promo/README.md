@@ -23,7 +23,7 @@ Set `PROMO_SRC` to the directory holding the three source clips.
 
 ## The edit
 
-43 shots, mostly 0.4–1.5 s, with a few longer holds for contrast,
+42 shots, mostly 0.4–1.5 s, with a few longer holds for contrast,
 alternating close-ups, extreme close-ups, medium and wide shots, low
 angles, crowd reactions, hands, stage lights and venue details. The
 rhythm builds: hard cut, punch-in, crowd, torn transition, close-up,
