@@ -1,11 +1,13 @@
 # Concert promo — vertical torn-film edit
 
-`concert_promo.mp4` — 1080x1920, 30 fps, 26 s, no audio.
+`concert_promo.mp4` — 1080x1920, 30 fps, 29 s, no audio.
 
-Built entirely from the three supplied source clips. Nothing is generated:
-no text, logos, typography or added graphic elements, and no people,
-faces, clothing or environments other than those in the footage. Each
-source clip is trimmed short of its trailing editing-app outro card.
+Built entirely from the seven supplied source clips, closing on the band's
+own logo. Nothing else is generated: no text, typography or added graphic
+elements, and no people, faces, clothing or environments other than those
+in the footage. Clips A, B and C are trimmed short of the trailing
+editing-app outro card each carries; D-G run clean to the end. Three of
+the clips are 720x1280 and are scaled up to the 1080x1920 timeline.
 
 ## Files
 
@@ -17,7 +19,7 @@ Set `PROMO_SRC` to the directory holding the three source clips.
 
 ## The edit
 
-~40 shots, mostly 0.4–1.5 s, with a few longer holds for contrast,
+43 shots, mostly 0.4–1.5 s, with a few longer holds for contrast,
 alternating close-ups, extreme close-ups, medium and wide shots, low
 angles, crowd reactions, hands, stage lights and venue details. The
 rhythm builds: hard cut, punch-in, crowd, torn transition, close-up,
@@ -41,12 +43,21 @@ Supporting transitions: hard cuts, very short white/camera-flash frames,
 overexposed roll-offs, and brief double exposures where two shots overlap
 semi-transparently.
 
+## Ending
+
+The closing shot slows down and is ripped away by one last torn transition
+into the band logo, which resolves over the crowd still moving in slow
+motion behind it, settles, holds, and fades out. The artwork is a solid
+silhouette and is used at its full shape, rendered as light so it reads
+against the dark stage footage.
+
 ## Look
 
 Saturated reds, purples, blues and greens; stage lights allowed to blow
 out and bloom; deep blacks with crowd silhouettes left dark. Per-shot
-auto-exposure keeps every framing readable across footage that swings
-from spotlights to near-black. Handheld shake, punch-ins, quick zooms,
+auto-iris meters every frame and follows the lighting, smoothed over about
+a third of a second, so footage that swings from spotlights to near-black
+stays readable while the venue strobing still reads as flicker. Handheld shake, punch-ins, quick zooms,
 speed ramps (fast → slow → fast) and motion blur on fast movement.
 Restrained analog texture on top: fine grain, faint scanlines, mild
 chromatic aberration at the edges, occasional light leaks and lens

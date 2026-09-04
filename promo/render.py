@@ -1,8 +1,9 @@
-"""Build the vertical concert promo from the three source clips.
+"""Build the vertical concert promo from the seven source clips.
 
 Only the supplied footage is used. Shots are re-framed, re-timed, graded and
-cut together; the transitions rip the frame apart physically. No text, logos
-or generated imagery are added anywhere.
+cut together; the transitions rip the frame apart physically. Nothing is
+generated: the only added element is the band's own logo, which closes the
+edit.
 """
 
 import os
@@ -21,12 +22,20 @@ UP = os.environ.get(
     "/root/.claude/uploads/38da5e2f-8246-5655-880d-8e28fbbc2dbf",
 )
 
-# Source clips, trimmed short of the trailing app outro on each.
+# Source clips. A/B/C are trimmed short of the trailing app outro card each
+# of them carries; D-G run clean to the end. D, E and F are 720x1280 and are
+# scaled up to the 1080x1920 timeline on decode.
 SRC = {
     "A": (f"{UP}/0e5e49bf-copy_CC8DD977890C41C08CBBE9B65B7EF9F0.mov", 6.0),
     "B": (f"{UP}/1d16230a-copy_E86BFBEFCC9F4491B7273090EE42AF2A.mov", 6.6),
     "C": (f"{UP}/7748be66-copy_E0792E9D4E6D4775832901CF7195E626.mov", 13.2),
+    "D": (f"{UP}/95297706-copy_58F8F1F5DCFB48818D866C1F722EF75F.mov", 4.7),
+    "E": (f"{UP}/a5dfdf39-copy_4505F4A3FDDE4CC8835507BAB5216B1D.mov", 11.9),
+    "F": (f"{UP}/f38e8ecc-copy_2DB5F7EF9CE04896A740BA1E239CB937.mov", 21.5),
+    "G": (f"{UP}/18d86975-copy_3A60ACACE1B14B47A64B0F19D5F7883F.mov", 14.7),
 }
+
+LOGO = f"{UP}/dd53e4b7-image.webp"
 
 _cache = {}
 
@@ -40,7 +49,9 @@ def decode(key, start, nframes):
         return _cache[ck]
     cmd = [
         "ffmpeg", "-v", "error", "-ss", f"{start:.3f}", "-i", path,
-        "-frames:v", str(nframes), "-f", "rawvideo", "-pix_fmt", "rgb24", "-",
+        "-frames:v", str(nframes),
+        "-vf", f"scale={W}:{H}:flags=lanczos",
+        "-f", "rawvideo", "-pix_fmt", "rgb24", "-",
     ]
     raw = subprocess.run(cmd, capture_output=True, check=True).stdout
     a = np.frombuffer(raw, np.uint8)
@@ -108,21 +119,30 @@ def render_shot(shot, seed):
     jolt = np.exp(-np.arange(n) / 3.0) * rng.normal(0, 16, 1)[0] * amp
     sx = sx + jolt
 
-    # Auto-exposure: the source swings from blown-out spotlights to near-black
-    # crowd. Meter the middle of the shot so every framing lands somewhere
-    # readable, then let the grade crush the blacks back down.
-    mid = min(len(src) - 1, int(pos[len(pos) // 2]))
+    # Auto-iris. The venue lighting swings from blown-out spotlights to black
+    # within a single shot, so a fixed gain leaves some frames dead. Meter
+    # every frame and follow it, smoothed over about a third of a second so
+    # the strobing still reads as flicker rather than being levelled flat.
     zm = (z0 + z1) / 2
     mcw, mch = W / zm, H / zm
     ml = float(np.clip((cx + cx1) / 2 * W - mcw / 2, 0, W - mcw))
     mt = float(np.clip((cy + cy1) / 2 * H - mch / 2, 0, H - mch))
-    probe = np.asarray(
-        Image.fromarray(src[mid]).resize((96, 170), Image.BILINEAR,
-                                         box=(ml, mt, ml + mcw, mt + mch)),
-        np.float32) / 255.0
-    lvl = float(np.mean(np.sort(probe.mean(2), axis=None)[-int(96 * 170 * 0.35):]))
-    auto = float(np.clip(0.30 / max(lvl, 0.02), 0.85, 2.6))
-    exposure = shot.get("exposure", 1.0) * auto
+    keep = int(96 * 170 * 0.35)
+    lvls = np.empty(n, np.float32)
+    for i in range(n):
+        k = min(ns - 1, int(pos[i]))
+        probe = np.asarray(
+            Image.fromarray(src[k]).resize((96, 170), Image.BILINEAR,
+                                           box=(ml, mt, ml + mcw, mt + mch)),
+            np.float32) / 255.0
+        lvls[i] = np.mean(np.sort(probe.mean(2), axis=None)[-keep:])
+
+    gain = np.clip(0.30 / np.maximum(lvls, 0.02), 0.85, 3.2)
+    if n > 2:                       # smooth so the iris glides, never pumps
+        k = np.hanning(min(11, n if n % 2 else n - 1) + 2)[1:-1]
+        k /= k.sum()
+        gain = np.convolve(np.pad(gain, len(k) // 2, mode="edge"), k, "valid")
+    exposures = gain[:n] * shot.get("exposure", 1.0)
 
     frames = []
     prev_box = None
@@ -169,7 +189,7 @@ def render_shot(shot, seed):
             sat=shot.get("sat", 1.34),
             black=shot.get("black", 0.055),
             bloom=shot.get("bloom", 0.55),
-            exposure=exposure,
+            exposure=float(exposures[i]),
         )
         if shot.get("flare"):
             fx, fy = shot["flare"]
@@ -179,6 +199,54 @@ def render_shot(shot, seed):
             a = tf.light_leak(a, i, seed=seed, strength=shot["leak"])
         frames.append(a)
 
+    return frames
+
+
+def logo_card(bg, logo_rgba, scale=1.0, opacity=1.0, dim=1.0):
+    """The band mark held over the footage, which keeps moving behind it.
+
+    The supplied artwork is a solid silhouette; it is carried through at full
+    shape and rendered as light so it reads against the dark stage footage.
+    """
+    out = bg.astype(np.float32) * dim
+
+    lw = int(W * 0.60 * scale)
+    lh = int(lw * logo_rgba.height / logo_rgba.width)
+    lg = np.asarray(logo_rgba.resize((lw, lh), Image.LANCZOS), np.float32) / 255.0
+    alpha = lg[:, :, 3] * opacity
+
+    x0 = (W - lw) // 2
+    y0 = int(H * 0.50) - lh // 2
+
+    a = np.zeros((H, W), np.float32)
+    a[y0:y0 + lh, x0:x0 + lw] = alpha
+
+    # a soft halo so the mark sits in the light of the stage, not on top of it
+    halo = tf.blur((a * 255).astype(np.uint8), 34).astype(np.float32) / 255.0
+    out += (halo * 46.0)[:, :, None]
+    out = out * (1 - a[:, :, None]) + 246.0 * a[:, :, None]
+    return np.clip(out, 0, 255).astype(np.uint8)
+
+
+def make_outro(tail, rng, hold=54, fade=20):
+    """Rip from the last shot to the logo, hold, then settle out to black."""
+    logo_rgba = Image.open(LOGO).convert("RGBA")
+    frames = []
+
+    # the footage carries on behind the mark, slowed and pushed down in
+    # brightness so the logo is what the eye lands on
+    n_bg = len(tail)
+    for i in range(hold + fade):
+        bg = tail[min(i, n_bg - 1)]
+        bg = tf.box_blur(bg, 2)
+        ease = tf.smoothstep(min(1.0, i / 14.0))
+        scale = 1.045 - 0.045 * ease          # settles in, then rests
+        dim = 0.62 - 0.20 * ease
+        f = logo_card(bg, logo_rgba, scale=scale, opacity=1.0, dim=dim)
+        if i >= hold:                          # fade out, unhurried
+            k = 1.0 - tf.smoothstep((i - hold) / max(1, fade - 1))
+            f = np.clip(f.astype(np.float32) * k, 0, 255).astype(np.uint8)
+        frames.append(f)
     return frames
 
 
@@ -197,111 +265,114 @@ LIGHTS = dict(cx=0.42, cy=0.13)
 LOW = dict(cx=0.52, cy=0.76)
 
 EDIT = [
-    # --- opening: the room, before the noise -----------------------------
+    # --- opening: the room fills, before the noise -----------------------
     dict(src="A", t=3.6, dur=26, z0=1.30, z1=1.55, cx=0.50, cy=0.50,
          grade="amber", ramp="ramp_up", shake=0.9, out="torn_thin"),
-    dict(src="B", t=1.6, dur=20, z0=1.9, z1=1.6, cx=0.45, cy=0.45,
+    dict(src="B", t=1.6, dur=18, z0=1.9, z1=1.6, cx=0.45, cy=0.45,
          grade="purple", shake=0.8, bloom=0.75, out="cut"),
-    dict(src="C", t=0.25, dur=24, z0=1.05, z1=1.18, cx=0.5, cy=0.5,
-         grade="magenta", shake=1.1, out="torn_strips"),
+    dict(src="F", t=4.6, dur=22, z0=1.20, z1=1.42, cx=0.5, cy=0.62,
+         grade="blue", shake=1.0, bloom=0.8, out="torn_strips"),
+
+    # --- the room is full: first look at the stage -----------------------
+    dict(src="F", t=1.6, dur=26, z0=1.10, z1=1.30, cx=0.50, cy=0.45,
+         grade="magenta", shake=1.0, bloom=1.0, ramp="ramp_up",
+         out="cut"),
+    dict(src="F", t=2.4, dur=15, z0=2.3, z1=2.7, cx=0.48, cy=0.40,
+         grade="red", shake=1.5, out="flash_white"),
+    dict(src="F", t=3.2, dur=20, z0=1.5, z1=1.8, cx=0.50, cy=0.78,
+         grade="purple", shake=1.3, out="torn_big"),
+    dict(src="E", t=2.6, dur=17, z0=2.0, z1=2.4, cx=0.42, cy=0.44,
+         grade="red", shake=1.5, out="cut"),
+    dict(src="G", t=4.3, dur=22, z0=1.35, z1=1.15, cx=0.52, cy=0.52,
+         grade="blue", shake=1.2, bloom=1.05, flare=(0.46, 0.30),
+         out="torn_strips"),
 
     # --- into the crowd ---------------------------------------------------
-    dict(src="C", t=4.05, dur=16, z0=2.1, z1=2.45, **CROWD,
-         grade="red", shake=1.3, out="cut"),
-    dict(src="C", t=0.5, dur=14, z0=2.9, z1=3.2, **ECU,
-         grade="magenta", shake=1.5, out="flash_white"),
-    dict(src="C", t=2.05, dur=22, z0=1.15, z1=1.35, cx=0.5, cy=0.5,
-         grade="purple", shake=1.0, bloom=0.8, out="torn_big"),
-    dict(src="A", t=0.5, dur=15, z0=1.6, z1=2.1, cx=0.42, cy=0.62,
-         grade="amber", shake=1.2, out="cut"),
-    dict(src="C", t=5.45, dur=20, z0=1.5, z1=1.25, **LOW,
-         grade="blue", shake=1.2, bloom=0.9, flare=(0.47, 0.16),
-         out="torn_strips"),
+    dict(src="C", t=4.05, dur=15, z0=2.1, z1=2.45, **CROWD,
+         grade="red", shake=1.4, out="cut"),
+    dict(src="F", t=9.6, dur=18, z0=1.7, z1=2.0, cx=0.50, cy=0.72,
+         grade="magenta", shake=1.5, ramp="fast", out="flash_camera"),
+    dict(src="D", t=0.4, dur=20, z0=1.30, z1=1.55, cx=0.45, cy=0.50,
+         grade="blue", shake=1.2, bloom=0.9, out="torn_thin"),
+    dict(src="E", t=6.2, dur=16, z0=1.8, z1=2.1, cx=0.52, cy=0.52,
+         grade="red", shake=1.5, out="cut"),
+    dict(src="C", t=0.5, dur=13, z0=2.9, z1=3.2, **ECU,
+         grade="magenta", shake=1.6, out="double"),
+    dict(src="F", t=14.6, dur=24, z0=1.15, z1=1.35, cx=0.50, cy=0.50,
+         grade="purple", shake=1.1, bloom=0.9, out="torn_strips"),
 
     # --- first drop: shorter, harder -------------------------------------
-    dict(src="C", t=7.05, dur=15, z0=2.2, z1=2.6, **CROWD,
-         grade="red", shake=1.5, ramp="fast", out="cut"),
-    dict(src="C", t=7.6, dur=13, z0=2.6, z1=2.9, **CU,
-         grade="magenta", shake=1.6, out="flash_camera"),
-    dict(src="B", t=4.7, dur=14, z0=1.7, z1=2.2, cx=0.55, cy=0.5,
-         grade="purple", shake=1.1, out="torn_linger"),
-    dict(src="C", t=9.0, dur=18, z0=1.9, z1=1.6, **HANDS,
-         grade="blue", shake=1.4, ramp="ramp_down", exposure=1.0, out="cut"),
-    dict(src="C", t=8.6, dur=16, z0=1.1, z1=1.3, cx=0.5, cy=0.48,
-         grade="magenta", shake=1.2, bloom=1.0, flare=(0.50, 0.12),
-         out="double"),
-    dict(src="C", t=2.6, dur=20, z0=2.0, z1=2.3, **CROWD2,
-         grade="red", shake=1.3, out="torn_strips"),
+    dict(src="G", t=1.2, dur=15, z0=2.2, z1=2.6, cx=0.46, cy=0.44,
+         grade="red", shake=1.6, ramp="fast", out="cut"),
+    dict(src="A", t=0.5, dur=13, z0=1.6, z1=2.1, cx=0.42, cy=0.62,
+         grade="amber", shake=1.2, out="torn_linger"),
+    dict(src="F", t=5.0, dur=19, z0=1.45, z1=1.25, cx=0.50, cy=0.42,
+         grade="magenta", shake=1.3, bloom=1.0, out="cut"),
+    dict(src="C", t=7.05, dur=14, z0=2.2, z1=2.6, **CROWD,
+         grade="red", shake=1.6, out="flash_hot"),
+    dict(src="E", t=9.4, dur=18, z0=1.9, z1=1.65, cx=0.50, cy=0.50,
+         grade="blue", shake=1.4, ramp="ramp_down", out="torn_big"),
+    dict(src="B", t=4.7, dur=13, z0=1.7, z1=2.2, cx=0.55, cy=0.5,
+         grade="purple", shake=1.1, out="cut"),
+    dict(src="F", t=6.4, dur=20, z0=1.6, z1=1.9, cx=0.52, cy=0.46,
+         grade="red", shake=1.4, out="torn_strips"),
+    dict(src="G", t=12.2, dur=17, z0=1.5, z1=1.8, cx=0.50, cy=0.46,
+         grade="magenta", shake=1.5, out="cut"),
 
     # --- breath: one longer held shot ------------------------------------
-    dict(src="C", t=11.4, dur=44, z0=1.35, z1=1.10, cx=0.5, cy=0.62,
-         grade="red", shake=0.8, ramp="slow", bloom=0.5, exposure=1.02, out="torn_thin"),
+    dict(src="F", t=17.2, dur=42, z0=1.35, z1=1.10, cx=0.50, cy=0.52,
+         grade="blue", shake=0.8, ramp="slow", bloom=0.75,
+         flare=(0.47, 0.22), out="torn_thin"),
 
     # --- second drop: fastest section ------------------------------------
-    dict(src="C", t=3.4, dur=13, z0=2.5, z1=2.9, **ECU,
+    dict(src="C", t=3.4, dur=12, z0=2.5, z1=2.9, **ECU,
          grade="magenta", shake=1.7, out="cut"),
-    dict(src="A", t=1.4, dur=12, z0=2.0, z1=2.6, cx=0.55, cy=0.55,
-         grade="amber", shake=1.4, out="torn_strips"),
-    dict(src="C", t=6.0, dur=15, z0=1.8, z1=2.2, **HANDS,
-         grade="green", shake=1.5, out="flash_hot"),
-    dict(src="C", t=4.6, dur=16, z0=2.3, z1=2.0, **CROWD,
-         grade="red", shake=1.6, ramp="fast", out="cut"),
-    dict(src="B", t=2.4, dur=14, z0=2.4, z1=1.9, cx=0.40, cy=0.42,
-         grade="purple", shake=1.2, bloom=0.9, leak=0.45, out="torn_big"),
-    dict(src="C", t=0.9, dur=17, z0=1.9, z1=2.3, **CU,
+    dict(src="F", t=19.4, dur=16, z0=1.8, z1=2.1, cx=0.48, cy=0.74,
+         grade="purple", shake=1.7, ramp="fast", out="torn_strips"),
+    dict(src="E", t=4.6, dur=15, z0=2.1, z1=2.4, cx=0.46, cy=0.48,
+         grade="red", shake=1.6, out="flash_white"),
+    dict(src="D", t=2.5, dur=17, z0=1.7, z1=2.0, cx=0.45, cy=0.46,
+         grade="blue", shake=1.4, out="cut"),
+    dict(src="F", t=7.6, dur=19, z0=1.25, z1=1.5, cx=0.50, cy=0.40,
+         grade="magenta", shake=1.2, bloom=1.1, out="torn_big"),
+    dict(src="A", t=2.2, dur=14, z0=1.8, z1=2.3, cx=0.38, cy=0.58,
+         grade="amber", shake=1.3, leak=0.45, out="cut"),
+    dict(src="G", t=6.4, dur=20, z0=1.55, z1=1.30, cx=0.50, cy=0.50,
+         grade="red", shake=1.4, ramp="fast_slow_fast", out="torn_linger"),
+    dict(src="C", t=8.7, dur=16, z0=2.2, z1=2.6, cx=0.30, cy=0.62,
          grade="magenta", shake=1.6, out="cut"),
-    dict(src="C", t=5.5, dur=18, z0=1.25, z1=1.45, **LIGHTS,
-         grade="blue", shake=1.1, bloom=1.1, exposure=1.0,
-         flare=(0.45, 0.14), out="torn_linger"),
-    dict(src="C", t=9.6, dur=20, z0=1.6, z1=1.35, **LOW,
-         grade="red", shake=1.3, ramp="fast_slow_fast", exposure=1.0, out="cut"),
-    dict(src="C", t=7.0, dur=14, z0=2.7, z1=3.1, cx=0.34, cy=0.64,
-         grade="magenta", shake=1.7, out="double"),
-    dict(src="A", t=4.6, dur=16, z0=1.4, z1=1.8, cx=0.5, cy=0.44,
-         grade="amber", shake=1.2, leak=0.5, out="torn_strips"),
-
-    # --- third pass: deepest into the crowd ------------------------------
-    dict(src="C", t=8.7, dur=17, z0=2.2, z1=2.6, cx=0.30, cy=0.62,
-         grade="magenta", shake=1.6, exposure=1.0, out="cut"),
-    dict(src="C", t=1.5, dur=14, z0=2.6, z1=3.0, **CU,
-         grade="red", shake=1.7, ramp="fast", out="torn_thin"),
-    dict(src="C", t=5.6, dur=19, z0=1.35, z1=1.6, **LIGHTS,
-         grade="blue", shake=1.0, bloom=1.15, exposure=1.0,
-         flare=(0.44, 0.15), out="flash_hot"),
-    dict(src="C", t=11.0, dur=24, z0=1.7, z1=1.4, **LOW,
-         grade="red", shake=1.2, exposure=1.02, ramp="ramp_down",
-         out="torn_strips"),
-    dict(src="B", t=0.6, dur=15, z0=2.0, z1=2.5, cx=0.48, cy=0.38,
-         grade="purple", shake=1.3, bloom=0.95, out="cut"),
-    dict(src="C", t=4.5, dur=18, z0=2.4, z1=2.1, **CROWD,
-         grade="magenta", shake=1.6, out="double"),
-    dict(src="C", t=2.3, dur=21, z0=1.2, z1=1.45, cx=0.5, cy=0.5,
-         grade="purple", shake=1.1, bloom=0.85, out="torn_linger"),
-    dict(src="A", t=2.2, dur=16, z0=1.8, z1=2.3, cx=0.38, cy=0.58,
-         grade="amber", shake=1.3, out="cut"),
-    dict(src="C", t=6.4, dur=20, z0=2.0, z1=1.7, **HANDS,
-         grade="green", shake=1.5, ramp="fast_slow_fast", out="torn_big"),
-    dict(src="C", t=9.3, dur=15, z0=2.7, z1=3.0, **ECU,
-         grade="magenta", shake=1.8, exposure=1.0, out="flash_camera"),
+    dict(src="F", t=4.2, dur=18, z0=2.0, z1=1.7, cx=0.52, cy=0.44,
+         grade="blue", shake=1.5, out="double"),
+    dict(src="E", t=0.6, dur=17, z0=1.5, z1=1.8, cx=0.50, cy=0.60,
+         grade="red", shake=1.3, out="torn_strips"),
+    dict(src="C", t=5.6, dur=17, z0=1.35, z1=1.6, **LIGHTS,
+         grade="blue", shake=1.0, bloom=1.15, flare=(0.44, 0.15),
+         out="flash_camera"),
+    dict(src="G", t=9.6, dur=19, z0=1.6, z1=1.35, cx=0.50, cy=0.48,
+         grade="magenta", shake=1.4, out="cut"),
+    dict(src="B", t=0.6, dur=13, z0=2.0, z1=2.5, cx=0.48, cy=0.38,
+         grade="purple", shake=1.3, bloom=0.95, out="torn_thin"),
 
     # --- final build ------------------------------------------------------
-    dict(src="C", t=10.4, dur=15, z0=2.1, z1=2.5, **CROWD2,
-         grade="red", shake=1.6, exposure=1.02, out="flash_white"),
-    dict(src="C", t=8.8, dur=13, z0=2.8, z1=3.1, **ECU,
-         grade="magenta", shake=1.8, out="cut"),
-    dict(src="B", t=5.4, dur=12, z0=2.2, z1=2.8, cx=0.5, cy=0.55,
-         grade="purple", shake=1.4, out="torn_strips"),
-    dict(src="C", t=12.0, dur=16, z0=1.5, z1=1.2, cx=0.5, cy=0.7,
-         grade="blue", shake=1.3, exposure=1.0, out="cut"),
-    dict(src="C", t=4.2, dur=30, z0=2.4, z1=1.15, cx=0.36, cy=0.66,
+    dict(src="C", t=4.5, dur=16, z0=2.4, z1=2.1, **CROWD,
+         grade="magenta", shake=1.6, out="cut"),
+    dict(src="F", t=13.0, dur=18, z0=1.9, z1=1.6, cx=0.50, cy=0.70,
+         grade="red", shake=1.6, ramp="fast", out="torn_strips"),
+    dict(src="E", t=7.4, dur=15, z0=2.2, z1=2.5, cx=0.50, cy=0.50,
+         grade="magenta", shake=1.7, out="flash_white"),
+    dict(src="G", t=13.4, dur=17, z0=1.7, z1=1.45, cx=0.50, cy=0.44,
+         grade="blue", shake=1.4, out="cut"),
+    dict(src="C", t=4.2, dur=26, z0=2.4, z1=1.15, cx=0.36, cy=0.66,
          cx1=0.5, cy1=0.52, grade="magenta", shake=1.2, bloom=1.0,
-         ramp="ramp_down", flare=(0.52, 0.15), out="torn_big"),
-    dict(src="C", t=0.2, dur=38, z0=1.15, z1=1.45, cx=0.5, cy=0.5,
-         grade="purple", shake=1.0, bloom=0.9, ramp="ramp_up",
-         out="torn_thin"),
-    dict(src="C", t=8.5, dur=52, z0=1.30, z1=1.05, cx=0.5, cy=0.52,
-         grade="magenta", shake=0.9, ramp="ramp_down", bloom=0.8,
-         flare=(0.50, 0.13), out="end"),
+         ramp="ramp_down", out="torn_big"),
+    dict(src="F", t=2.0, dur=34, z0=1.45, z1=1.15, cx=0.50, cy=0.46,
+         grade="purple", shake=1.0, bloom=1.0, ramp="ramp_up",
+         flare=(0.50, 0.24), out="torn_thin"),
+
+    # --- last shot, slowing into the logo --------------------------------
+    dict(src="F", t=15.6, dur=52, z0=1.30, z1=1.06, cx=0.50, cy=0.50,
+         grade="magenta", shake=0.85, ramp="ramp_down", bloom=0.85,
+         flare=(0.48, 0.20), out="logo"),
 ]
 
 
@@ -374,6 +445,9 @@ def build(outfile, preview=None):
                 for f in de:
                     emit(f)
                 frames = frames[3:]
+            elif kind == "logo":
+                for f in pending:
+                    emit(f)
             else:
                 for f in pending:
                     emit(f)
@@ -383,8 +457,22 @@ def build(outfile, preview=None):
         print(f"  shot {si + 1}/{len(shots)} {shot['src']} "
               f"{len(frames)}f -> {pending_out}", flush=True)
 
-    for f in pending:
-        emit(f)
+    if pending_out == "logo":
+        # rip one last time, from the closing shot into the band mark
+        for f in pending:
+            emit(f)
+        # the crowd keeps moving behind the mark, in slow motion
+        bg = render_shot(dict(src="F", t=17.8, dur=74, z0=1.12, z1=1.02,
+                              cx=0.50, cy=0.50, grade="magenta", shake=0.5,
+                              ramp="slow", bloom=0.7), 4242)
+        outro = make_outro(bg, rng)
+        for f in tf.torn_transition(pending[-1], outro, rng, "strips"):
+            emit(f)
+        for f in outro[6:]:
+            emit(f)
+    else:
+        for f in pending:
+            emit(f)
 
     proc.stdin.close()
     proc.wait()
