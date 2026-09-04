@@ -47,6 +47,15 @@ def hblur(a, radius):
     return np.clip(acc / n, 0, 255).astype(np.uint8)
 
 
+def sharpen(a, percent=95, radius=1.6, threshold=2):
+    """Unsharp mask - puts back the bite lost to framing and upscaling."""
+    if percent <= 0:
+        return a
+    return to_np(to_pil(a).filter(
+        ImageFilter.UnsharpMask(radius=radius, percent=int(percent),
+                                threshold=threshold)))
+
+
 def smoothstep(t):
     t = np.clip(t, 0.0, 1.0)
     return t * t * (3 - 2 * t)

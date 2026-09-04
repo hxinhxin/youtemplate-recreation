@@ -1,6 +1,10 @@
 # Concert promo — vertical torn-film edit
 
-`concert_promo.mp4` — 1080x1920, 30 fps, 29 s, no audio.
+`concert_promo_compressed.mp4` — 1080x1920, 30 fps, 27 s, no audio, 8 Mbps.
+
+The full-quality master (`concert_promo.mp4`, CRF 19, ~100 MB) is not
+committed because it exceeds GitHub's file limit; `render.py` reproduces it
+byte-for-byte, since every random choice in the edit is seeded.
 
 Built entirely from the seven supplied source clips, closing on the band's
 own logo. Nothing else is generated: no text, typography or added graphic
@@ -24,6 +28,26 @@ alternating close-ups, extreme close-ups, medium and wide shots, low
 angles, crowd reactions, hands, stage lights and venue details. The
 rhythm builds: hard cut, punch-in, crowd, torn transition, close-up,
 flash, low angle, speed ramp, torn strips, double exposure, hard cut.
+
+## Sharpness
+
+Framing is done in each clip's own native pixels and resampled to the
+timeline exactly once, with Lanczos - the picture is never scaled twice.
+How far a shot may punch in is capped by the resolution it actually has
+(2.7x for the 1080x1920 clips, 1.85x for the 720x1280 ones), so no shot is
+enlarged past what its detail supports. An unsharp mask scaled to how much
+each shot was enlarged puts the bite back, motion blur is reserved for
+genuinely fast movement, and grain is kept light so it does not eat detail
+through compression.
+
+## Repetition
+
+No two shots draw on the same moment of the same clip: all 42 shots plus
+the outro background come from distinct, non-overlapping source spans.
+Where several shots share a similar camera setup - the locked stage wide,
+the performer on the mic - each is framed differently (tight left, crowd
+low, stage right, up into the lights) so distinct moments also look
+distinct.
 
 ## Transitions
 
