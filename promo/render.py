@@ -41,6 +41,24 @@ MAX_ZOOM = {1080: 2.7, 720: 1.85}
 
 LOGO = f"{UP}/dd53e4b7-image.webp"
 
+TRACK = f"{UP}/46ddfcd1-BANDATA_NA_RUBA__TRAPA_MI_INSTRUMENTAL.mp3"
+
+# Measured from the track by beats.py: 132.51 bpm, first beat at 0.3204s.
+# The cut grid is this beat, so every shot boundary lands on the music.
+SPB = 0.45283                      # seconds per beat
+BEAT0 = 0.3204
+BAR = SPB * 4
+FPB = SPB * FPS                    # 13.585 frames per beat
+
+# Two spans of the track, both cut on a downbeat and butted together: the
+# quiet intro and the drop, then the peak. This skips the mid-track
+# breakdown, which is far too long a lull to carry a promo.
+AUDIO = [
+    (BEAT0 + 4 * BAR, BEAT0 + 13 * BAR),      # 9 bars: 2 quiet, then the drop
+    (BEAT0 + 27 * BAR, BEAT0 + 38 * BAR),     # 11 bars: peak, then 2 of release
+]
+TOTAL_BEATS = 80                   # 20 bars
+
 _cache = {}
 
 
@@ -281,117 +299,150 @@ HANDS = dict(cx=0.46, cy=0.70)
 LIGHTS = dict(cx=0.42, cy=0.13)
 LOW = dict(cx=0.52, cy=0.76)
 
+OUTRO_BEATS = 4
+
+# Every shot's length is given in beats of the track, so each cut lands on
+# the music. Bars 1-2 are the quiet intro and carry the venue and its name;
+# the drop is on bar 3, where the cutting starts. NAKED BEACH is established
+# there and not returned to - the rest is the show.
 EDIT = [
-    # --- opening: the venue, and its name ---------------------------------
-    dict(src="A", t=4.35, dur=28, z0=1.10, z1=1.24, cx=0.50, cy=0.46,
-         grade="amber", shake=0.7, out="torn_thin"),
-    # the venue name, held: slowed right down so the camera's pan does not
-    # carry the sign out of frame while it reads
-    dict(src="B", t=4.78, dur=40, z0=1.06, z1=1.00, cx=0.50, cy=0.50,
-         grade="purple", shake=0.35, bloom=0.55, sharpen=125, ramp="slow",
-         out="torn_strips"),
+    # --- bars 1-2: the venue, and its name (over the quiet intro) ---------
+    dict(src="A", t=4.10, beats=4, z0=1.10, z1=1.26, cx=0.50, cy=0.46,
+         grade="amber", shake=0.6, out="torn_thin"),
+    dict(src="B", t=4.78, beats=4, z0=1.06, z1=1.00, cx=0.50, cy=0.50,
+         grade="purple", shake=0.3, bloom=0.55, sharpen=125, ramp="slow",
+         out="torn_big"),
 
-    # --- the room is full -------------------------------------------------
-    dict(src="F", t=1.40, dur=22, z0=1.05, z1=1.22, cx=0.50, cy=0.48,
+    # --- bar 3: the drop -------------------------------------------------
+    dict(src="F", t=1.40, beats=2, z0=1.05, z1=1.22, cx=0.50, cy=0.48,
          grade="magenta", shake=1.0, bloom=0.85, ramp="ramp_up", out="cut"),
-    dict(src="F", t=2.90, dur=15, z0=1.50, z1=1.70, cx=0.48, cy=0.42,
+    dict(src="F", t=2.90, beats=1, z0=1.50, z1=1.70, cx=0.48, cy=0.42,
          grade="red", shake=1.4, out="flash_white"),
-    dict(src="G", t=0.80, dur=16, z0=1.80, z1=2.10, cx=0.46, cy=0.44,
-         grade="blue", shake=1.4, out="torn_big"),
-    dict(src="C", t=4.00, dur=15, z0=2.00, z1=2.30, **CROWD,
+    dict(src="G", t=0.80, beats=1, z0=1.80, z1=2.10, cx=0.46, cy=0.44,
+         grade="blue", shake=1.4, out="torn_strips"),
+
+    # --- bars 4-9 --------------------------------------------------------
+    dict(src="C", t=4.00, beats=2, z0=2.00, z1=2.30, **CROWD,
          grade="red", shake=1.4, out="cut"),
-    dict(src="E", t=2.30, dur=16, z0=1.60, z1=1.78, cx=0.44, cy=0.46,
+    dict(src="E", t=2.30, beats=2, z0=1.60, z1=1.78, cx=0.44, cy=0.46,
          grade="magenta", shake=1.4, out="torn_strips"),
-    dict(src="F", t=4.30, dur=20, z0=1.45, z1=1.65, cx=0.36, cy=0.60,
-         grade="purple", shake=1.1, bloom=0.9, out="cut"),
-
-    # --- into the crowd ---------------------------------------------------
-    dict(src="D", t=0.30, dur=20, z0=1.25, z1=1.45, cx=0.46, cy=0.50,
+    dict(src="F", t=4.30, beats=1, z0=1.45, z1=1.65, cx=0.36, cy=0.60,
+         grade="purple", shake=1.2, bloom=0.9, out="cut"),
+    dict(src="D", t=0.30, beats=2, z0=1.25, z1=1.45, cx=0.46, cy=0.50,
          grade="blue", shake=1.2, bloom=0.85, out="torn_thin"),
-    dict(src="C", t=0.40, dur=14, z0=2.40, z1=2.65, **ECU,
+    dict(src="C", t=0.40, beats=1, z0=2.40, z1=2.65, **ECU,
          grade="magenta", shake=1.6, out="double"),
-    dict(src="F", t=5.80, dur=16, z0=1.40, z1=1.60, cx=0.50, cy=0.44,
+    dict(src="F", t=5.80, beats=2, z0=1.40, z1=1.60, cx=0.50, cy=0.44,
          grade="red", shake=1.3, out="cut"),
-    dict(src="G", t=2.40, dur=15, z0=1.90, z1=2.20, cx=0.48, cy=0.46,
+    dict(src="G", t=2.40, beats=1, z0=1.90, z1=2.20, cx=0.48, cy=0.46,
          grade="magenta", shake=1.5, ramp="fast", out="torn_strips"),
-    dict(src="E", t=4.20, dur=16, z0=1.50, z1=1.72, cx=0.60, cy=0.54,
+    dict(src="E", t=4.20, beats=2, z0=1.50, z1=1.72, cx=0.60, cy=0.54,
          grade="red", shake=1.4, out="flash_camera"),
-    dict(src="A", t=0.40, dur=14, z0=1.60, z1=2.00, cx=0.42, cy=0.62,
-         grade="amber", shake=1.2, out="cut"),
-    dict(src="F", t=7.20, dur=18, z0=1.35, z1=1.55, cx=0.62, cy=0.38,
+    dict(src="F", t=7.20, beats=2, z0=1.35, z1=1.55, cx=0.62, cy=0.38,
          grade="magenta", shake=1.2, bloom=1.0, out="torn_linger"),
-
-    # --- first drop -------------------------------------------------------
-    dict(src="C", t=5.50, dur=17, z0=1.30, z1=1.52, **LIGHTS,
+    dict(src="C", t=5.50, beats=2, z0=1.30, z1=1.52, **LIGHTS,
          grade="blue", shake=1.1, bloom=1.05, flare=(0.45, 0.15), out="cut"),
-    dict(src="G", t=4.20, dur=20, z0=1.32, z1=1.14, cx=0.52, cy=0.52,
+    dict(src="G", t=4.20, beats=4, z0=1.32, z1=1.14, cx=0.52, cy=0.52,
          grade="magenta", shake=1.2, bloom=0.95, out="torn_big"),
-    dict(src="E", t=6.00, dur=15, z0=1.62, z1=1.80, cx=0.38, cy=0.62,
+    dict(src="E", t=6.00, beats=1, z0=1.62, z1=1.80, cx=0.38, cy=0.62,
          grade="red", shake=1.5, out="cut"),
-    dict(src="F", t=8.70, dur=16, z0=1.48, z1=1.68, cx=0.50, cy=0.66,
+    dict(src="F", t=8.70, beats=1, z0=1.48, z1=1.68, cx=0.50, cy=0.66,
          grade="purple", shake=1.6, ramp="fast", out="flash_hot"),
-    dict(src="B", t=0.50, dur=14, z0=1.70, z1=2.05, cx=0.48, cy=0.42,
-         grade="purple", shake=1.1, bloom=0.9, out="torn_strips"),
-    dict(src="C", t=7.00, dur=14, z0=2.10, z1=2.40, **CROWD,
-         grade="red", shake=1.6, out="cut"),
+    dict(src="C", t=7.00, beats=2, z0=2.10, z1=2.40, **CROWD,
+         grade="red", shake=1.6, out="torn_strips"),
+    dict(src="G", t=6.20, beats=2, z0=1.70, z1=1.48, cx=0.36, cy=0.44,
+         grade="magenta", shake=1.4, out="cut"),
 
-    # --- breath: one longer held shot -------------------------------------
-    dict(src="F", t=18.00, dur=34, z0=1.46, z1=1.24, cx=0.48, cy=0.28,
+    # --- the splice: into the peak ---------------------------------------
+    dict(src="F", t=18.00, beats=4, z0=1.46, z1=1.24, cx=0.48, cy=0.28,
          grade="blue", shake=0.8, ramp="slow", bloom=0.7,
          flare=(0.47, 0.22), out="torn_thin"),
-
-    # --- second drop: fastest section -------------------------------------
-    dict(src="G", t=6.20, dur=18, z0=1.70, z1=1.48, cx=0.36, cy=0.44,
-         grade="magenta", shake=1.4, out="cut"),
-    dict(src="E", t=7.60, dur=16, z0=1.55, z1=1.75, cx=0.52, cy=0.36,
-         grade="red", shake=1.6, out="torn_strips"),
-    dict(src="C", t=8.60, dur=16, z0=1.20, z1=1.42, cx=0.50, cy=0.48,
+    dict(src="E", t=7.60, beats=1, z0=1.55, z1=1.75, cx=0.52, cy=0.36,
+         grade="red", shake=1.6, out="cut"),
+    dict(src="C", t=8.60, beats=2, z0=1.20, z1=1.42, cx=0.50, cy=0.48,
          grade="magenta", shake=1.2, bloom=1.0, out="flash_white"),
-    dict(src="F", t=9.90, dur=17, z0=1.50, z1=1.72, cx=0.50, cy=0.70,
-         grade="purple", shake=1.7, ramp="fast", out="cut"),
-    dict(src="A", t=2.00, dur=14, z0=1.70, z1=2.05, cx=0.38, cy=0.58,
-         grade="amber", shake=1.3, leak=0.45, out="torn_big"),
-    dict(src="G", t=8.00, dur=16, z0=1.75, z1=2.00, cx=0.50, cy=0.46,
+    dict(src="F", t=9.90, beats=1, z0=1.50, z1=1.72, cx=0.50, cy=0.70,
+         grade="purple", shake=1.7, ramp="fast", out="torn_strips"),
+    dict(src="G", t=8.00, beats=1, z0=1.75, z1=2.00, cx=0.50, cy=0.46,
          grade="blue", shake=1.5, out="cut"),
-    dict(src="E", t=0.50, dur=17, z0=1.30, z1=1.50, cx=0.50, cy=0.58,
+    dict(src="E", t=0.50, beats=2, z0=1.30, z1=1.50, cx=0.50, cy=0.58,
          grade="red", shake=1.3, out="double"),
-    dict(src="F", t=13.20, dur=18, z0=1.68, z1=1.85, cx=0.34, cy=0.52,
-         grade="magenta", shake=1.3, out="torn_strips"),
-    dict(src="C", t=2.20, dur=16, z0=1.40, z1=1.62, cx=0.50, cy=0.50,
+    dict(src="F", t=13.20, beats=2, z0=1.68, z1=1.85, cx=0.34, cy=0.52,
+         grade="magenta", shake=1.3, out="torn_big"),
+    dict(src="C", t=2.20, beats=1, z0=1.40, z1=1.62, cx=0.50, cy=0.50,
          grade="purple", shake=1.2, bloom=0.9, out="cut"),
-    dict(src="D", t=2.40, dur=18, z0=1.40, z1=1.60, cx=0.46, cy=0.46,
+    dict(src="D", t=2.40, beats=2, z0=1.40, z1=1.60, cx=0.46, cy=0.46,
          grade="blue", shake=1.4, ramp="fast_slow_fast", out="torn_linger"),
-    dict(src="G", t=9.80, dur=18, z0=1.62, z1=1.42, cx=0.62, cy=0.56,
+    dict(src="G", t=9.80, beats=2, z0=1.62, z1=1.42, cx=0.62, cy=0.56,
          grade="red", shake=1.4, out="cut"),
-
-    # --- final build ------------------------------------------------------
-    dict(src="F", t=14.70, dur=20, z0=1.50, z1=1.72, cx=0.52, cy=0.74,
+    dict(src="F", t=14.70, beats=2, z0=1.50, z1=1.72, cx=0.52, cy=0.74,
          grade="magenta", shake=1.3, bloom=0.95, out="torn_thin"),
-    dict(src="C", t=10.20, dur=15, z0=1.90, z1=2.20, **CROWD2,
+    dict(src="C", t=10.20, beats=1, z0=1.90, z1=2.20, **CROWD2,
          grade="red", shake=1.6, out="flash_camera"),
-    dict(src="E", t=9.60, dur=18, z0=1.50, z1=1.72, cx=0.50, cy=0.50,
+    dict(src="E", t=9.60, beats=2, z0=1.50, z1=1.72, cx=0.46, cy=0.55,
          grade="magenta", shake=1.5, ramp="ramp_down", out="cut"),
-    dict(src="B", t=2.60, dur=13, z0=1.90, z1=2.25, cx=0.42, cy=0.44,
-         grade="purple", shake=1.3, bloom=0.95, out="torn_strips"),
-    dict(src="G", t=11.60, dur=17, z0=1.80, z1=1.58, cx=0.42, cy=0.60,
-         grade="blue", shake=1.4, out="cut"),
-    dict(src="C", t=11.80, dur=20, z0=1.50, z1=1.25, cx=0.50, cy=0.62,
-         grade="red", shake=1.3, ramp="ramp_down", out="torn_big"),
-    dict(src="F", t=16.30, dur=24, z0=1.62, z1=1.40, cx=0.64, cy=0.44,
+    dict(src="G", t=11.60, beats=2, z0=1.80, z1=1.58, cx=0.42, cy=0.60,
+         grade="blue", shake=1.4, out="torn_strips"),
+    dict(src="C", t=11.80, beats=2, z0=1.50, z1=1.25, cx=0.50, cy=0.62,
+         grade="red", shake=1.3, ramp="ramp_down", out="cut"),
+    dict(src="F", t=16.30, beats=2, z0=1.62, z1=1.40, cx=0.64, cy=0.44,
          grade="purple", shake=1.0, bloom=1.0, flare=(0.50, 0.24),
-         out="cut"),
-    dict(src="G", t=13.40, dur=20, z0=1.38, z1=1.16, cx=0.54, cy=0.40,
-         grade="magenta", shake=1.2, ramp="ramp_up", out="torn_thin"),
+         out="torn_big"),
+    dict(src="G", t=13.40, beats=2, z0=1.38, z1=1.16, cx=0.54, cy=0.40,
+         grade="magenta", shake=1.2, ramp="ramp_up", out="cut"),
+    dict(src="C", t=0.90, beats=1, z0=2.20, z1=2.50, cx=0.60, cy=0.56,
+         grade="magenta", shake=1.7, out="flash_white"),
+    dict(src="E", t=10.90, beats=1, z0=1.45, z1=1.65, cx=0.50, cy=0.48,
+         grade="red", shake=1.5, out="torn_strips"),
 
-    # --- last shot, slowing into the logo ---------------------------------
-    dict(src="F", t=19.20, dur=26, z0=1.24, z1=1.06, cx=0.50, cy=0.50,
-         grade="magenta", shake=0.85, ramp="ramp_down", bloom=0.85,
+    # --- release: the last shot slows into the logo ----------------------
+    dict(src="F", t=19.20, beats=4, z0=1.24, z1=1.06, cx=0.50, cy=0.50,
+         grade="magenta", shake=0.85, ramp="slow", bloom=0.85,
          out="logo"),
 ]
+
+assert sum(s["beats"] for s in EDIT) + OUTRO_BEATS == TOTAL_BEATS, (
+    sum(s["beats"] for s in EDIT) + OUTRO_BEATS)
+
+
+def beat_boundaries(shots, outro_beats):
+    """Frame index of every cut, snapped to the music's beat grid."""
+    acc, bounds = 0.0, [0]
+    for sh in shots:
+        acc += sh["beats"]
+        bounds.append(int(round(acc * FPB)))
+    acc += outro_beats
+    bounds.append(int(round(acc * FPB)))
+    return bounds, acc
+
+
+def build_audio(path, nframes):
+    """Butt the chosen spans of the track together on their downbeats."""
+    parts = []
+    for i, (a, b) in enumerate(AUDIO):
+        parts.append(
+            f"[0:a]atrim=start={a:.5f}:end={b:.5f},asetpts=N/SR/TB,"
+            f"afade=t=in:st=0:d=0.008,"
+            f"afade=t=out:st={b - a - 0.008:.5f}:d=0.008[a{i}]")
+    joins = "".join(f"[a{i}]" for i in range(len(AUDIO)))
+    dur = nframes / FPS
+    chain = (";".join(parts) + ";" + joins +
+             f"concat=n={len(AUDIO)}:v=0:a=1[c];"
+             f"[c]atrim=0:{dur:.5f},afade=t=out:st={dur - 0.55:.5f}:d=0.55[out]")
+    subprocess.run(
+        ["ffmpeg", "-y", "-v", "error", "-i", TRACK,
+         "-filter_complex", chain, "-map", "[out]",
+         "-c:a", "aac", "-b:a", "192k", path], check=True)
 
 
 def build(outfile, preview=None):
     rng = np.random.default_rng(20240904)
+    shots = EDIT if preview is None else EDIT[:preview]
+    outro_beats = 0 if preview else OUTRO_BEATS
+    bounds, total_beats = beat_boundaries(shots, outro_beats)
+    nframes = bounds[-1]
+
+    tmp = outfile + ".video.mp4"
     proc = subprocess.Popen(
         ["ffmpeg", "-y", "-v", "error",
          "-f", "rawvideo", "-pix_fmt", "rgb24", "-s", f"{W}x{H}",
@@ -400,12 +451,14 @@ def build(outfile, preview=None):
          "-x264-params", "aq-mode=3:aq-strength=0.9",
          "-pix_fmt", "yuv420p", "-movflags", "+faststart",
          "-color_primaries", "bt709", "-color_trc", "bt709",
-         "-colorspace", "bt709", outfile],
+         "-colorspace", "bt709", tmp],
         stdin=subprocess.PIPE,
     )
 
     idx = [0]
-    leak_at = set(int(x) for x in rng.choice(np.arange(60, 900), 5, replace=False))
+    leak_at = set(int(x) for x in
+                  rng.choice(np.arange(60, max(120, nframes - 120)), 5,
+                             replace=False))
 
     def emit(frame):
         i = idx[0]
@@ -421,76 +474,70 @@ def build(outfile, preview=None):
         proc.stdin.write(f.tobytes())
         idx[0] += 1
 
-    shots = EDIT if preview is None else EDIT[:preview]
+    def open_with(kind, frames, prev_last, prev_tail):
+        """Play the incoming shot, with its transition landing on the beat.
 
-    pending = None      # frames of the current shot not yet emitted
-    pending_out = None
+        The rip, flash or overlap occupies the first frames of the new shot,
+        so the hit is on the downbeat rather than just before it.
+        """
+        if prev_last is None or kind == "cut" or kind == "logo":
+            return frames
+        n = len(frames)
+        if kind.startswith("torn_"):
+            mode = {"torn_thin": "thin", "torn_strips": "strips",
+                    "torn_big": "big", "torn_linger": "linger"}[kind]
+            tr = tf.torn_transition(prev_last, frames[:max(1, min(8, n))],
+                                    rng, mode)
+            return tr + frames[len(tr):]
+        if kind.startswith("flash_"):
+            k = {"flash_white": "white", "flash_camera": "camera",
+                 "flash_hot": "hot"}[kind]
+            fl = tf.flash_frames(prev_last, frames, rng, k)
+            fl = fl[:max(1, min(len(fl), n))]
+            return fl + frames[len(fl):]
+        if kind == "double":
+            m = min(6, n, len(prev_tail))
+            de = tf.double_exposure(prev_tail[-m:], frames, n=m)
+            return de + frames[m:]
+        return frames
+
+    prev_last, prev_tail, prev_out = None, [], None
     for si, shot in enumerate(shots):
-        frames = render_shot(shot, 1000 + si * 17)
-
-        if pending is not None:
-            kind = pending_out
-            if kind == "cut":
-                for f in pending:
-                    emit(f)
-            elif kind.startswith("torn_"):
-                mode = {"torn_thin": "thin", "torn_strips": "strips",
-                        "torn_big": "big", "torn_linger": "linger"}[kind]
-                for f in pending[:-1]:
-                    emit(f)
-                trans = tf.torn_transition(pending[-1], frames, rng, mode)
-                for f in trans:
-                    emit(f)
-                frames = frames[len(trans):]
-            elif kind.startswith("flash_"):
-                for f in pending:
-                    emit(f)
-                k = {"flash_white": "white", "flash_camera": "camera",
-                     "flash_hot": "hot"}[kind]
-                fl = tf.flash_frames(pending[-1], frames, rng, k)
-                for f in fl:
-                    emit(f)
-                frames = frames[len(fl):]
-            elif kind == "double":
-                keep = max(0, len(pending) - 6)
-                for f in pending[:keep]:
-                    emit(f)
-                de = tf.double_exposure(pending[keep:], frames, n=6)
-                for f in de:
-                    emit(f)
-                frames = frames[3:]
-            elif kind == "logo":
-                for f in pending:
-                    emit(f)
-            else:
-                for f in pending:
-                    emit(f)
-
-        pending = frames
-        pending_out = shot.get("out", "cut")
-        print(f"  shot {si + 1}/{len(shots)} {shot['src']} "
-              f"{len(frames)}f -> {pending_out}", flush=True)
-
-    if pending_out == "logo":
-        # rip one last time, from the closing shot into the band mark
-        for f in pending:
+        d = bounds[si + 1] - bounds[si]
+        sh = dict(shot, dur=d)
+        frames = render_shot(sh, 1000 + si * 17)
+        frames = open_with(prev_out, frames, prev_last, prev_tail)
+        for f in frames[:d]:
             emit(f)
+        prev_last, prev_tail = frames[d - 1], frames[max(0, d - 6):d]
+        prev_out = shot.get("out", "cut")
+        print(f"  shot {si + 1}/{len(shots)} {shot['src']} "
+              f"{shot['beats']}b {d}f -> {prev_out}", flush=True)
+
+    if outro_beats:
+        d = bounds[-1] - bounds[-2]
         # the crowd keeps moving behind the mark, in slow motion
-        bg = render_shot(dict(src="F", t=20.40, dur=74, z0=1.12, z1=1.02,
+        bg = render_shot(dict(src="F", t=20.40, dur=d, z0=1.12, z1=1.02,
                               cx=0.50, cy=0.50, grade="magenta", shake=0.5,
                               ramp="slow", bloom=0.7), 4242)
-        outro = make_outro(bg, rng)
-        for f in tf.torn_transition(pending[-1], outro, rng, "strips"):
-            emit(f)
-        for f in outro[6:]:
-            emit(f)
-    else:
-        for f in pending:
+        outro = make_outro(bg, rng, hold=d - 22, fade=22)
+        outro = open_with("torn_strips", outro, prev_last, prev_tail)
+        for f in outro[:d]:
             emit(f)
 
     proc.stdin.close()
     proc.wait()
-    print(f"wrote {outfile}: {idx[0]} frames, {idx[0] / FPS:.2f}s")
+
+    audio = outfile + ".audio.m4a"
+    build_audio(audio, idx[0])
+    subprocess.run(
+        ["ffmpeg", "-y", "-v", "error", "-i", tmp, "-i", audio,
+         "-c:v", "copy", "-c:a", "copy", "-shortest",
+         "-movflags", "+faststart", outfile], check=True)
+    os.remove(tmp)
+    os.remove(audio)
+    print(f"wrote {outfile}: {idx[0]} frames, {idx[0] / FPS:.2f}s, "
+          f"{total_beats:.0f} beats")
 
 
 if __name__ == "__main__":

@@ -1,6 +1,6 @@
 # Concert promo — vertical torn-film edit
 
-`concert_promo_compressed.mp4` — 1080x1920, 30 fps, 27 s, no audio, 8 Mbps.
+`concert_promo_compressed.mp4` — 1080x1920, 30 fps, 36 s, with music.
 
 The full-quality master (`concert_promo.mp4`, CRF 19, ~100 MB) is not
 committed because it exceeds GitHub's file limit; `render.py` reproduces it
@@ -16,6 +16,7 @@ the clips are 720x1280 and are scaled up to the 1080x1920 timeline.
 ## Files
 
 - `tornfilm.py` — the torn-film transitions, grade, and analog texture.
+- `beats.py` — beat analysis of the soundtrack (tempo, beat grid).
 - `render.py` — the shot list (the edit itself) and the render pipeline.
 
 Run with `python3 render.py out.mp4` (needs `ffmpeg`, `numpy`, `pillow`).
@@ -42,8 +43,9 @@ through compression.
 
 ## Repetition
 
-No two shots draw on the same moment of the same clip: all 42 shots plus
-the outro background come from distinct, non-overlapping source spans.
+No two shots draw on the same moment of the same clip: all 40 shots plus
+the outro background come from distinct, non-overlapping source spans,
+checked programmatically at build time.
 Where several shots share a similar camera setup - the locked stage wide,
 the performer on the mic - each is framed differently (tight left, crowd
 low, stage right, up into the lights) so distinct moments also look
