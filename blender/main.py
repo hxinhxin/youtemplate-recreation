@@ -3,8 +3,8 @@ import bpy, bmesh, math, os, sys
 from mathutils import Vector, Matrix, Euler
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from lib_build import make_materials, aim_bone, add_blob, new_mesh_object, M_WHITE
-import lib_character as C
+from lib_build import aim_bone
+import lib_char2 as C
 
 FPS, F_END = 30, 150
 # ---- тайминг (кадри) -------------------------------------------------
@@ -47,9 +47,7 @@ POSE_BURST = {                      # изправено, издължено т�
 POSE_WEB = {                        # двете ръце изстрелват рязко напред-нагоре
     'hips': (0.02, -0.26, 0.965), 'spine': (0.02, -0.14, 0.990), 'chest': (0.04, -0.06, 0.997),
     'neck': (0, -0.05, 0.999), 'head': (0, -0.02, 1.0),
-    'shoulder.R': (-0.90, -0.34, 0.28),
     'upperarm.R': (-0.26, -0.90, 0.35), 'forearm.R': (-0.12, -0.98, 0.12), 'hand.R': (-0.09, -0.99, 0.10),
-    'shoulder.L': (0.90, -0.34, 0.28),
     'upperarm.L': (0.34, -0.86, 0.38),  'forearm.L': (0.18, -0.96, 0.20),  'hand.L': (0.14, -0.98, 0.16),
     # краката вече се подгъват към финалната поза
     'thigh.R': (-0.26, -0.60, -0.76), 'shin.R': (-0.05, 0.34, -0.94), 'foot.R': (-0.28, -0.66, -0.70),
@@ -63,13 +61,13 @@ POSE_FINAL = {                      # финалната поза от рефе�
     'neck':  (0.01, -0.06, 0.998),
     'head':  (0.00, -0.02, 1.000),
     # дясна ръка — изпъната нагоре и силно встрани (ляво на екрана)
-    'shoulder.R': (-0.94, -0.12, 0.32),
     'upperarm.R': (-0.72, -0.17, 0.672), 'forearm.R': (-0.62, -0.12, 0.775),
     'hand.R':     (-0.58, -0.10, 0.808),
     # лява ръка — свита пред гърдите, дланта в "thwip" жест
-    'shoulder.L': (0.96, -0.22, 0.17),
-    'upperarm.L': (0.30, -0.52, -0.800), 'forearm.L': (-0.55, -0.55, 0.63),
-    'hand.L':     (-0.58, -0.50, 0.64),
+    # ръката стои ПРЕД тялото: без силна -Y компонента мишницата потъва в
+    # гръдния кош и скинирането слива двете в безформена маса
+    'upperarm.L': (0.72, -0.42, -0.550), 'forearm.L': (0.10, -0.90, 0.42),
+    'hand.L':     (0.05, -0.92, 0.39),
     # ляв крак — вдигнат високо, коляното силно свито (дясно на екрана)
     'thigh.L': (0.70, -0.25, 0.668), 'shin.L': (0.05, 0.20, 0.978), 'foot.L': (-0.30, -0.55, 0.78),
     # десен крак — бедрото напред, подбедрицата увиснала надолу-наляво
@@ -90,7 +88,34 @@ def exaggerate(pose, k):
 ORDER = ['hips', 'spine', 'chest', 'neck', 'head',
          'shoulder.L', 'upperarm.L', 'forearm.L', 'hand.L',
          'shoulder.R', 'upperarm.R', 'forearm.R', 'hand.R',
-         'thigh.L', 'shin.L', 'foot.L', 'thigh.R', 'shin.R', 'foot.R']
+         'thigh.L', 'shin.L', 'foot.L', 'toe.L',
+         'thigh.R', 'shin.R', 'foot.R', 'toe.R']
+
+# пръсти: 1=палец 2=показалец 3=среден 4=безименен 5=кутре
+FINGERS = [f'f{i}_{s}.{t}' for t in 'LR' for i in range(1, 6) for s in range(1, 4)]
+
+# свиване на фалангите в радиани за всеки жест
+GRIP = {
+    'open':  {1: (0.05, 0.05, 0.05), 2: (0.02, 0.02, 0.05), 3: (0.02, 0.03, 0.06),
+              4: (0.04, 0.05, 0.08), 5: (0.08, 0.10, 0.12)},
+    'thwip': {1: (0.10, 0.05, 0.05), 2: (0.00, 0.00, 0.02), 3: (1.35, 1.45, 1.20),
+              4: (1.40, 1.50, 1.25), 5: (0.05, 0.05, 0.08)},
+    'fist':  {1: (0.70, 0.60, 0.40), 2: (1.30, 1.45, 1.20), 3: (1.35, 1.50, 1.25),
+              4: (1.35, 1.50, 1.25), 5: (1.30, 1.45, 1.20)},
+}
+
+
+def apply_grip(rig, side, gesture, frame):
+    """Свива фалангите около локалната ос на всяка кост."""
+    from mathutils import Quaternion
+    g = GRIP[gesture]
+    for fi in range(1, 6):
+        for seg in range(1, 4):
+            pb = rig.pose.bones.get(f'f{fi}_{seg}.{side}')
+            if pb is None:
+                continue
+            pb.rotation_quaternion = Quaternion((1, 0, 0), -g[fi][seg - 1])
+            pb.keyframe_insert('rotation_quaternion', frame=frame)
 
 
 def apply_pose(rig, pose, frame):
@@ -301,7 +326,7 @@ def build_camera(rig):
     bpy.context.scene.collection.objects.link(tgt)
     for f, loc in ((1, (0, 0, 0.5)), (F_CALM_END, (0, 0, 0.7)),
                    (F_BURST, (0, 0, 1.4)), (F_APEX, (0, 0, 5.05)),
-                   (F_SETTLE, (0.10, 0, 5.15)), (F_END, (0.10, 0, 5.18))):
+                   (F_SETTLE, (0.08, 0, 5.25)), (F_END, (0.08, 0, 5.28))):
         tgt.location = loc
         tgt.keyframe_insert('location', frame=f)
 
@@ -315,12 +340,14 @@ def build_camera(rig):
     con.track_axis = 'TRACK_NEGATIVE_Z'
     con.up_axis = 'UP_Y'
 
-    for f, loc, lens in ((1, (1.2, -13.0, 1.10), 30),
-                         (F_CALM_END, (0.7, -12.4, 1.20), 31),
-                         (F_BURST, (0.2, -11.6, 1.70), 33),
-                         (F_APEX, (-0.5, -8.6, 4.60), 46),
-                         (F_SETTLE, (-0.9, -6.9, 4.95), 58),
-                         (F_END, (-1.05, -6.55, 5.00), 63)):
+    # При портретен кадър Blender ляга сензора (36 мм) по ВИСОЧИНАТА, значи
+    # видимата височина = разстояние * 36 / фокус. Героят е 1.86 м.
+    for f, loc, lens in ((1, (1.2, -13.0, 1.10), 31),
+                         (F_CALM_END, (0.7, -12.4, 1.20), 32),
+                         (F_BURST, (0.2, -11.0, 1.70), 40),
+                         (F_APEX, (-0.4, -7.3, 4.60), 58),
+                         (F_SETTLE, (-0.7, -4.5, 5.05), 66),
+                         (F_END, (-0.8, -4.2, 5.08), 68)):
         cam.location = loc
         cam.keyframe_insert('location', frame=f)
         cam.data.lens = lens
@@ -430,6 +457,17 @@ def animate_body(rig):
                 kp.interpolation = 'BEZIER'; kp.easing = 'EASE_IN_OUT'
 
 
+def animate_hands(rig):
+    for f, l, r in ((1, 'fist', 'fist'),
+                    (F_BURST + 2, 'open', 'open'),
+                    (F_WEB_A, 'thwip', 'thwip'),
+                    (F_WEB_B + 1, 'thwip', 'thwip'),
+                    (F_SETTLE, 'thwip', 'open'),      # финалът: thwip длан + разперена
+                    (F_END, 'thwip', 'open')):
+        apply_grip(rig, 'L', l, f)
+        apply_grip(rig, 'R', r, f)
+
+
 def animate_pose(rig):
     apply_pose(rig, POSE_TUCK, 1)
     apply_pose(rig, POSE_TUCK, F_ANTIC)
@@ -478,12 +516,12 @@ def setup_render():
 
 def main():
     clean()
-    mats = make_materials()
-    rig, body, rigid = C.build_character(mats)
+    rig, body, lenses, J = C.build()
     build_ocean()
     build_splash()
     animate_body(rig)
     animate_pose(rig)
+    animate_hands(rig)
     build_webs(rig)
     build_camera(rig)
     build_lights()
