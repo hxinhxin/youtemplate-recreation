@@ -28,13 +28,13 @@ def _parser():
         sp.add_argument("--preset", default="draft", help="thumb | draft | preview | final")
         sp.add_argument("--no-outline", action="store_true")
         sp.add_argument("--threads", type=int, default=0)
+        sp.add_argument("--fps", type=int, default=24)
         return sp
 
     c = common(sub.add_parser("character", help="build + rig a character, render a turnaround still"))
     c.add_argument("--still", default="renders/character.png")
 
     d = common(sub.add_parser("demo", help="build, rig, animate the six-beat snap demo, render"))
-    d.add_argument("--fps", type=int, default=24)
     d.add_argument("--video", default="renders/snap_demo.mp4")
     d.add_argument("--frames", default=None, help="also write a PNG sequence here")
     d.add_argument("--contact-sheet", default=None, help="render only these frames, e.g. 1,18,21,23,27,60")
