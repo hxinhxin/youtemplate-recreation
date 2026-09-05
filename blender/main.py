@@ -6,19 +6,21 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from lib_build import aim_bone
 import lib_char2 as C
 
-FPS, F_END = 30, 150
+FPS, F_END = 30, 180
 # ---- тайминг (кадри) -------------------------------------------------
-F_CALM_END   = 30    # празен океан
-F_ANTIC      = 34    # антиципация под водата
-F_BURST      = 37    # изскачането
-F_SURFACE    = 39    # пробива повърхността
-F_APEX       = 48    # най-високата точка
-F_WEB_A      = 50    # първи изстрел паяжина
-F_WEB_B      = 54    # втори
-F_SNAP_START = 58
-F_OVER       = 64    # overshoot
-F_RECOIL     = 68
-F_SETTLE     = 72    # финалната поза е заключена
+F_CALM_END   = 34    # празен океан
+F_ANTIC      = 38    # свива се под водата (anticipation)
+F_BURST      = 42    # изстрелването
+F_SURFACE    = 44    # пробива повърхността
+F_EXTEND     = 50    # тялото е напълно изпънато като стрела
+F_SPREAD     = 58    # краката се разтварят в широк ритник
+F_APEX       = 64    # най-високата точка
+F_WEB_A      = 67    # първи изстрел паяжина
+F_WEB_B      = 73    # втори
+F_TUCK       = 81    # коленете се прибират към гърдите
+F_OVER       = 89    # overshoot отвъд позата
+F_RECOIL     = 95    # откат
+F_SETTLE     = 101   # позата е заключена
 WATER_Z      = 0.0
 
 
@@ -26,53 +28,122 @@ WATER_Z      = 0.0
 # ПОЗИ — посоки на костите в световни координати (героят гледа към -Y,
 # неговата дясна страна е -X = ляво на екрана)
 # =====================================================================
-POSE_TUCK = {
-    'hips': (0, -0.55, 0.84), 'spine': (0, -0.42, 0.91), 'chest': (0, -0.30, 0.95),
-    'head': (0, -0.20, 0.98),
-    'upperarm.R': (-0.35, -0.55, -0.76), 'forearm.R': (-0.20, -0.90, 0.38),
-    'upperarm.L': (0.35, -0.55, -0.76),  'forearm.L': (0.20, -0.90, 0.38),
-    'thigh.R': (-0.18, -0.86, 0.48), 'shin.R': (-0.10, 0.55, -0.83), 'foot.R': (-0.12, -0.55, -0.83),
-    'thigh.L': (0.18, -0.86, 0.48),  'shin.L': (0.10, 0.55, -0.83),  'foot.L': (0.12, -0.55, -0.83),
+POSE_TUCK = {                       # свит под водата
+    'hips': (0, -0.62, 0.78), 'spine': (0, -0.48, 0.88), 'chest': (0, -0.32, 0.95),
+    'head': (0, -0.18, 0.98),
+    'upperarm.R': (-0.32, -0.42, -0.85), 'forearm.R': (-0.18, -0.90, 0.40),
+    'upperarm.L': (0.32, -0.42, -0.85),  'forearm.L': (0.18, -0.90, 0.40),
+    'thigh.R': (-0.22, -0.90, 0.38), 'shin.R': (-0.12, 0.60, -0.79),
+    'foot.R': (-0.12, -0.50, -0.86),
+    'thigh.L': (0.22, -0.90, 0.38),  'shin.L': (0.12, 0.60, -0.79),
+    'foot.L': (0.12, -0.50, -0.86),
 }
 
-POSE_BURST = {                      # изправено, издължено тяло, ръце нагоре
-    'hips': (0, 0.02, 1.0), 'spine': (0, 0.01, 1.0), 'chest': (0, 0, 1.0),
-    'head': (0, 0.04, 1.0),
-    'upperarm.R': (-0.16, 0.05, 0.985), 'forearm.R': (-0.10, 0.03, 0.994), 'hand.R': (-0.08, 0, 0.997),
-    'upperarm.L': (0.16, 0.05, 0.985),  'forearm.L': (0.10, 0.03, 0.994),  'hand.L': (0.08, 0, 0.997),
-    'thigh.R': (-0.05, 0.05, -0.997), 'shin.R': (-0.03, 0.02, -0.999), 'foot.R': (-0.03, -0.60, -0.80),
-    'thigh.L': (0.05, 0.05, -0.997),  'shin.L': (0.03, 0.02, -0.999),  'foot.L': (0.03, -0.60, -0.80),
+POSE_COIL = {                       # плътно свит точно преди изстрелването
+    'hips': (0, -0.78, 0.63), 'spine': (0, -0.60, 0.80), 'chest': (0, -0.40, 0.92),
+    'head': (0, -0.30, 0.95),
+    'upperarm.R': (-0.28, -0.28, -0.92), 'forearm.R': (-0.14, -0.94, 0.31),
+    'upperarm.L': (0.28, -0.28, -0.92),  'forearm.L': (0.14, -0.94, 0.31),
+    'thigh.R': (-0.20, -0.95, 0.24), 'shin.R': (-0.10, 0.70, -0.71),
+    'foot.R': (-0.10, -0.42, -0.90),
+    'thigh.L': (0.20, -0.95, 0.24),  'shin.L': (0.10, 0.70, -0.71),
+    'foot.L': (0.10, -0.42, -0.90),
 }
 
-POSE_WEB = {                        # двете ръце изстрелват рязко напред-нагоре
-    'hips': (0.02, -0.26, 0.965), 'spine': (0.02, -0.14, 0.990), 'chest': (0.04, -0.06, 0.997),
-    'neck': (0, -0.05, 0.999), 'head': (0, -0.02, 1.0),
-    'upperarm.R': (-0.26, -0.90, 0.35), 'forearm.R': (-0.12, -0.98, 0.12), 'hand.R': (-0.09, -0.99, 0.10),
-    'upperarm.L': (0.34, -0.86, 0.38),  'forearm.L': (0.18, -0.96, 0.20),  'hand.L': (0.14, -0.98, 0.16),
-    # краката вече се подгъват към финалната поза
-    'thigh.R': (-0.26, -0.60, -0.76), 'shin.R': (-0.05, 0.34, -0.94), 'foot.R': (-0.28, -0.66, -0.70),
-    'thigh.L': (0.34, -0.56, -0.76),  'shin.L': (0.10, 0.40, -0.91),  'foot.L': (0.30, -0.62, -0.72),
+POSE_ARROW = {                      # стрела: тяло изпънато, крака събрани, пръсти опънати
+    'hips': (0, 0.02, 1.0), 'spine': (0, 0.01, 1.0), 'chest': (0, 0.0, 1.0),
+    'neck': (0, 0.03, 1.0), 'head': (0, 0.06, 1.0),
+    'upperarm.R': (-0.14, 0.05, 0.989), 'forearm.R': (-0.09, 0.02, 0.996),
+    'hand.R': (-0.07, 0.0, 0.998),
+    'upperarm.L': (0.14, 0.05, 0.989),  'forearm.L': (0.09, 0.02, 0.996),
+    'hand.L': (0.07, 0.0, 0.998),
+    'thigh.R': (-0.04, 0.03, -0.999), 'shin.R': (-0.02, 0.01, -1.0),
+    'foot.R': (-0.02, -0.72, -0.69),                    # опънато ходило
+    'thigh.L': (0.04, 0.03, -0.999),  'shin.L': (0.02, 0.01, -1.0),
+    'foot.L': (0.02, -0.72, -0.69),
+}
+
+POSE_SPREAD = {                     # краката се разтварят широко, ръцете настрани
+    'hips': (0, -0.20, 0.98), 'spine': (0, -0.09, 0.996), 'chest': (0.02, -0.05, 0.998),
+    'neck': (0, -0.04, 0.999), 'head': (0, -0.02, 1.0),
+    'upperarm.R': (-0.80, -0.26, 0.54), 'forearm.R': (-0.66, -0.36, 0.66),
+    'hand.R': (-0.62, -0.40, 0.67),
+    'upperarm.L': (0.80, -0.26, 0.54),  'forearm.L': (0.66, -0.36, 0.66),
+    'hand.L': (0.62, -0.40, 0.67),
+    'thigh.R': (-0.60, -0.32, -0.73), 'shin.R': (-0.46, -0.26, -0.85),
+    'foot.R': (-0.42, -0.66, -0.62),
+    'thigh.L': (0.60, -0.32, -0.73),  'shin.L': (0.46, -0.26, -0.85),
+    'foot.L': (0.42, -0.66, -0.62),
+}
+
+POSE_WEB = {                        # изстрелване на паяжините напред
+    'hips': (0.02, -0.28, 0.96), 'spine': (0.02, -0.14, 0.99), 'chest': (0.04, -0.07, 0.997),
+    'neck': (0, -0.05, 0.999), 'head': (0, -0.03, 1.0),
+    'upperarm.R': (-0.30, -0.88, 0.37), 'forearm.R': (-0.14, -0.97, 0.19),
+    'hand.R': (-0.11, -0.98, 0.16),
+    'upperarm.L': (0.38, -0.84, 0.39),  'forearm.L': (0.20, -0.95, 0.24),
+    'hand.L': (0.16, -0.97, 0.18),
+    'thigh.R': (-0.40, -0.62, -0.67), 'shin.R': (-0.20, 0.06, -0.98),
+    'foot.R': (-0.38, -0.64, -0.67),
+    'thigh.L': (0.44, -0.58, -0.69),  'shin.L': (0.18, 0.24, -0.95),
+    'foot.L': (0.34, -0.62, -0.71),
+}
+
+POSE_TUCKIN = {                     # коленете се прибират към гърдите
+    'hips': (0.04, -0.30, 0.95), 'spine': (0.03, -0.16, 0.987), 'chest': (0.06, -0.10, 0.993),
+    'neck': (0.01, -0.06, 0.998), 'head': (0, -0.03, 1.0),
+    'upperarm.R': (-0.60, -0.42, 0.68), 'forearm.R': (-0.52, -0.34, 0.78),
+    'hand.R': (-0.50, -0.32, 0.80),
+    'upperarm.L': (0.60, -0.60, -0.53), 'forearm.L': (0.22, -0.90, 0.38),
+    'hand.L': (0.18, -0.92, 0.35),
+    'thigh.R': (-0.62, -0.62, -0.48), 'shin.R': (-0.12, -0.10, -0.99),
+    'foot.R': (-0.52, -0.58, -0.63),
+    'thigh.L': (0.62, -0.52, 0.59),  'shin.L': (0.20, 0.32, 0.93),
+    'foot.L': (-0.10, -0.62, 0.78),
 }
 
 POSE_FINAL = {                      # финалната поза от референцията
-    'hips':  (0.06, -0.30, 0.952),   # тазът назад, тялото компактно
+    'hips':  (0.06, -0.30, 0.952),
     'spine': (0.04, -0.17, 0.985),
     'chest': (0.08, -0.10, 0.992),
     'neck':  (0.01, -0.06, 0.998),
     'head':  (0.00, -0.02, 1.000),
-    # дясна ръка — изпъната нагоре и силно встрани (ляво на екрана)
+    # дясна ръка — изпъната нагоре и встрани (ляво на екрана)
     'upperarm.R': (-0.72, -0.17, 0.672), 'forearm.R': (-0.62, -0.12, 0.775),
     'hand.R':     (-0.58, -0.10, 0.808),
-    # лява ръка — свита пред гърдите, дланта в "thwip" жест
     # ръката стои ПРЕД тялото: без силна -Y компонента мишницата потъва в
     # гръдния кош и скинирането слива двете в безформена маса
     'upperarm.L': (0.72, -0.42, -0.550), 'forearm.L': (0.10, -0.90, 0.42),
     'hand.L':     (0.05, -0.92, 0.39),
     # ляв крак — вдигнат високо, коляното силно свито (дясно на екрана)
-    'thigh.L': (0.70, -0.25, 0.668), 'shin.L': (0.05, 0.20, 0.978), 'foot.L': (-0.30, -0.55, 0.78),
-    # десен крак — бедрото напред, подбедрицата увиснала надолу-наляво
-    'thigh.R': (-0.68, -0.48, -0.55), 'shin.R': (0.05, -0.18, -0.982), 'foot.R': (-0.58, -0.52, -0.63),
+    'thigh.L': (0.70, -0.25, 0.668), 'shin.L': (0.05, 0.20, 0.978),
+    'foot.L': (-0.30, -0.55, 0.78),
+    # десен крак — бедрото напред, подбедрицата надолу-наляво
+    'thigh.R': (-0.68, -0.48, -0.55), 'shin.R': (0.05, -0.18, -0.982),
+    'foot.R': (-0.58, -0.52, -0.63),
 }
+
+
+def blend(a, b, t):
+    """Междинна поза между две ключови — за плавни дъги на крайниците."""
+    out = dict(a)
+    for k, v in b.items():
+        if k in a:
+            out[k] = tuple(Vector(a[k]).normalized().lerp(
+                Vector(v).normalized(), t).normalized())
+        else:
+            out[k] = v
+    return out
+
+
+def drift(pose, phase, amt=0.030):
+    """Лек живот в задържането — крайниците не са замразени."""
+    out = {}
+    for i, (k, v) in enumerate(sorted(pose.items())):
+        d = Vector(v).normalized()
+        w = math.sin(phase + i * 1.7) * amt
+        out[k] = tuple((d + Vector((w, w * 0.5, -w * 0.7))).normalized())
+    return out
 
 
 def exaggerate(pose, k):
@@ -176,7 +247,7 @@ def build_splash():
     objs = []
 
     # --- капката-инстанция ---
-    bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=2, radius=0.05,
+    bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=2, radius=0.038,
                                           location=(0, 0, -50))
     drop = bpy.context.object
     drop.name = 'DropInstance'
@@ -211,7 +282,7 @@ def build_splash():
     s.normal_factor = 11.0
     s.factor_random = 4.5
     s.object_align_factor[2] = 6.0
-    s.particle_size, s.size_random = 1.35, 0.8
+    s.particle_size, s.size_random = 0.85, 0.6
     s.render_type = 'OBJECT'
     s.instance_object = drop
     s.physics_type = 'NEWTON'
@@ -325,7 +396,9 @@ def build_camera(rig):
     tgt = bpy.data.objects.new('CamTarget', None)
     bpy.context.scene.collection.objects.link(tgt)
     for f, loc in ((1, (0, 0, 0.5)), (F_CALM_END, (0, 0, 0.7)),
-                   (F_BURST, (0, 0, 1.4)), (F_APEX, (0, 0, 5.05)),
+                   (F_BURST, (0, 0, 1.2)), (F_EXTEND, (0, 0, 3.6)),
+                   (F_SPREAD, (0, 0, 5.1)), (F_APEX, (0, 0, 5.85)),
+                   (F_TUCK, (0.06, 0, 5.45)),
                    (F_SETTLE, (0.08, 0, 5.25)), (F_END, (0.08, 0, 5.28))):
         tgt.location = loc
         tgt.keyframe_insert('location', frame=f)
@@ -335,6 +408,9 @@ def build_camera(rig):
     bpy.context.scene.camera = cam
     cam.data.lens = 40
     cam.data.sensor_width = 36
+    cam.data.dof.use_dof = True                  # киното иска дълбочина
+    cam.data.dof.focus_object = tgt
+    cam.data.dof.aperture_fstop = 4.5
     con = cam.constraints.new('TRACK_TO')
     con.target = tgt
     con.track_axis = 'TRACK_NEGATIVE_Z'
@@ -342,12 +418,18 @@ def build_camera(rig):
 
     # При портретен кадър Blender ляга сензора (36 мм) по ВИСОЧИНАТА, значи
     # видимата височина = разстояние * 36 / фокус. Героят е 1.86 м.
-    for f, loc, lens in ((1, (1.2, -13.0, 1.10), 31),
-                         (F_CALM_END, (0.7, -12.4, 1.20), 32),
-                         (F_BURST, (0.2, -11.0, 1.70), 40),
-                         (F_APEX, (-0.4, -7.3, 4.60), 58),
-                         (F_SETTLE, (-0.7, -4.5, 5.05), 66),
-                         (F_END, (-0.8, -4.2, 5.08), 68)):
+    # При портретен кадър Blender ляга сензора (36 мм) по ВИСОЧИНАТА, значи
+    # видимата височина = разстояние * 36 / фокус. Героят е 1.86 м.
+    for f, loc, lens in ((1, (1.4, -13.5, 1.05), 30),
+                         (F_CALM_END, (0.8, -12.6, 1.15), 32),
+                         (F_BURST, (0.2, -11.2, 1.55), 38),
+                         (F_SURFACE, (0.15, -9.8, 1.95), 42),
+                         (F_EXTEND, (-0.1, -6.4, 3.20), 48),
+                         (F_SPREAD, (-0.3, -5.9, 4.80), 50),
+                         (F_APEX, (-0.45, -5.8, 5.50), 52),
+                         (F_TUCK, (-0.6, -5.0, 5.30), 60),
+                         (F_SETTLE, (-0.75, -4.6, 5.05), 66),
+                         (F_END, (-0.85, -4.25, 5.08), 69)):
         cam.location = loc
         cam.keyframe_insert('location', frame=f)
         cam.data.lens = lens
@@ -379,22 +461,22 @@ def build_lights():
     bg = nt.nodes['Background']
     sky = nt.nodes.new('ShaderNodeTexSky')
     sky.sky_type = 'NISHITA'
-    sky.sun_elevation = math.radians(5.0)
+    sky.sun_elevation = math.radians(6.5)
     sky.sun_rotation = math.radians(-38)
     sky.altitude = 200
     nt.links.new(sky.outputs['Color'], bg.inputs['Color'])
-    bg.inputs['Strength'].default_value = 0.45
+    bg.inputs['Strength'].default_value = 0.42
 
     sun = bpy.data.objects.new('Sun', bpy.data.lights.new('Sun', 'SUN'))
     bpy.context.scene.collection.objects.link(sun)
-    sun.data.energy = 6.0
+    sun.data.energy = 5.2
     sun.data.angle = math.radians(2.5)
     sun.data.color = (1.0, 0.86, 0.72)
     sun.rotation_euler = (math.radians(58), 0, math.radians(-42))
 
     fill = bpy.data.objects.new('Fill', bpy.data.lights.new('Fill', 'AREA'))
     bpy.context.scene.collection.objects.link(fill)
-    fill.data.energy = 900
+    fill.data.energy = 620
     fill.data.size = 9
     fill.data.color = (0.62, 0.78, 1.0)
     fill.location = (7.5, -9.0, 7.0)
@@ -404,7 +486,7 @@ def build_lights():
 
     rim = bpy.data.objects.new('Rim', bpy.data.lights.new('Rim', 'AREA'))
     bpy.context.scene.collection.objects.link(rim)
-    rim.data.energy = 1400
+    rim.data.energy = 2100
     rim.data.size = 6
     rim.data.color = (1.0, 0.72, 0.45)
     rim.location = (-6.0, 6.5, 6.0)
@@ -414,25 +496,24 @@ def build_lights():
 
 
 def animate_body(rig):
-    """Движение на целия герой: под водата -> експлозивно нагоре -> застива."""
+    """Траектория на целия герой: coil -> взрив -> дъга -> заковаване."""
     rig.rotation_mode = 'XYZ'
-
     keys = [
-        # кадър, z,     scale(x,y,z),      rot z
-        (1,            -9.00, (1.00, 1.00, 1.00), 0.35),
-        (F_CALM_END,   -8.60, (1.00, 1.00, 1.00), 0.30),
-        (F_ANTIC,      -9.35, (1.10, 1.10, 0.86), 0.25),   # антиципация: сгъва се
-        (F_BURST,      -5.20, (0.74, 0.74, 1.55), 0.10),   # изстрелване, издължен
-        (F_SURFACE,    -0.30, (0.72, 0.72, 1.62), 0.02),
-        (F_SURFACE + 1, 1.45, (0.76, 0.76, 1.52), 0.00),
-        (F_BURST + 4,   2.35, (0.80, 0.80, 1.42), -0.05),
-        (F_BURST + 7,   3.75, (0.94, 0.94, 1.10), -0.12),
-        (F_APEX,        4.42, (1.03, 1.03, 0.95), -0.18),  # леко сплескване на върха
-        (F_WEB_B,       4.30, (1.00, 1.00, 1.00), -0.22),
-        (F_OVER,        4.18, (0.97, 0.97, 1.04), -0.34),  # overshoot
-        (F_RECOIL,      4.30, (1.02, 1.02, 0.98), -0.26),  # откат
-        (F_SETTLE,      4.26, (1.00, 1.00, 1.00), -0.29),
-        (F_END,         4.20, (1.00, 1.00, 1.00), -0.29),
+        # кадър, z,     scale(x,y,z),        rot z
+        (1,            -9.20, (1.00, 1.00, 1.00), 0.34),
+        (F_CALM_END,   -8.70, (1.00, 1.00, 1.00), 0.28),
+        (F_ANTIC,      -9.55, (1.14, 1.14, 0.82), 0.22),   # свива се
+        (F_BURST,      -5.60, (0.72, 0.72, 1.58), 0.08),   # изстрелване
+        (F_SURFACE,    -0.20, (0.70, 0.70, 1.66), 0.02),
+        (F_EXTEND,      2.90, (0.82, 0.82, 1.34), -0.06),
+        (F_SPREAD,      4.35, (0.96, 0.96, 1.06), -0.13),
+        (F_APEX,        4.95, (1.04, 1.04, 0.95), -0.19),  # сплескване на върха
+        (F_WEB_B,       4.72, (1.00, 1.00, 1.00), -0.24),
+        (F_TUCK,        4.46, (0.98, 0.98, 1.03), -0.30),
+        (F_OVER,        4.24, (0.96, 0.96, 1.05), -0.38),  # overshoot
+        (F_RECOIL,      4.40, (1.03, 1.03, 0.97), -0.27),  # откат
+        (F_SETTLE,      4.33, (1.00, 1.00, 1.00), -0.30),
+        (F_END,         4.24, (1.00, 1.00, 1.00), -0.30),
     ]
     for f, z, sc, rz in keys:
         rig.location = (0, 0, z)
@@ -442,7 +523,6 @@ def animate_body(rig):
         rig.keyframe_insert('scale', frame=f)
         rig.keyframe_insert('rotation_euler', frame=f)
 
-    # рязко ускорение: без плавно влизане в изстрелването
     act = rig.animation_data.action
     for fc in act.fcurves:
         for kp in fc.keyframe_points:
@@ -458,27 +538,43 @@ def animate_body(rig):
 
 
 def animate_hands(rig):
+    """Жестовете на дланите вървят с фазите на екшъна."""
     for f, l, r in ((1, 'fist', 'fist'),
-                    (F_BURST + 2, 'open', 'open'),
+                    (F_ANTIC, 'fist', 'fist'),
+                    (F_SURFACE + 2, 'open', 'open'),
+                    (F_SPREAD, 'open', 'open'),
                     (F_WEB_A, 'thwip', 'thwip'),
-                    (F_WEB_B + 1, 'thwip', 'thwip'),
-                    (F_SETTLE, 'thwip', 'open'),      # финалът: thwip длан + разперена
+                    (F_WEB_B, 'thwip', 'thwip'),
+                    (F_TUCK, 'thwip', 'open'),
+                    (F_SETTLE, 'thwip', 'open'),   # финалът: thwip длан + разперена
                     (F_END, 'thwip', 'open')):
         apply_grip(rig, 'L', l, f)
         apply_grip(rig, 'R', r, f)
 
 
 def animate_pose(rig):
+    """Крайниците пътуват през реални междинни пози, не се телепортират."""
     apply_pose(rig, POSE_TUCK, 1)
-    apply_pose(rig, POSE_TUCK, F_ANTIC)
-    apply_pose(rig, POSE_BURST, F_BURST + 2)
-    apply_pose(rig, POSE_BURST, F_APEX - 3)
+    apply_pose(rig, POSE_TUCK, F_CALM_END)
+    apply_pose(rig, POSE_COIL, F_ANTIC)
+    # изстрелването: от свито към изпънато за 4 кадъра
+    apply_pose(rig, blend(POSE_COIL, POSE_ARROW, 0.45), F_BURST)
+    apply_pose(rig, POSE_ARROW, F_SURFACE + 2)
+    apply_pose(rig, POSE_ARROW, F_EXTEND)
+    # краката се разтварят
+    apply_pose(rig, blend(POSE_ARROW, POSE_SPREAD, 0.5), F_EXTEND + 4)
+    apply_pose(rig, POSE_SPREAD, F_SPREAD)
+    apply_pose(rig, blend(POSE_SPREAD, POSE_WEB, 0.55), F_APEX)
     apply_pose(rig, POSE_WEB, F_WEB_A)
-    apply_pose(rig, POSE_WEB, F_WEB_B + 1)
-    apply_pose(rig, exaggerate(POSE_FINAL, 0.16), F_OVER)
+    apply_pose(rig, POSE_WEB, F_WEB_B)
+    # прибиране на коленете, после щракване в позата
+    apply_pose(rig, POSE_TUCKIN, F_TUCK)
+    apply_pose(rig, exaggerate(POSE_FINAL, 0.14), F_OVER)
     apply_pose(rig, exaggerate(POSE_FINAL, -0.05), F_RECOIL)
     apply_pose(rig, POSE_FINAL, F_SETTLE)
-    apply_pose(rig, POSE_FINAL, F_END)
+    # задържането диша, вместо да е замразен кадър
+    for k, f in enumerate((122, 143, 164, F_END)):
+        apply_pose(rig, drift(POSE_FINAL, k * 1.9), f)
 
     act = rig.animation_data.action
     for fc in act.fcurves:
@@ -486,32 +582,31 @@ def animate_pose(rig):
             continue
         for kp in fc.keyframe_points:
             fr = kp.co.x
-            if F_SNAP_START <= fr <= F_RECOIL:
-                kp.interpolation = 'QUART'
-                kp.easing = 'EASE_OUT'
+            if F_TUCK <= fr <= F_RECOIL:
+                kp.interpolation = 'QUART'; kp.easing = 'EASE_OUT'   # snap
+            elif fr <= F_SURFACE + 2:
+                kp.interpolation = 'QUAD'; kp.easing = 'EASE_IN'     # взрив
             elif fr <= F_APEX:
-                kp.interpolation = 'QUAD'
-                kp.easing = 'EASE_IN_OUT'
+                kp.interpolation = 'SINE'; kp.easing = 'EASE_IN_OUT'
             else:
-                kp.interpolation = 'BEZIER'
-                kp.easing = 'EASE_IN_OUT'
+                kp.interpolation = 'BEZIER'; kp.easing = 'EASE_IN_OUT'
 
 
 def setup_render():
     sc = bpy.context.scene
     sc.render.engine = 'CYCLES'
     sc.cycles.device = 'CPU'
-    sc.cycles.samples = 40
+    sc.cycles.samples = 48
     sc.cycles.use_denoising = True
-    sc.cycles.max_bounces = 6
+    sc.cycles.max_bounces = 8
     sc.cycles.transmission_bounces = 2
-    sc.render.resolution_x, sc.render.resolution_y = 540, 960
+    sc.render.resolution_x, sc.render.resolution_y = 720, 1280
     sc.render.film_transparent = False
     sc.render.use_motion_blur = True
-    sc.render.motion_blur_shutter = 0.6
+    sc.render.motion_blur_shutter = 0.55
     sc.view_settings.view_transform = 'AgX'
     sc.view_settings.look = 'AgX - Punchy'
-    sc.view_settings.exposure = 0.35
+    sc.view_settings.exposure = -0.05
 
 
 def main():

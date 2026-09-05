@@ -139,9 +139,14 @@ def _suit_shader():
     m.use_nodes = True
     nt = m.node_tree
     b = nt.nodes['Principled BSDF']
-    b.inputs['Roughness'].default_value = 0.32
+    b.inputs['Roughness'].default_value = 0.30
     if 'Specular IOR Level' in b.inputs:
-        b.inputs['Specular IOR Level'].default_value = 0.55
+        b.inputs['Specular IOR Level'].default_value = 0.62
+    # тънък лак + плюш: дава на плата обем под силна светлина
+    for name, val in (('Coat Weight', 0.22), ('Coat Roughness', 0.24),
+                      ('Sheen Weight', 0.16), ('Sheen Roughness', 0.45)):
+        if name in b.inputs:
+            b.inputs[name].default_value = val
 
     ca = nt.nodes.new('ShaderNodeVertexColor')
     ca.layer_name = 'suit'
@@ -174,8 +179,8 @@ def _suit_shader():
         nt.links.new(sub.outputs[0], ab.inputs[0])
         return ab
 
-    a = stripes('X', 90.0)
-    b2 = stripes('Y', 62.0)
+    a = stripes('X', 82.0)
+    b2 = stripes('Y', 56.0)
     mn = nt.nodes.new('ShaderNodeMath'); mn.operation = 'MINIMUM'
     nt.links.new(a.outputs[0], mn.inputs[0])
     nt.links.new(b2.outputs[0], mn.inputs[1])
@@ -183,7 +188,7 @@ def _suit_shader():
     web.color_ramp.interpolation = 'B_SPLINE'
     web.color_ramp.elements[0].position = 0.000
     web.color_ramp.elements[0].color = (0.0, 0.0, 0.0, 1)
-    web.color_ramp.elements[1].position = 0.055
+    web.color_ramp.elements[1].position = 0.075
     web.color_ramp.elements[1].color = (1, 1, 1, 1)
     tint = nt.nodes.new('ShaderNodeMixRGB')
     tint.blend_type = 'MULTIPLY'

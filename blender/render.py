@@ -7,7 +7,7 @@ import main as M
 M.main()
 sc = bpy.context.scene
 sc.cycles.samples = 48
-sc.render.resolution_x, sc.render.resolution_y = 540, 960
+sc.render.resolution_x, sc.render.resolution_y = 720, 1280
 sc.render.image_settings.file_format = 'PNG'
 out = '/tmp/render/'
 os.makedirs(out, exist_ok=True)
