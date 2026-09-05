@@ -188,7 +188,7 @@ def _suit_shader():
     web.color_ramp.interpolation = 'B_SPLINE'
     web.color_ramp.elements[0].position = 0.000
     web.color_ramp.elements[0].color = (0.0, 0.0, 0.0, 1)
-    web.color_ramp.elements[1].position = 0.075
+    web.color_ramp.elements[1].position = 0.095
     web.color_ramp.elements[1].color = (1, 1, 1, 1)
     tint = nt.nodes.new('ShaderNodeMixRGB')
     tint.blend_type = 'MULTIPLY'
@@ -377,6 +377,101 @@ def make_lens(bvh, eye, sgn, su, sv, tilt, offset, name, mats, mat_idx):
     return ob
 
 
+def _ellipse_loop(cx, cy, rx, ry, rot=0.0, n=26):
+    ca, sa = math.cos(rot), math.sin(rot)
+    pts = []
+    for i in range(n):
+        a = 2 * math.pi * i / n
+        u, v = rx * math.cos(a), ry * math.sin(a)
+        pts.append((cx + u * ca - v * sa, cy + u * sa + v * ca))
+    return pts
+
+
+def _fan(loop):
+    """Ветрилна триангулация около центъра — за изпъкнали контури."""
+    c = (sum(p[0] for p in loop) / len(loop), sum(p[1] for p in loop) / len(loop))
+    pts = [c] + list(loop)
+    n = len(loop)
+    return pts, [[0, 1 + i, 1 + (i + 1) % n] for i in range(n)]
+
+
+def _leg(p0, p1, p2, w0, w1, w2, seg=7):
+    """Двусегментен крак като лента с четириъгълници — винаги свързан с тялото."""
+    def bez(t):
+        a = (1 - t) ** 2
+        b = 2 * (1 - t) * t
+        c = t * t
+        return (a * p0[0] + b * p1[0] + c * p2[0],
+                a * p0[1] + b * p1[1] + c * p2[1])
+
+    pts, faces = [], []
+    for i in range(seg + 1):
+        t = i / seg
+        x, y = bez(t)
+        nx, ny = bez(min(1.0, t + 0.01))
+        dx, dy = nx - x, ny - y
+        ln = math.hypot(dx, dy) or 1
+        px, py = -dy / ln, dx / ln
+        w = w0 + (w1 - w0) * (2 * t if t < .5 else 1) if t < .5 else \
+            w1 + (w2 - w1) * (t - .5) * 2
+        pts += [(x + px * w, y + py * w), (x - px * w, y - py * w)]
+        if i:
+            k = (i - 1) * 2
+            faces.append([k, k + 2, k + 3, k + 1])
+    return pts, faces
+
+
+def _spider_parts(scale):
+    """Тяло, главогръд и осем крака, всички слети в един силует."""
+    parts = [_fan(_ellipse_loop(0, -0.14, 0.38, 0.70)),
+             _fan(_ellipse_loop(0, 0.56, 0.24, 0.26))]
+    legs = [((0.10, 0.44), (0.70, 0.94), (1.16, 0.58)),
+            ((0.12, 0.24), (0.84, 0.52), (1.34, 0.10)),
+            ((0.12, 0.02), (0.84, -0.06), (1.30, -0.44)),
+            ((0.10, -0.20), (0.70, -0.56), (1.10, -0.90))]
+    for sgn in (1, -1):
+        for a, b, c in legs:
+            parts.append(_leg((a[0] * sgn, a[1]), (b[0] * sgn, b[1]),
+                              (c[0] * sgn, c[1]), 0.085, 0.055, 0.028))
+    return [([(x * scale, y * scale) for x, y in pts], f) for pts, f in parts]
+
+
+def build_emblem(verts, faces, J, mats):
+    """Паякът на гърдите — реална геометрия, конформирана върху торса.
+
+    Проектира се с raycast като лещите, вместо да се рисува в текстура:
+    така следва извивката на гръдния кош и хваща отблясъци по ръба.
+    """
+    from mathutils.bvhtree import BVHTree
+    bvh = BVHTree.FromPolygons([tuple(v) for v in verts], faces, all_triangles=False)
+    chest_z = J['spine-2'].z + (J['neck'].z - J['spine-2'].z) * 0.50
+    co, tris = [], []
+    for pts2d, faces2d in _spider_parts(0.135):
+        base = len(co)
+        for x, z in pts2d:
+            origin = Vector((x, -0.9, chest_z + z))
+            hit, nrm, *_ = bvh.ray_cast(origin, Vector((0, 1, 0)))
+            if hit is None:
+                hit, nrm = Vector((x, -0.16, chest_z + z)), Vector((0, -1, 0))
+            co.append(hit + nrm.normalized() * 0.0035)
+        tris += [[base + i for i in f] for f in faces2d]
+
+    me = bpy.data.meshes.new('Emblem')
+    me.from_pydata([tuple(c) for c in co], [], tris)
+    me.update()
+    ob = bpy.data.objects.new('Emblem', me)
+    bpy.context.scene.collection.objects.link(ob)
+    for m in mats:
+        ob.data.materials.append(m)
+    for p in ob.data.polygons:
+        p.material_index = M_BLACK
+        p.use_smooth = True
+    sol = ob.modifiers.new('Solid', 'SOLIDIFY')
+    sol.thickness = 0.004
+    sol.offset = -1
+    return ob
+
+
 def build_lens_pair(verts, faces, J, mats):
     from mathutils.bvhtree import BVHTree
     bvh = BVHTree.FromPolygons([tuple(v) for v in verts], faces, all_triangles=False)
@@ -385,9 +480,9 @@ def build_lens_pair(verts, faces, J, mats):
         eye = J[f'{side}-eye']
         e = Vector((0.040 * sgn, eye.y, eye.z + 0.009))
         tilt = math.radians(15)
-        out.append(make_lens(bvh, e, sgn, 0.0430, 0.0290, tilt, 0.0125,
+        out.append(make_lens(bvh, e, sgn, 0.0480, 0.0325, tilt, 0.0125,
                              f'LensRim_{side}', mats, M_BLACK))
-        out.append(make_lens(bvh, e, sgn, 0.0355, 0.0235, tilt, 0.0175,
+        out.append(make_lens(bvh, e, sgn, 0.0400, 0.0265, tilt, 0.0175,
                              f'Lens_{side}', mats, M_WHITE))
     return out
 
@@ -488,6 +583,7 @@ def build(mats=None):
 
     # лещите се вземат от главата ПРЕДИ маската да бъде изгладена
     lenses = build_lens_pair(verts, faces, J, mats)
+    emblem = build_emblem(verts, faces, J, mats)
 
     rig = build_armature(J)
 
@@ -545,11 +641,11 @@ def build(mats=None):
     assert [m.type for m in body.modifiers] == ['SMOOTH', 'SMOOTH', 'SMOOTH', 'ARMATURE'], \
         [m.type for m in body.modifiers]
 
-    for lens in lenses:
-        lens.parent = rig
-        lens.parent_type = 'BONE'
-        lens.parent_bone = 'head'
-        pb = rig.pose.bones['head']
-        lens.matrix_parent_inverse = (rig.matrix_world @ pb.matrix
-                                      @ Matrix.Translation((0, pb.length, 0))).inverted()
-    return rig, body, lenses, J
+    for ob, bone in [(l, 'head') for l in lenses] + [(emblem, 'chest')]:
+        ob.parent = rig
+        ob.parent_type = 'BONE'
+        ob.parent_bone = bone
+        pb = rig.pose.bones[bone]
+        ob.matrix_parent_inverse = (rig.matrix_world @ pb.matrix
+                                    @ Matrix.Translation((0, pb.length, 0))).inverted()
+    return rig, body, lenses + [emblem], J

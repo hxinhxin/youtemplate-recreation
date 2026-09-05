@@ -210,18 +210,45 @@ def clean():
     sc.render.fps = FPS
 
 
+def water_shader(name, deep=(0.004, 0.030, 0.055), rough=0.02):
+    """Физически коректна вода: пропускане, IOR 1.33 и обемно поглъщане.
+
+    Непрозрачният син материал изглеждаше като пластмаса; истинската
+    рефракция е това, което прави кадъра CGI, а не илюстрация.
+    """
+    m = bpy.data.materials.new(name)
+    m.use_nodes = True
+    nt = m.node_tree
+    out = nt.nodes['Material Output']
+    b = nt.nodes['Principled BSDF']
+    b.inputs['Base Color'].default_value = (1, 1, 1, 1)
+    b.inputs['Roughness'].default_value = rough
+    b.inputs['IOR'].default_value = 1.333
+    if 'Transmission Weight' in b.inputs:
+        b.inputs['Transmission Weight'].default_value = 1.0
+    # обемно поглъщане -> дълбочината потъмнява естествено
+    vol = nt.nodes.new('ShaderNodeVolumeAbsorption')
+    vol.inputs['Color'].default_value = (*deep, 1)
+    vol.inputs['Density'].default_value = 0.55
+    nt.links.new(vol.outputs['Volume'], out.inputs['Volume'])
+    return m, nt, b
+
+
 def build_ocean():
     bpy.ops.mesh.primitive_plane_add(size=1, location=(0, 0, WATER_Z))
     oc = bpy.context.object
     oc.name = 'Ocean'
     m = oc.modifiers.new('Ocean', 'OCEAN')
     m.spatial_size = 34
-    m.resolution = 11
+    m.resolution = 12
     m.wave_scale = 1.75
     m.wave_scale_min = 0.03
-    m.choppiness = 1.45
+    m.choppiness = 1.5
     m.wind_velocity = 15.0
     m.random_seed = 7
+    m.use_foam = True                  # реална пяна по гребените
+    m.foam_coverage = 0.055
+    m.foam_layer_name = 'foam'
     for f, t in ((1, 0.0), (F_END, F_END / FPS * 1.4)):
         m.time = t
         m.keyframe_insert('time', frame=f)
@@ -229,17 +256,69 @@ def build_ocean():
         for kp in fc.keyframe_points:
             kp.interpolation = 'LINEAR'
 
-    mat = bpy.data.materials.new('Water')
-    mat.use_nodes = True
-    b = mat.node_tree.nodes['Principled BSDF']
-    b.inputs['Base Color'].default_value = (0.004, 0.026, 0.055, 1)
-    b.inputs['Roughness'].default_value = 0.13
-    if 'Specular IOR Level' in b.inputs:
-        b.inputs['Specular IOR Level'].default_value = 0.85
+    mat, nt, b = water_shader('Water')
+    # пяната от модификатора се смесва като бяла разсейваща повърхност
+    ca = nt.nodes.new('ShaderNodeVertexColor')
+    ca.layer_name = 'foam'
+    ramp = nt.nodes.new('ShaderNodeValToRGB')
+    ramp.color_ramp.elements[0].position = 0.30
+    ramp.color_ramp.elements[1].position = 0.72
+    foam = nt.nodes.new('ShaderNodeBsdfDiffuse')
+    foam.inputs['Color'].default_value = (0.92, 0.96, 1.0, 1)
+    mix = nt.nodes.new('ShaderNodeMixShader')
+    out = nt.nodes['Material Output']
+    nt.links.new(ca.outputs['Color'], ramp.inputs['Fac'])
+    nt.links.new(ramp.outputs['Color'], mix.inputs['Fac'])
+    nt.links.new(b.outputs['BSDF'], mix.inputs[1])
+    nt.links.new(foam.outputs['BSDF'], mix.inputs[2])
+    nt.links.new(mix.outputs['Shader'], out.inputs['Surface'])
+
     oc.data.materials.append(mat)
     for p in oc.data.polygons:
         p.use_smooth = True
     return oc
+
+
+def build_interaction():
+    """Кратер и разширяваща се вълна там, където тялото пробива водата.
+
+    Mantaflow в този bpy build е счупен (Manta bindings крашват при bake),
+    затова изместването на водата е геометрично: радиална вълнова функция,
+    изпечена като shape keys, вместо частична физика.
+    """
+    bpy.ops.mesh.primitive_grid_add(x_subdivisions=96, y_subdivisions=96,
+                                    size=13, location=(0, 0, WATER_Z + 0.005))
+    g = bpy.context.object
+    g.name = 'WaterImpact'
+    mat, nt, b = water_shader('ImpactWater', rough=0.04)
+    g.data.materials.append(mat)
+    for p in g.data.polygons:
+        p.use_smooth = True
+
+    base = [v.co.copy() for v in g.data.vertices]
+    g.shape_key_add(name='rest', from_mix=False)
+    import math as _m
+    for f in range(F_BURST - 3, min(F_END, F_BURST + 60), 3):
+        t = (f - F_BURST) / FPS
+        key = g.shape_key_add(name=f'k{f}', from_mix=False)
+        for i, co in enumerate(base):
+            r = _m.hypot(co.x, co.y)
+            if t <= 0:
+                key.data[i].co.z = co.z
+                continue
+            # кратер, който се затваря + пръстеновидна вълна, която бяга навън
+            crater = -1.9 * _m.exp(-(r / (0.75 + t * 2.6)) ** 2) * _m.exp(-t * 2.4)
+            front = r - t * 6.2
+            ring = 0.85 * _m.exp(-(front / 0.85) ** 2) * _m.cos(front * 2.6) \
+                * _m.exp(-t * 0.85) / (1 + r * 0.28)
+            key.data[i].co.z = co.z + crater + ring
+        key.value = 0.0
+        key.keyframe_insert('value', frame=f - 3)
+        key.value = 1.0
+        key.keyframe_insert('value', frame=f)
+        key.value = 0.0
+        key.keyframe_insert('value', frame=f + 3)
+    return g
 
 
 def build_splash():
@@ -247,17 +326,13 @@ def build_splash():
     objs = []
 
     # --- капката-инстанция ---
-    bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=2, radius=0.038,
+    bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=2, radius=0.030,
                                           location=(0, 0, -50))
     drop = bpy.context.object
     drop.name = 'DropInstance'
     for _p in drop.data.polygons:
         _p.use_smooth = True
-    wat = bpy.data.materials.new('SplashWhite')
-    wat.use_nodes = True
-    nb = wat.node_tree.nodes['Principled BSDF']
-    nb.inputs['Base Color'].default_value = (0.86, 0.94, 1.0, 1)
-    nb.inputs['Roughness'].default_value = 0.15
+    wat, _, _ = water_shader('DropWater', deep=(0.05, 0.14, 0.20), rough=0.0)
     drop.data.materials.append(wat)
     drop.hide_render = True
     objs.append(drop)
@@ -276,13 +351,13 @@ def build_splash():
 
     ps = em.modifiers.new('Splash', 'PARTICLE_SYSTEM').particle_system
     s = ps.settings
-    s.count = 1050
-    s.frame_start, s.frame_end = F_BURST, F_BURST + 5
-    s.lifetime, s.lifetime_random = 42, 0.55
+    s.count = 2200
+    s.frame_start, s.frame_end = F_BURST, F_BURST + 9
+    s.lifetime, s.lifetime_random = 62, 0.6
     s.normal_factor = 11.0
     s.factor_random = 4.5
     s.object_align_factor[2] = 6.0
-    s.particle_size, s.size_random = 0.85, 0.6
+    s.particle_size, s.size_random = 0.42, 0.8
     s.render_type = 'OBJECT'
     s.instance_object = drop
     s.physics_type = 'NEWTON'
@@ -304,13 +379,7 @@ def build_splash():
     dm.texture = disp_tex
     dm.strength = 0.85
     dm.mid_level = 0.5
-    cm = bpy.data.materials.new('ColumnWhite')
-    cm.use_nodes = True
-    nt = cm.node_tree
-    nb = nt.nodes['Principled BSDF']
-    nb.inputs['Base Color'].default_value = (0.82, 0.93, 1.0, 1)
-    nb.inputs['Roughness'].default_value = 0.2
-    cm.blend_method = 'BLEND'
+    cm, _, nb = water_shader('ColumnWater', deep=(0.08, 0.18, 0.24), rough=0.05)
     col.data.materials.append(cm)
     for p in col.data.polygons:
         p.use_smooth = True
@@ -347,6 +416,29 @@ def build_splash():
         rb.inputs['Alpha'].default_value = al
         rb.inputs['Alpha'].keyframe_insert('default_value', frame=f)
     objs.append(ring)
+
+    # втора емисия: фина мъгла, която виси във въздуха дълго след удара
+    bpy.ops.mesh.primitive_uv_sphere_add(radius=1.5, location=(0, 0, 0.9))
+    mist = bpy.context.object
+    mist.name = 'MistEmitter'
+    mist.show_instancer_for_render = False
+    ps2 = mist.modifiers.new('Mist', 'PARTICLE_SYSTEM').particle_system
+    m2 = ps2.settings
+    m2.count = 900
+    m2.frame_start, m2.frame_end = F_BURST + 1, F_BURST + 16
+    m2.lifetime, m2.lifetime_random = 90, 0.5
+    m2.normal_factor = 3.2
+    m2.factor_random = 2.2
+    m2.object_align_factor[2] = 2.0
+    m2.particle_size, m2.size_random = 0.30, 0.9
+    m2.render_type = 'OBJECT'
+    m2.instance_object = drop
+    m2.physics_type = 'NEWTON'
+    m2.mass = 0.12
+    m2.effector_weights.gravity = 0.28          # мъглата пада бавно
+    m2.use_rotations = True
+    m2.angular_velocity_mode = 'RAND'
+    objs.append(mist)
     return objs
 
 
@@ -428,8 +520,8 @@ def build_camera(rig):
                          (F_SPREAD, (-0.3, -5.9, 4.80), 50),
                          (F_APEX, (-0.45, -5.8, 5.50), 52),
                          (F_TUCK, (-0.6, -5.0, 5.30), 60),
-                         (F_SETTLE, (-0.75, -4.6, 5.05), 66),
-                         (F_END, (-0.85, -4.25, 5.08), 69)):
+                         (F_SETTLE, (-0.80, -4.95, 5.00), 62),
+                         (F_END, (-0.90, -4.65, 5.03), 65)):
         cam.location = loc
         cam.keyframe_insert('location', frame=f)
         cam.data.lens = lens
@@ -592,14 +684,127 @@ def animate_pose(rig):
                 kp.interpolation = 'BEZIER'; kp.easing = 'EASE_IN_OUT'
 
 
+def build_compositor():
+    """Кинематографско компoзитиране: bloom, хроматична аберация, винетка,
+    зърно и цветови грейд. Това е разликата между render и кадър от филм."""
+    sc = bpy.context.scene
+    sc.use_nodes = True
+    nt = sc.node_tree
+    for n in list(nt.nodes):
+        nt.nodes.remove(n)
+
+    rl = nt.nodes.new('CompositorNodeRLayers')
+    x = 300
+
+    def add(t, **kw):
+        nonlocal x
+        n = nt.nodes.new(t)
+        n.location = (x, 0)
+        x += 220
+        for k, v in kw.items():
+            setattr(n, k, v)
+        return n
+
+    prev = rl.outputs['Image']
+
+    # 1) сияние по ярките отблясъци на водата
+    glare = add('CompositorNodeGlare')
+    glare.glare_type = 'BLOOM' if hasattr(glare, 'quality') and 'BLOOM' in \
+        [i.identifier for i in glare.bl_rna.properties['glare_type'].enum_items] else 'FOG_GLOW'
+    glare.quality = 'HIGH'
+    if hasattr(glare, 'threshold'):
+        glare.threshold = 0.82
+    if hasattr(glare, 'mix'):
+        glare.mix = -0.62
+    if hasattr(glare, 'size'):
+        glare.size = 8
+    nt.links.new(prev, glare.inputs['Image'])
+    prev = glare.outputs['Image']
+
+    # 2) лека дисперсия по краищата на кадъра
+    lens = add('CompositorNodeLensdist')
+    for nm, val in (('Dispersion', 0.006), ('Distort', 0.004),
+                    ('Distortion', 0.004)):
+        if nm in lens.inputs:
+            lens.inputs[nm].default_value = val
+    nt.links.new(prev, lens.inputs['Image'])
+    prev = lens.outputs['Image']
+
+    # 3) грейд: студени сенки, топли акценти
+    bal = add('CompositorNodeColorBalance')
+    bal.correction_method = 'LIFT_GAMMA_GAIN'
+    bal.lift = (0.97, 0.99, 1.05)
+    bal.gamma = (1.00, 1.00, 0.99)
+    bal.gain = (1.06, 1.02, 0.96)
+    nt.links.new(prev, bal.inputs['Image'])
+    prev = bal.outputs['Image']
+
+    hs = add('CompositorNodeHueSat')
+    hs.inputs['Saturation'].default_value = 1.12
+    nt.links.new(prev, hs.inputs['Image'])
+    prev = hs.outputs['Image']
+
+    # 4) винетка
+    ell = nt.nodes.new('CompositorNodeEllipseMask')
+    ell.location = (x - 220, -320)
+    ell.width, ell.height = 0.92, 0.86
+    blur = nt.nodes.new('CompositorNodeBlur')
+    blur.location = (x - 60, -320)
+    blur.size_x = blur.size_y = 220
+    blur.use_relative = False
+    vig = add('CompositorNodeMixRGB')
+    vig.blend_type = 'MULTIPLY'
+    vig.inputs['Fac'].default_value = 0.34
+    nt.links.new(ell.outputs['Mask'], blur.inputs['Image'])
+    nt.links.new(prev, vig.inputs[1])
+    nt.links.new(blur.outputs['Image'], vig.inputs[2])
+    prev = vig.outputs['Image']
+
+    # 5) фино филмово зърно
+    noise = nt.nodes.new('CompositorNodeTexture')
+    noise.location = (x - 220, -560)
+    tex = bpy.data.textures.new('Grain', 'NOISE')
+    noise.texture = tex
+    grain = add('CompositorNodeMixRGB')
+    grain.blend_type = 'OVERLAY'
+    grain.inputs['Fac'].default_value = 0.045
+    nt.links.new(prev, grain.inputs[1])
+    nt.links.new(noise.outputs['Color'], grain.inputs[2])
+    prev = grain.outputs['Image']
+
+    comp = add('CompositorNodeComposite')
+    nt.links.new(prev, comp.inputs['Image'])
+
+
+def animate_wetness(rig):
+    """Костюмът излиза от океана огледално мокър и постепенно изсъхва.
+
+    Това е най-силният реалистичен знак, че тялото току-що е било във
+    водата — по-силен от всяка добавена частица.
+    """
+    mat = bpy.data.materials.get('Suit')
+    if mat is None:
+        return
+    b = mat.node_tree.nodes['Principled BSDF']
+    keys = [(1, 0.055, 0.85), (F_SURFACE, 0.055, 0.85),
+            (F_APEX, 0.085, 0.70), (F_SETTLE, 0.17, 0.45),
+            (140, 0.28, 0.26), (F_END, 0.30, 0.22)]
+    for f, rough, coat in keys:
+        b.inputs['Roughness'].default_value = rough
+        b.inputs['Roughness'].keyframe_insert('default_value', frame=f)
+        if 'Coat Weight' in b.inputs:
+            b.inputs['Coat Weight'].default_value = coat
+            b.inputs['Coat Weight'].keyframe_insert('default_value', frame=f)
+
+
 def setup_render():
     sc = bpy.context.scene
     sc.render.engine = 'CYCLES'
     sc.cycles.device = 'CPU'
     sc.cycles.samples = 48
     sc.cycles.use_denoising = True
-    sc.cycles.max_bounces = 8
-    sc.cycles.transmission_bounces = 2
+    sc.cycles.max_bounces = 10
+    sc.cycles.transmission_bounces = 6
     sc.render.resolution_x, sc.render.resolution_y = 720, 1280
     sc.render.film_transparent = False
     sc.render.use_motion_blur = True
@@ -613,13 +818,16 @@ def main():
     clean()
     rig, body, lenses, J = C.build()
     build_ocean()
+    build_interaction()
     build_splash()
     animate_body(rig)
     animate_pose(rig)
     animate_hands(rig)
+    animate_wetness(rig)
     build_webs(rig)
     build_camera(rig)
     build_lights()
+    build_compositor()
     setup_render()
     out = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'spiderman_ocean.blend')
     bpy.ops.wm.save_as_mainfile(filepath=out)
