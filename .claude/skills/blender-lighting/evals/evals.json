@@ -1,0 +1,14 @@
+[
+  { "query": "Set up three-point lighting", "should_trigger": true },
+  { "query": "Make this look like a studio product shot", "should_trigger": true },
+  { "query": "Add an HDRI environment", "should_trigger": true },
+  { "query": "Give the scene a moody, dramatic feel", "should_trigger": true },
+  { "query": "Golden hour lighting please", "should_trigger": true },
+  { "query": "My render looks completely flat", "should_trigger": true },
+  { "query": "Add a rim light behind the subject", "should_trigger": true },
+  { "query": "The shadows are too hard", "should_trigger": true },
+  { "query": "Make the object metallic", "should_trigger": false, "rationale": "blender-materials" },
+  { "query": "Add a subdivision modifier", "should_trigger": false, "rationale": "blender-modeling" },
+  { "query": "Render a 120 frame animation", "should_trigger": false, "rationale": "blender-rendering" },
+  { "query": "Use an 85mm lens", "should_trigger": false, "rationale": "blender-cameras" }
+]

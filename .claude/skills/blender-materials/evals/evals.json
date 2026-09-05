@@ -1,0 +1,13 @@
+[
+  { "query": "Make this object look like brushed aluminium", "should_trigger": true },
+  { "query": "Add a glass material with correct IOR", "should_trigger": true },
+  { "query": "Everything looks like plastic, fix it", "should_trigger": true },
+  { "query": "Make the panel glow orange", "should_trigger": true },
+  { "query": "Add procedural roughness variation to the surface", "should_trigger": true },
+  { "query": "Set the base colour to a warm wood tone", "should_trigger": true },
+  { "query": "Why is my glass rendering black?", "should_trigger": true },
+  { "query": "Add a bevel modifier", "should_trigger": false, "rationale": "blender-modeling" },
+  { "query": "Make the key light warmer", "should_trigger": false, "rationale": "blender-lighting" },
+  { "query": "Switch to Cycles and render", "should_trigger": false, "rationale": "blender-rendering" },
+  { "query": "Move the camera back", "should_trigger": false, "rationale": "blender-cameras" }
+]

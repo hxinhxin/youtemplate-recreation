@@ -1,0 +1,14 @@
+[
+  { "query": "Render this scene to a PNG", "should_trigger": true },
+  { "query": "Should I use Cycles or EEVEE?", "should_trigger": true },
+  { "query": "My render is really noisy", "should_trigger": true },
+  { "query": "The render takes forever, speed it up", "should_trigger": true },
+  { "query": "Render frames 1 to 120 as a sequence", "should_trigger": true },
+  { "query": "The highlights are blown out", "should_trigger": true },
+  { "query": "Enable GPU rendering", "should_trigger": true },
+  { "query": "Render with a transparent background", "should_trigger": true },
+  { "query": "Add a fill light", "should_trigger": false, "rationale": "blender-lighting" },
+  { "query": "Make the surface rougher", "should_trigger": false, "rationale": "blender-materials" },
+  { "query": "Export as GLB", "should_trigger": false, "rationale": "blender-export" },
+  { "query": "Move the camera closer", "should_trigger": false, "rationale": "blender-cameras" }
+]

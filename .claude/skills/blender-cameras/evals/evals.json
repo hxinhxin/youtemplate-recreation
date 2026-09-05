@@ -1,0 +1,13 @@
+[
+  { "query": "Add a camera and frame the subject", "should_trigger": true },
+  { "query": "Use an 85mm lens with shallow depth of field", "should_trigger": true },
+  { "query": "Give me a hero angle on this model", "should_trigger": true },
+  { "query": "Set up an orthographic front view", "should_trigger": true },
+  { "query": "Make a turntable orbit around the object", "should_trigger": true },
+  { "query": "The subject is cut off at the edge of frame", "should_trigger": true },
+  { "query": "Add bokeh to the background", "should_trigger": true },
+  { "query": "Add a key light", "should_trigger": false, "rationale": "blender-lighting" },
+  { "query": "Make it look like gold", "should_trigger": false, "rationale": "blender-materials" },
+  { "query": "Render it at 4K", "should_trigger": false, "rationale": "blender-rendering" },
+  { "query": "Add a bevel to the edges", "should_trigger": false, "rationale": "blender-modeling" }
+]

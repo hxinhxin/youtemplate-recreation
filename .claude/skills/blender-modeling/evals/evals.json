@@ -1,0 +1,15 @@
+[
+  { "query": "Add a beveled cube at 20cm", "should_trigger": true },
+  { "query": "Apply a subdivision surface modifier", "should_trigger": true },
+  { "query": "Boolean a hole through this plate", "should_trigger": true },
+  { "query": "Build a chair from primitives", "should_trigger": true },
+  { "query": "Mirror the half mesh to make it symmetric", "should_trigger": true },
+  { "query": "Turn this bezier curve into a cable mesh", "should_trigger": true },
+  { "query": "Extrude the top face upward", "should_trigger": true },
+  { "query": "Clean up the normals on this mesh", "should_trigger": true },
+  { "query": "Make the blade metallic", "should_trigger": false, "rationale": "blender-materials" },
+  { "query": "Three-point light this scene", "should_trigger": false, "rationale": "blender-lighting" },
+  { "query": "Render at 1080p with 512 samples", "should_trigger": false, "rationale": "blender-rendering" },
+  { "query": "Frame the subject with an 85mm lens", "should_trigger": false, "rationale": "blender-cameras" },
+  { "query": "Save this out as FBX for Unity", "should_trigger": false, "rationale": "blender-export" }
+]

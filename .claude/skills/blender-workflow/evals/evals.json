@@ -1,0 +1,13 @@
+[
+  { "query": "Make a hero render of a sword", "should_trigger": true },
+  { "query": "Build a complete product shot from scratch", "should_trigger": true },
+  { "query": "What order should I do modeling, lighting and rendering in?", "should_trigger": true },
+  { "query": "Set up a full pipeline for a 3D logo", "should_trigger": true },
+  { "query": "I want a professional-looking final image of this chair", "should_trigger": true },
+  { "query": "I have a Blender idea but no idea where to start", "should_trigger": true },
+  { "query": "Bevel this cube", "should_trigger": false, "rationale": "single-phase geometry — blender-modeling" },
+  { "query": "Set the roughness to 0.2", "should_trigger": false, "rationale": "materials only" },
+  { "query": "Add a rim light", "should_trigger": false, "rationale": "lighting only" },
+  { "query": "Export this as GLB", "should_trigger": false, "rationale": "export only" },
+  { "query": "What is the Blender Python API for meshes?", "should_trigger": false, "rationale": "knowledge question, no scene work" }
+]

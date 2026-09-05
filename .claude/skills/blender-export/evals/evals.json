@@ -1,0 +1,13 @@
+[
+  { "query": "Export this as GLB for the web", "should_trigger": true },
+  { "query": "Save as FBX for Unity", "should_trigger": true },
+  { "query": "I need an STL for 3D printing", "should_trigger": true },
+  { "query": "Get this model into Unreal", "should_trigger": true },
+  { "query": "The model arrives 100x too large in the engine", "should_trigger": true },
+  { "query": "Decimate this down to 50k triangles for the web", "should_trigger": true },
+  { "query": "Convert this scene to USD", "should_trigger": true },
+  { "query": "Render a still image", "should_trigger": false, "rationale": "blender-rendering" },
+  { "query": "Add a mirror modifier", "should_trigger": false, "rationale": "blender-modeling" },
+  { "query": "Light it like a studio", "should_trigger": false, "rationale": "blender-lighting" },
+  { "query": "Make the material glossy", "should_trigger": false, "rationale": "blender-materials" }
+]
