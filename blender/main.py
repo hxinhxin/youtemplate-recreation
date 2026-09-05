@@ -1,10 +1,10 @@
 """Изгражда цялата сцена и анимацията, записва .blend."""
 import bpy, bmesh, math, os, sys
-from mathutils import Vector, Matrix, Euler
+from mathutils import Vector, Matrix, Euler, Quaternion
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from lib_build import aim_bone
-import lib_char2 as C
+import lib_fbx as F
 
 FPS, F_END = 30, 180
 # ---- тайминг (кадри) -------------------------------------------------
@@ -117,7 +117,7 @@ POSE_FINAL = {                      # финалната поза от рефе�
     'hand.L':     (0.05, -0.92, 0.39),
     # ляв крак — вдигнат високо, коляното силно свито (дясно на екрана)
     'thigh.L': (0.70, -0.25, 0.668), 'shin.L': (0.05, 0.20, 0.978),
-    'foot.L': (-0.30, -0.55, 0.78),
+    'foot.L': (-0.32, -0.22, 0.92), 'foot.L#twist': 1.55,
     # десен крак — бедрото напред, подбедрицата надолу-наляво
     'thigh.R': (-0.68, -0.48, -0.55), 'shin.R': (0.05, -0.18, -0.982),
     'foot.R': (-0.58, -0.52, -0.63),
@@ -128,7 +128,9 @@ def blend(a, b, t):
     """Междинна поза между две ключови — за плавни дъги на крайниците."""
     out = dict(a)
     for k, v in b.items():
-        if k in a:
+        if k.endswith('#twist'):
+            out[k] = a.get(k, 0.0) * (1 - t) + v * t
+        elif k in a:
             out[k] = tuple(Vector(a[k]).normalized().lerp(
                 Vector(v).normalized(), t).normalized())
         else:
@@ -140,6 +142,9 @@ def drift(pose, phase, amt=0.030):
     """Лек живот в задържането — крайниците не са замразени."""
     out = {}
     for i, (k, v) in enumerate(sorted(pose.items())):
+        if k.endswith('#twist'):
+            out[k] = v
+            continue
         d = Vector(v).normalized()
         w = math.sin(phase + i * 1.7) * amt
         out[k] = tuple((d + Vector((w, w * 0.5, -w * 0.7))).normalized())
@@ -150,6 +155,9 @@ def exaggerate(pose, k):
     """Overshoot: избутва посоките малко по-нататък от неутралното."""
     out = {}
     for b, d in pose.items():
+        if b.endswith('#twist'):
+            out[b] = d
+            continue
         v = Vector(d).normalized()
         n = Vector((0, 0, 1)) if 'thigh' not in b and 'shin' not in b and 'foot' not in b else Vector((0, 0, -1))
         out[b] = (v + (v - n) * k).normalized()[:]
@@ -176,30 +184,63 @@ GRIP = {
 }
 
 
+_BEND_AXIS = {}
+
+
 def apply_grip(rig, side, gesture, frame):
-    """Свива фалангите около локалната ос на всяка кост."""
-    from mathutils import Quaternion
+    """Свива фалангите около истинската ос на дланта.
+
+    Ставите на Maya имат произволна ориентация, затова фиксирана локална X
+    ос ги въртеше настрани вместо да ги свива.
+    """
     g = GRIP[gesture]
+    if side not in _BEND_AXIS:
+        _BEND_AXIS[side] = F.finger_bend_axis(rig, side)
+    ax_arm = _BEND_AXIS[side]
     for fi in range(1, 6):
         for seg in range(1, 4):
-            pb = rig.pose.bones.get(f'f{fi}_{seg}.{side}')
+            pb = _pb(rig, f'f{fi}_{seg}.{side}')
             if pb is None:
                 continue
-            pb.rotation_quaternion = Quaternion((1, 0, 0), -g[fi][seg - 1])
+            local = pb.bone.matrix_local.to_3x3().inverted() @ ax_arm
+            pb.rotation_quaternion = Quaternion(local.normalized(), g[fi][seg - 1])
             pb.keyframe_insert('rotation_quaternion', frame=frame)
+
+
+AXIS = None          # кватернионът на вносната ос; задава се от main()
+
+
+def _pb(rig, name):
+    """Име от анимацията -> pose bone на production рига."""
+    real = F.BONE_MAP.get(name, name)
+    return rig.pose.bones.get(real) if real else None
+
+
+_REST_AXIS = {}
 
 
 def apply_pose(rig, pose, frame):
     bpy.context.scene.frame_set(frame)
+    inv = AXIS.inverted() if AXIS else None
+    touched = []
     for name in ORDER:
-        pb = rig.pose.bones[name]
-        if name in pose:
-            aim_bone(pb, pose[name])
+        pb = _pb(rig, name)
+        if pb is None:
+            continue
+        touched.append(pb)
+        if name in pose and F.AXIS_CHILD.get(name):
+            if name not in _REST_AXIS:
+                _REST_AXIS[name] = F.rest_axis(
+                    rig, F.BONE_MAP[name], F.AXIS_CHILD[name])
+            d = Vector(pose[name])
+            tw = pose.get(name + '#twist', 0.0)
+            F.aim_joint(pb, _REST_AXIS[name],
+                        (inv @ d if inv else d).normalized(), tw)
         else:
             pb.rotation_quaternion = (1, 0, 0, 0)
             bpy.context.view_layer.update()
-    for name in ORDER:
-        rig.pose.bones[name].keyframe_insert('rotation_quaternion', frame=frame)
+    for pb in touched:
+        pb.keyframe_insert('rotation_quaternion', frame=frame)
 
 
 # =====================================================================
@@ -294,6 +335,16 @@ def build_interaction():
     g.data.materials.append(mat)
     for p in g.data.polygons:
         p.use_smooth = True
+
+    # преди удара решетката не съществува за камерата (иначе се вижда
+    # като тъмен правоъгълник върху океана)
+    for f, hide in ((1, True), (F_BURST - 4, True), (F_BURST - 3, False), (F_END, False)):
+        g.hide_render = g.hide_viewport = hide
+        g.keyframe_insert('hide_render', frame=f)
+        g.keyframe_insert('hide_viewport', frame=f)
+    for fc in g.animation_data.action.fcurves:
+        for kp in fc.keyframe_points:
+            kp.interpolation = 'CONSTANT'
 
     base = [v.co.copy() for v in g.data.vertices]
     g.shape_key_add(name='rest', from_mix=False)
@@ -452,8 +503,8 @@ def build_webs(rig):
 
     out = []
     # посоките са встрани от главата, за да не пресича паяжината лицето
-    for tag, bone, tip, start in (('R', 'hand.R', Vector((-7.0, -3.0, 6.5)), F_WEB_A),
-                                  ('L', 'hand.L', Vector((7.5, -3.5, 2.2)), F_WEB_B)):
+    for tag, bone, tip, start in (('R', F.BONE_MAP['hand.R'], Vector((-7.0, -3.0, 6.5)), F_WEB_A),
+                                  ('L', F.BONE_MAP['hand.L'], Vector((7.5, -3.5, 2.2)), F_WEB_B)):
         cu = bpy.data.curves.new(f'Web_{tag}', 'CURVE')
         cu.dimensions = '3D'
         cu.bevel_depth = 0.013
@@ -782,7 +833,7 @@ def animate_wetness(rig):
     Това е най-силният реалистичен знак, че тялото току-що е било във
     водата — по-силен от всяка добавена частица.
     """
-    mat = bpy.data.materials.get('Suit')
+    mat = bpy.data.materials.get('SpideySuit')
     if mat is None:
         return
     b = mat.node_tree.nodes['Principled BSDF']
@@ -815,17 +866,18 @@ def setup_render():
 
 
 def main():
+    global AXIS
     clean()
-    rig, body, lenses, J = C.build()
+    ctrl, rig, body, AXIS = F.load_character()
     build_ocean()
     build_interaction()
     build_splash()
-    animate_body(rig)
+    animate_body(ctrl)
     animate_pose(rig)
     animate_hands(rig)
     animate_wetness(rig)
     build_webs(rig)
-    build_camera(rig)
+    build_camera(ctrl)
     build_lights()
     build_compositor()
     setup_render()
