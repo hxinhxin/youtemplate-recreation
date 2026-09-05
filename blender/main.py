@@ -263,11 +263,12 @@ def build_webs(rig):
     wb.inputs['Roughness'].default_value = 0.35
 
     out = []
-    for tag, bone, tip, start in (('R', 'hand.R', Vector((-5.5, -3.5, 8.5)), F_WEB_A),
-                                  ('L', 'hand.L', Vector((5.0, -4.0, 7.5)), F_WEB_B)):
+    # посоките са встрани от главата, за да не пресича паяжината лицето
+    for tag, bone, tip, start in (('R', 'hand.R', Vector((-7.0, -3.0, 6.5)), F_WEB_A),
+                                  ('L', 'hand.L', Vector((7.5, -3.5, 2.2)), F_WEB_B)):
         cu = bpy.data.curves.new(f'Web_{tag}', 'CURVE')
         cu.dimensions = '3D'
-        cu.bevel_depth = 0.022
+        cu.bevel_depth = 0.013
         cu.bevel_resolution = 2
         sp = cu.splines.new('BEZIER')
         sp.bezier_points.add(3)
@@ -287,7 +288,8 @@ def build_webs(rig):
         for f, v in ((start - 1, 0.0), (start, 0.02), (start + 4, 1.0)):
             cu.bevel_factor_end = v
             cu.keyframe_insert('bevel_factor_end', frame=f)
-        for f, v in ((start + 26, 0.0), (start + 34, 0.55)):
+        # и двете се прибират докрай по един и същи начин, без остатъчни чуканчета
+        for f, v in ((F_WEB_B + 26, 0.0), (F_WEB_B + 40, 1.0)):
             cu.bevel_factor_start = v
             cu.keyframe_insert('bevel_factor_start', frame=f)
         out.append(ob)
@@ -298,8 +300,8 @@ def build_camera(rig):
     tgt = bpy.data.objects.new('CamTarget', None)
     bpy.context.scene.collection.objects.link(tgt)
     for f, loc in ((1, (0, 0, 0.5)), (F_CALM_END, (0, 0, 0.7)),
-                   (F_BURST, (0, 0, 1.4)), (F_APEX, (0, 0, 5.15)),
-                   (F_SETTLE, (0.05, 0, 5.32)), (F_END, (0.05, 0, 5.36))):
+                   (F_BURST, (0, 0, 1.4)), (F_APEX, (0, 0, 5.05)),
+                   (F_SETTLE, (0.10, 0, 5.15)), (F_END, (0.10, 0, 5.18))):
         tgt.location = loc
         tgt.keyframe_insert('location', frame=f)
 
@@ -316,9 +318,9 @@ def build_camera(rig):
     for f, loc, lens in ((1, (1.2, -13.0, 1.10), 30),
                          (F_CALM_END, (0.7, -12.4, 1.20), 31),
                          (F_BURST, (0.2, -11.6, 1.70), 33),
-                         (F_APEX, (-0.5, -8.2, 4.70), 52),
-                         (F_SETTLE, (-1.0, -6.1, 5.10), 72),
-                         (F_END, (-1.15, -5.75, 5.15), 78)):
+                         (F_APEX, (-0.5, -8.6, 4.60), 46),
+                         (F_SETTLE, (-0.9, -6.9, 4.95), 58),
+                         (F_END, (-1.05, -6.55, 5.00), 63)):
         cam.location = loc
         cam.keyframe_insert('location', frame=f)
         cam.data.lens = lens
