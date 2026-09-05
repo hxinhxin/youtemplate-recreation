@@ -65,3 +65,17 @@ Inside a real Blender install the same script works as
   saturated cartoon colour into pastel mud.
 - **Freestyle supplies the ink outline**, and flat materials depend on it — the
   two are a package.
+
+## Shipped output
+
+`renders/` holds the rendered demonstration:
+
+| File | What |
+|------|------|
+| `snap_demo.mp4` | the 72-frame loop at 960×540, 24 fps |
+| `snap_demo_beats.png` | the eight beat frames as a contact sheet |
+| `snap_demo.blend` | the scene, for continuing by hand |
+| `toon_character.glb` | engine handoff with the action baked in |
+
+Regenerate any of them with `blender/scripts/toon.py`. Verify the pipeline
+without rendering: `python blender/scripts/smoke_test.py` (14 checks).
