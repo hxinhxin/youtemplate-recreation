@@ -1,0 +1,6 @@
+__pycache__/
+*.pyc
+.venv/
+renders/frames/
+renders/beat_*.png
+renders/contact_sheet.png
