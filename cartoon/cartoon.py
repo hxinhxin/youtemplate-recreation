@@ -159,11 +159,12 @@ def hero_y(f):
     """Център на героя по вертикала (в supersample пиксели)."""
     hz = 0.605 * SH
     if f < F_BURST:                 return hz + 0.30 * SH
-    if f < F_BURST + 7:             return lerp(hz + 0.18 * SH, 0.40 * SH,
-                                                ease_in(inv(f, F_BURST, F_BURST + 7)))
-    if f < F_APEX:                  return lerp(0.40 * SH, 0.30 * SH,
-                                                ease_out(inv(f, F_BURST + 7, F_APEX)))
-    if f < F_SETTLE:                return lerp(0.30 * SH, 0.475 * SH,
+    # взривно: най-бързо в самото начало, после рязко забавяне
+    if f < F_BURST + 6:             return lerp(hz + 0.04 * SH, 0.36 * SH,
+                                                ease_out(inv(f, F_BURST, F_BURST + 6)))
+    if f < F_APEX:                  return lerp(0.36 * SH, 0.285 * SH,
+                                                ease_out(inv(f, F_BURST + 6, F_APEX)))
+    if f < F_SETTLE:                return lerp(0.285 * SH, 0.475 * SH,
                                                 ease_back(inv(f, F_APEX, F_SETTLE)))
     return 0.475 * SH + math.sin((f - F_SETTLE) * 0.09) * 0.006 * SH
 
