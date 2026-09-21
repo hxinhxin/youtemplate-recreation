@@ -2,6 +2,7 @@ import { Fragment } from "react";
 import { AbsoluteFill, Audio, interpolate, Sequence, staticFile, useVideoConfig } from "remotion";
 import { TransitionSeries, linearTiming } from "@remotion/transitions";
 import { fade } from "@remotion/transitions/fade";
+import { slide } from "@remotion/transitions/slide";
 import { CLIPS } from "./clips";
 import { INTRO_DURATION, OUTRO_DURATION, TOTAL_DURATION, TRANSITION_DURATION } from "./durations";
 import { IntroCard } from "./IntroCard";
@@ -11,10 +12,21 @@ import { Sticker } from "./Sticker";
 import { clipTimelines, introTimeline, outroTimeline } from "./timeline";
 import { audioConfig } from "./audioConfig";
 
-const transition = (
+const fadeTransition = (key: string) => (
   <TransitionSeries.Transition
+    key={key}
     timing={linearTiming({ durationInFrames: TRANSITION_DURATION })}
     presentation={fade()}
+  />
+);
+
+// Bookend transitions (intro<->clips, clips<->outro) stay a clean fade;
+// cuts between clips alternate slide directions for punchier pacing.
+const clipTransition = (key: string, i: number) => (
+  <TransitionSeries.Transition
+    key={key}
+    timing={linearTiming({ durationInFrames: TRANSITION_DURATION })}
+    presentation={slide({ direction: i % 2 === 0 ? "from-right" : "from-left" })}
   />
 );
 
@@ -50,18 +62,18 @@ export const ConcertPromo: React.FC = () => {
           <IntroCard />
         </TransitionSeries.Sequence>
 
-        {transition}
+        {fadeTransition("intro-to-clip1")}
 
         {CLIPS.map((clip, i) => (
           <Fragment key={clip.src}>
             <TransitionSeries.Sequence durationInFrames={clip.durationInFrames}>
-              <ClipWithOverlay clip={clip} />
+              <ClipWithOverlay clip={clip} index={i} />
             </TransitionSeries.Sequence>
-            {i < CLIPS.length - 1 && transition}
+            {i < CLIPS.length - 1 && clipTransition(`clip-${i}`, i)}
           </Fragment>
         ))}
 
-        {transition}
+        {fadeTransition("last-clip-to-outro")}
 
         <TransitionSeries.Sequence durationInFrames={OUTRO_DURATION}>
           <OutroCard />

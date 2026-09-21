@@ -1,13 +1,17 @@
 import { AbsoluteFill, interpolate, useCurrentFrame } from "remotion";
 import { concertInfo } from "./concertInfo";
 import { theme } from "./theme";
+import { INTRO_DURATION } from "./durations";
 
 export const IntroCard: React.FC = () => {
   const frame = useCurrentFrame();
   const opacity = interpolate(frame, [0, 15], [0, 1], {
     extrapolateRight: "clamp",
   });
-  const scale = interpolate(frame, [0, 15], [0.9, 1], {
+  // Pop in over the first 15 frames, then a slow continuous drift for the
+  // rest of the card's hold so it doesn't sit completely still.
+  const scale = interpolate(frame, [0, 15, INTRO_DURATION], [0.9, 1, 1.05], {
+    extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
   });
 

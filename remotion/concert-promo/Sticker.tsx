@@ -18,7 +18,8 @@ export const Sticker: React.FC<{
     [1, 0],
     { extrapolateLeft: "clamp", extrapolateRight: "clamp" },
   );
-  const scale = Math.min(pop, 1) * exit;
+  const breathe = 1 + Math.sin(frame / 9) * 0.04;
+  const scale = Math.min(pop, 1) * exit * breathe;
   const wiggle = Math.sin(frame / 5) * 3;
 
   return (

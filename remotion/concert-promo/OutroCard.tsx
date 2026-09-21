@@ -1,10 +1,17 @@
 import { AbsoluteFill, interpolate, useCurrentFrame } from "remotion";
 import { concertInfo } from "./concertInfo";
 import { theme } from "./theme";
+import { OUTRO_DURATION } from "./durations";
 
 export const OutroCard: React.FC = () => {
   const frame = useCurrentFrame();
   const opacity = interpolate(frame, [0, 15], [0, 1], {
+    extrapolateRight: "clamp",
+  });
+  // Same pop-then-drift treatment as the intro card, kept subtle so the
+  // lineup/CTA text stays easy to read.
+  const scale = interpolate(frame, [0, 15, OUTRO_DURATION], [0.92, 1, 1.03], {
+    extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
   });
 
@@ -16,7 +23,14 @@ export const OutroCard: React.FC = () => {
         alignItems: "center",
       }}
     >
-      <div style={{ opacity, textAlign: "center", padding: "0 60px" }}>
+      <div
+        style={{
+          opacity,
+          transform: `scale(${scale})`,
+          textAlign: "center",
+          padding: "0 60px",
+        }}
+      >
         <div
           style={{
             fontFamily: theme.headlineFont,
