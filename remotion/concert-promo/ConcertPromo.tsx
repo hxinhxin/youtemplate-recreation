@@ -1,10 +1,17 @@
 import { Fragment } from "react";
 import { AbsoluteFill, Audio, interpolate, Sequence, staticFile, useVideoConfig } from "remotion";
 import { TransitionSeries, linearTiming } from "@remotion/transitions";
-import { flip } from "@remotion/transitions/flip";
+import { iris } from "@remotion/transitions/iris";
 import { pushCut } from "@remotion/transitions/push-cut";
 import { CLIPS } from "./clips";
-import { INTRO_DURATION, OUTRO_DURATION, TOTAL_DURATION, TRANSITION_DURATION } from "./durations";
+import {
+  HEIGHT,
+  INTRO_DURATION,
+  OUTRO_DURATION,
+  TOTAL_DURATION,
+  TRANSITION_DURATION,
+  WIDTH,
+} from "./durations";
 import { IntroCard } from "./IntroCard";
 import { OutroCard } from "./OutroCard";
 import { ClipWithOverlay } from "./ClipWithOverlay";
@@ -22,14 +29,15 @@ const punch = (key: string) => (
   />
 );
 
-// Cuts between clips alternate a 3D flip and the punch-cut so no two
-// transitions in a row feel the same — much more energetic than a slide.
+// Cuts between clips alternate a circular iris reveal with the punch-cut
+// so no two transitions in a row feel the same — no sliding or flipping,
+// just a punchy zoom/reveal pair.
 const clipTransition = (key: string, i: number) =>
   i % 2 === 0 ? (
     <TransitionSeries.Transition
       key={key}
       timing={linearTiming({ durationInFrames: TRANSITION_DURATION })}
-      presentation={flip({ direction: i % 4 === 0 ? "from-right" : "from-left" })}
+      presentation={iris({ width: WIDTH, height: HEIGHT })}
     />
   ) : (
     punch(key)
