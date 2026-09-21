@@ -2,6 +2,8 @@ import { Composition } from "remotion";
 import { HelloWorld } from "./HelloWorld";
 import { ConcertPromo } from "./concert-promo/ConcertPromo";
 import { FPS, HEIGHT, TOTAL_DURATION, WIDTH } from "./concert-promo/durations";
+import { SofiaTeaser } from "./sofia-teaser/SofiaTeaser";
+import { TOTAL_DURATION as SOFIA_TOTAL_DURATION } from "./sofia-teaser/durations";
 
 export const RemotionRoot: React.FC = () => {
   return (
@@ -10,6 +12,14 @@ export const RemotionRoot: React.FC = () => {
         id="ConcertPromo"
         component={ConcertPromo}
         durationInFrames={TOTAL_DURATION}
+        fps={FPS}
+        width={WIDTH}
+        height={HEIGHT}
+      />
+      <Composition
+        id="SofiaTeaser"
+        component={SofiaTeaser}
+        durationInFrames={SOFIA_TOTAL_DURATION}
         fps={FPS}
         width={WIDTH}
         height={HEIGHT}
