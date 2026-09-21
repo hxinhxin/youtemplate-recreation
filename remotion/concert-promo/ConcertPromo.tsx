@@ -1,14 +1,15 @@
 import { Fragment } from "react";
-import { AbsoluteFill, Sequence, staticFile } from "remotion";
+import { AbsoluteFill, Audio, interpolate, Sequence, staticFile, useVideoConfig } from "remotion";
 import { TransitionSeries, linearTiming } from "@remotion/transitions";
 import { fade } from "@remotion/transitions/fade";
 import { CLIPS } from "./clips";
-import { INTRO_DURATION, OUTRO_DURATION, TRANSITION_DURATION } from "./durations";
+import { INTRO_DURATION, OUTRO_DURATION, TOTAL_DURATION, TRANSITION_DURATION } from "./durations";
 import { IntroCard } from "./IntroCard";
 import { OutroCard } from "./OutroCard";
 import { ClipWithOverlay } from "./ClipWithOverlay";
 import { Sticker } from "./Sticker";
 import { clipTimelines, introTimeline, outroTimeline } from "./timeline";
+import { audioConfig } from "./audioConfig";
 
 const transition = (
   <TransitionSeries.Transition
@@ -22,8 +23,28 @@ const transition = (
 const midClip = clipTimelines[Math.floor(clipTimelines.length / 2)];
 
 export const ConcertPromo: React.FC = () => {
+  const { fps } = useVideoConfig();
+
   return (
     <AbsoluteFill>
+      <Audio
+        src={staticFile(audioConfig.src)}
+        startFrom={Math.round(audioConfig.startFromSeconds * fps)}
+        volume={(f) =>
+          interpolate(
+            f,
+            [
+              0,
+              audioConfig.fadeInFrames,
+              TOTAL_DURATION - audioConfig.fadeOutFrames,
+              TOTAL_DURATION,
+            ],
+            [0, 1, 1, 0],
+            { extrapolateLeft: "clamp", extrapolateRight: "clamp" },
+          )
+        }
+      />
+
       <TransitionSeries>
         <TransitionSeries.Sequence durationInFrames={INTRO_DURATION}>
           <IntroCard />
