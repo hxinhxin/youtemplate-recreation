@@ -1,8 +1,8 @@
 import { Fragment } from "react";
 import { AbsoluteFill, Audio, interpolate, Sequence, staticFile, useVideoConfig } from "remotion";
 import { TransitionSeries, linearTiming } from "@remotion/transitions";
-import { fade } from "@remotion/transitions/fade";
-import { slide } from "@remotion/transitions/slide";
+import { flip } from "@remotion/transitions/flip";
+import { pushCut } from "@remotion/transitions/push-cut";
 import { CLIPS } from "./clips";
 import { INTRO_DURATION, OUTRO_DURATION, TOTAL_DURATION, TRANSITION_DURATION } from "./durations";
 import { IntroCard } from "./IntroCard";
@@ -12,23 +12,28 @@ import { Sticker } from "./Sticker";
 import { clipTimelines, introTimeline, outroTimeline } from "./timeline";
 import { audioConfig } from "./audioConfig";
 
-const fadeTransition = (key: string) => (
+// Punchy scale-cut with the flash disabled (flashOpacity: 0) so the cut
+// stays snappy without ever tinting a frame — no color grading touched.
+const punch = (key: string) => (
   <TransitionSeries.Transition
     key={key}
     timing={linearTiming({ durationInFrames: TRANSITION_DURATION })}
-    presentation={fade()}
+    presentation={pushCut({ flashOpacity: 0 })}
   />
 );
 
-// Bookend transitions (intro<->clips, clips<->outro) stay a clean fade;
-// cuts between clips alternate slide directions for punchier pacing.
-const clipTransition = (key: string, i: number) => (
-  <TransitionSeries.Transition
-    key={key}
-    timing={linearTiming({ durationInFrames: TRANSITION_DURATION })}
-    presentation={slide({ direction: i % 2 === 0 ? "from-right" : "from-left" })}
-  />
-);
+// Cuts between clips alternate a 3D flip and the punch-cut so no two
+// transitions in a row feel the same — much more energetic than a slide.
+const clipTransition = (key: string, i: number) =>
+  i % 2 === 0 ? (
+    <TransitionSeries.Transition
+      key={key}
+      timing={linearTiming({ durationInFrames: TRANSITION_DURATION })}
+      presentation={flip({ direction: i % 4 === 0 ? "from-right" : "from-left" })}
+    />
+  ) : (
+    punch(key)
+  );
 
 // A curated subset of the sticker pack — enough to add energy without
 // cluttering the frame or fighting the text overlays for attention.
@@ -62,7 +67,7 @@ export const ConcertPromo: React.FC = () => {
           <IntroCard />
         </TransitionSeries.Sequence>
 
-        {fadeTransition("intro-to-clip1")}
+        {punch("intro-to-clip1")}
 
         {CLIPS.map((clip, i) => (
           <Fragment key={clip.src}>
@@ -73,7 +78,7 @@ export const ConcertPromo: React.FC = () => {
           </Fragment>
         ))}
 
-        {fadeTransition("last-clip-to-outro")}
+        {punch("last-clip-to-outro")}
 
         <TransitionSeries.Sequence durationInFrames={OUTRO_DURATION}>
           <OutroCard />
