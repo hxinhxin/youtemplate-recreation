@@ -12,4 +12,5 @@ export type ClipConfig = {
 // Add one entry per clip you send over, in the order they should appear.
 export const CLIPS: ClipConfig[] = [
   { src: staticFile("videos/clip-01.mp4"), durationInFrames: 90 },
+  { src: staticFile("videos/clip-02.mov"), durationInFrames: 90 },
 ];
