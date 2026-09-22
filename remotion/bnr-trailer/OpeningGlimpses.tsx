@@ -1,7 +1,6 @@
-import { AbsoluteFill, Easing, interpolate, OffthreadVideo, useCurrentFrame } from "remotion";
+import { AbsoluteFill, interpolate, OffthreadVideo, useCurrentFrame } from "remotion";
 import { BNR_CLIPS as CLIPS } from "./clips";
 import { theme } from "./theme";
-import { concertInfo } from "./concertInfo";
 import { ENERGY_ORDER } from "./energyOrder";
 
 // Footage plays continuously throughout — cutting between the most
@@ -55,20 +54,6 @@ export const OpeningGlimpses: React.FC<{ durationInFrames: number }> = ({ durati
     extrapolateRight: "clamp",
   });
 
-  // A minimal "BNR" flash near the very end, per the brief.
-  const brandWindow = durationInFrames - 16;
-  const brandOpacity = interpolate(
-    frame,
-    [brandWindow, brandWindow + 4, durationInFrames - 4, durationInFrames],
-    [0, 0.9, 0.9, 0],
-    { extrapolateLeft: "clamp", extrapolateRight: "clamp" },
-  );
-  const brandScale = interpolate(frame, [brandWindow, brandWindow + 6], [0.85, 1], {
-    extrapolateLeft: "clamp",
-    extrapolateRight: "clamp",
-    easing: Easing.out(Easing.cubic),
-  });
-
   return (
     <AbsoluteFill style={{ backgroundColor: theme.background, overflow: "hidden" }}>
       <OffthreadVideo
@@ -96,25 +81,6 @@ export const OpeningGlimpses: React.FC<{ durationInFrames: number }> = ({ durati
 
       {/* Brightness pulse on every cut */}
       <AbsoluteFill style={{ backgroundColor: "#ffffff", opacity: flashPulse }} />
-
-      <AbsoluteFill style={{ justifyContent: "center", alignItems: "center" }}>
-        <div
-          style={{
-            opacity: brandOpacity,
-            transform: `scale(${brandScale})`,
-            fontFamily: theme.headlineFont,
-            fontWeight: 900,
-            color: theme.white,
-            fontSize: concertInfo.brand.length > 8 ? 54 : 90,
-            letterSpacing: concertInfo.brand.length > 8 ? 2 : 8,
-            textAlign: "center",
-            padding: "0 60px",
-            textShadow: `0 0 30px ${theme.red}`,
-          }}
-        >
-          {concertInfo.brand}
-        </div>
-      </AbsoluteFill>
     </AbsoluteFill>
   );
 };

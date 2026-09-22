@@ -4,11 +4,11 @@ import { WIDTH, HEIGHT } from "./durations";
 
 // The hero countdown digit: concert footage clipped to the shape of the
 // glyph via an SVG clipPath (the video exists INSIDE the number, not
-// behind a transparent layer on top of it). A thin white outline, a soft
-// sheen, a sweeping reflection band, a subtle red accent glow, and film
-// grain — kept premium, not glitchy, but constantly moving: a breathing
-// pulse, a slow rotation wobble, a stronger camera push, and a periodic
-// light sweep on top of the one-time reveal and climax.
+// behind a transparent layer on top of it). A subtle red accent glow and
+// film grain — no glass/chrome treatment (sheen, reflection sweep, white
+// outline) — kept simple, but constantly moving: a breathing pulse, a
+// slow rotation wobble, a stronger camera push, and the one-time reveal
+// and climax.
 export const MaskedVideoNumber: React.FC<{
   text: string;
   videoSrc: string;
@@ -62,11 +62,6 @@ export const MaskedVideoNumber: React.FC<{
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
   });
-
-  // A light streak that sweeps across the glass repeatedly (not just once).
-  const streakCycle = 46;
-  const streakProgress = (frame % streakCycle) / streakCycle;
-  const streakOffset = interpolate(streakProgress, [0, 1], [-40, 140]);
 
   // A soft rhythmic pulse on the red glow, like it's breathing with a beat.
   const beatPulse = 22 + Math.sin(frame / 9) * 10;
@@ -179,30 +174,6 @@ export const MaskedVideoNumber: React.FC<{
           }}
         />
 
-        {/* Glass sheen */}
-        <div
-          style={{
-            position: "absolute",
-            inset: 0,
-            background: "linear-gradient(135deg, rgba(255,255,255,0.3) 0%, transparent 32%)",
-            mixBlendMode: "screen",
-          }}
-        />
-
-        {/* Sweeping reflection band, repeating instead of a single static pass */}
-        <div
-          style={{
-            position: "absolute",
-            top: "10%",
-            left: `${streakOffset}%`,
-            width: "38%",
-            height: "18%",
-            background: "linear-gradient(120deg, transparent, rgba(255,255,255,0.45), transparent)",
-            transform: "rotate(-16deg)",
-            mixBlendMode: "screen",
-          }}
-        />
-
         {/* Depth shading at the base — kept light so the footage stays
             clearly visible, not a dark texture */}
         <div
@@ -217,13 +188,6 @@ export const MaskedVideoNumber: React.FC<{
           <div style={{ position: "absolute", inset: 0, backgroundColor: "#ffffff", opacity: climaxFlash }} />
         )}
       </div>
-
-      {/* Thin white glass outline, drawn last so it stays crisp */}
-      <svg width={boxW} height={boxH} style={{ position: "absolute", top: 0, left: 0, opacity: chromeOpacity }}>
-        <text {...textProps} fill="none" stroke="rgba(255,255,255,0.8)" strokeWidth={2}>
-          {text}
-        </text>
-      </svg>
     </div>
   );
 };
