@@ -12,6 +12,17 @@ loadFont({
   weight: "400",
 });
 
+// Anton has no Cyrillic glyphs at all (not even upstream on Google
+// Fonts) — needed for "СОФИЯ". Oswald Bold is a close-enough condensed,
+// heavy sans as a per-character fallback: browsers automatically use it
+// only for characters Anton can't render, so Latin text is untouched.
+const OSWALD = "Oswald";
+loadFont({
+  family: OSWALD,
+  url: staticFile("fonts/Oswald-Bold-Cyrillic.woff2"),
+  weight: "700",
+});
+
 // Dedicated palette for this trailer — black/red/white per the brief.
 // Separate from concert-promo/theme.ts (pink) so the other two videos
 // keep their existing branding untouched. One typeface everywhere
@@ -23,6 +34,6 @@ export const theme = {
   redDeep: "#7a0714",
   white: "#ffffff",
   textMuted: "rgba(255,255,255,0.7)",
-  headlineFont: `'${ANTON}', sans-serif`,
-  bodyFont: `'${ANTON}', sans-serif`,
+  headlineFont: `'${ANTON}', '${OSWALD}', sans-serif`,
+  bodyFont: `'${ANTON}', '${OSWALD}', sans-serif`,
 };

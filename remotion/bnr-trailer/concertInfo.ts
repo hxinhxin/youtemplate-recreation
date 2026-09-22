@@ -1,6 +1,6 @@
 export const concertInfo = {
   brand: "Bandata na Ruba",
-  city: "SOFIA",
+  city: "СОФИЯ",
   day: "SATURDAY",
   dateLabel: "26.09.26",
   // ISO datetime the countdown counts down to.
