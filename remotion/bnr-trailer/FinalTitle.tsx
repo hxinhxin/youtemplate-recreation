@@ -3,6 +3,7 @@ import { CLIPS } from "../concert-promo/clips";
 import { concertInfo } from "./concertInfo";
 import { theme } from "./theme";
 import { FINAL_TITLE_DURATION } from "./durations";
+import { FilmGrain } from "./FilmGrain";
 
 const heroClip = CLIPS[0];
 
@@ -64,13 +65,7 @@ export const FinalTitle: React.FC = () => {
         }}
       />
 
-      {/* Very subtle film grain */}
-      <svg style={{ position: "absolute", inset: 0, width: "100%", height: "100%", opacity: 0.05 }}>
-        <filter id="grain">
-          <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" stitchTiles="stitch" />
-        </filter>
-        <rect width="100%" height="100%" filter="url(#grain)" />
-      </svg>
+      <FilmGrain />
 
       <AbsoluteFill style={{ justifyContent: "center", alignItems: "center", padding: "0 50px" }}>
         <div style={{ textAlign: "center" }}>

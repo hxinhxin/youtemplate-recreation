@@ -4,42 +4,43 @@ import { TransitionSeries, linearTiming } from "@remotion/transitions";
 import { pushCut } from "@remotion/transitions/push-cut";
 import { CLIPS } from "../concert-promo/clips";
 import { audioConfig } from "../concert-promo/audioConfig";
-import { GlassNumber } from "./GlassNumber";
+import { OpeningGlimpses } from "./OpeningGlimpses";
+import { DaysHero } from "./DaysHero";
 import { QuickCutMontage } from "./QuickCutMontage";
 import { TextBeat } from "./TextBeat";
 import { RevealClip } from "./RevealClip";
+import { FinalDaysCard } from "./FinalDaysCard";
 import { FinalTitle } from "./FinalTitle";
 import {
-  BREAK_APART_FRAMES,
-  COUNTDOWN_DURATIONS,
+  BUILDUP_SLICE_DURATIONS,
+  DAYS_HERO_DURATION,
+  FINAL_DAYS_CARD_DURATION,
   FINAL_TITLE_DURATION,
-  OPENING_SLICE_DURATIONS,
-  REVEAL_CLIP_DURATION,
+  OPENING_DURATION,
+  REVEAL_PAUSE_DURATION,
   TOTAL_DURATION,
   TRANSITION_DURATION,
   TYPOGRAPHY_WORDS,
   TYPOGRAPHY_WORD_DURATION,
 } from "./durations";
 
-// Strobe-flash punch-cut — the brief explicitly wants flashes and hard
-// cuts synced to the beat throughout this trailer, unlike the softer
-// no-flash cuts used in the other two videos.
+// Punch-cut with a flash — used at every beat so cuts feel synced to the
+// music, but kept restrained (short flash, modest scale) per the brief's
+// "avoid excessive effects."
 const strobeCut = (key: string) => (
   <TransitionSeries.Transition
     key={key}
     timing={linearTiming({ durationInFrames: TRANSITION_DURATION })}
     presentation={pushCut({
       flashColor: "#ffffff",
-      flashOpacity: 0.55,
+      flashOpacity: 0.4,
       flashFrames: 2,
-      outgoingScale: 1.08,
-      incomingStartScale: 1.15,
+      outgoingScale: 1.05,
+      incomingStartScale: 1.1,
       incomingEndScale: 1.0,
     })}
   />
 );
-
-const countdownDigits = ["3", "2", "1"];
 
 export const BnrTrailer: React.FC = () => {
   return (
@@ -49,7 +50,9 @@ export const BnrTrailer: React.FC = () => {
         volume={(f) =>
           interpolate(
             f,
-            [0, audioConfig.fadeInFrames, TOTAL_DURATION - audioConfig.fadeOutFrames, TOTAL_DURATION],
+            // Slow ~3s ambient build before the beat comes in, per
+            // "start with silence... slowly introduce the music."
+            [0, 90, TOTAL_DURATION - audioConfig.fadeOutFrames, TOTAL_DURATION],
             [0, 1, 1, 0],
             { extrapolateLeft: "clamp", extrapolateRight: "clamp" },
           )
@@ -57,55 +60,39 @@ export const BnrTrailer: React.FC = () => {
       />
 
       <TransitionSeries>
-        {/* SCENE 1 — intro montage. No literal tournament footage exists,
-            so it runs on the concert clips per your call; "BNR" flashes
-            briefly near the end. */}
-        <TransitionSeries.Sequence
-          durationInFrames={OPENING_SLICE_DURATIONS.reduce((a, b) => a + b, 0)}
-        >
-          <QuickCutMontage sliceDurations={OPENING_SLICE_DURATIONS} brandFlash />
+        {/* SCENE 1 — opening tension: near-black glimpses, not a bright
+            montage. Builds toward "something is coming." */}
+        <TransitionSeries.Sequence durationInFrames={OPENING_DURATION}>
+          <OpeningGlimpses durationInFrames={OPENING_DURATION} />
         </TransitionSeries.Sequence>
 
-        {strobeCut("opening-to-countdown")}
+        {strobeCut("opening-to-hero")}
 
-        {/* SCENE 2 + 3 — 3 -> 2 -> 1, each numeral filled with a different
-            clip; "1" shatters/expands into the reveal in its own final
-            frames (Scene 3's "zoom through the number"). */}
-        {countdownDigits.map((digit, i) => (
-          <Fragment key={digit}>
-            <TransitionSeries.Sequence durationInFrames={COUNTDOWN_DURATIONS[i]}>
-              <AbsoluteFill
-                style={{ backgroundColor: "#050505", justifyContent: "center", alignItems: "center" }}
-              >
-                <GlassNumber
-                  digit={digit}
-                  videoSrc={CLIPS[i % CLIPS.length].src}
-                  videoStartFrom={i * 25}
-                  durationInFrames={COUNTDOWN_DURATIONS[i]}
-                  breakApart={i === countdownDigits.length - 1}
-                  breakApartFrames={BREAK_APART_FRAMES}
-                />
-              </AbsoluteFill>
-            </TransitionSeries.Sequence>
-            {i < countdownDigits.length - 1 && strobeCut(`countdown-${i}`)}
-          </Fragment>
-        ))}
+        {/* SCENE 2 — the signature shot: DAYS_LEFT filled with concert
+            footage, light sweep reveal, bass-hit climax. */}
+        <TransitionSeries.Sequence durationInFrames={DAYS_HERO_DURATION}>
+          <DaysHero videoSrc={CLIPS[0].src} durationInFrames={DAYS_HERO_DURATION} />
+        </TransitionSeries.Sequence>
 
-        {strobeCut("countdown-to-reveal")}
+        {strobeCut("hero-to-buildup")}
 
-        {/* SCENE 4 — concert reveal: clips only, no text. */}
-        {CLIPS.map((clip, i) => (
-          <Fragment key={clip.src}>
-            <TransitionSeries.Sequence durationInFrames={REVEAL_CLIP_DURATION}>
-              <RevealClip clip={clip} index={i} durationInFrames={REVEAL_CLIP_DURATION} />
-            </TransitionSeries.Sequence>
-            {i < CLIPS.length - 1 && strobeCut(`reveal-${i}`)}
-          </Fragment>
-        ))}
+        {/* SCENE 3 — build-up montage: very short, fast-accelerating cuts. */}
+        <TransitionSeries.Sequence
+          durationInFrames={BUILDUP_SLICE_DURATIONS.reduce((a, b) => a + b, 0)}
+        >
+          <QuickCutMontage sliceDurations={BUILDUP_SLICE_DURATIONS} clipOffset={1} />
+        </TransitionSeries.Sequence>
 
-        {strobeCut("reveal-to-typography")}
+        {strobeCut("buildup-to-reveal")}
 
-        {/* SCENE 5 — event typography: BNR / SOFIA / SATURDAY, one at a time. */}
+        {/* SCENE 4 — everything slows down: one cinematic pause on the
+            event, then BNR / SOFIA / SATURDAY one at a time. */}
+        <TransitionSeries.Sequence durationInFrames={REVEAL_PAUSE_DURATION}>
+          <RevealClip clip={CLIPS[2 % CLIPS.length]} index={0} durationInFrames={REVEAL_PAUSE_DURATION} />
+        </TransitionSeries.Sequence>
+
+        {strobeCut("pause-to-typography")}
+
         {TYPOGRAPHY_WORDS.map((word, i) => (
           <Fragment key={word}>
             <TransitionSeries.Sequence durationInFrames={TYPOGRAPHY_WORD_DURATION}>
@@ -117,7 +104,14 @@ export const BnrTrailer: React.FC = () => {
 
         {strobeCut("typography-to-final")}
 
-        {/* SCENE 6 — final event card. */}
+        {/* SCENE 5 — the countdown returns as the strongest visual, then
+            the ticket card. */}
+        <TransitionSeries.Sequence durationInFrames={FINAL_DAYS_CARD_DURATION}>
+          <FinalDaysCard durationInFrames={FINAL_DAYS_CARD_DURATION} />
+        </TransitionSeries.Sequence>
+
+        {strobeCut("final-days-to-title")}
+
         <TransitionSeries.Sequence durationInFrames={FINAL_TITLE_DURATION}>
           <FinalTitle />
         </TransitionSeries.Sequence>

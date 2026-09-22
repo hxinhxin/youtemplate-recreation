@@ -16,6 +16,14 @@ export const TextBeat: React.FC<{ word: string; durationInFrames: number }> = ({
     easing: Easing.out(Easing.back(3)),
   });
   const opacity = interpolate(frame, [0, 6], [0, 1], { extrapolateRight: "clamp" });
+  const blur = interpolate(frame, [0, 8], [10, 0], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+  });
+  const tracking = interpolate(frame, [0, 12], [0, 4], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+  });
   const glow = interpolate(frame, [0, 8, 20], [0, 50, 20], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
@@ -33,11 +41,12 @@ export const TextBeat: React.FC<{ word: string; durationInFrames: number }> = ({
         style={{
           transform: `scale(${scale})`,
           opacity,
+          filter: `blur(${blur}px)`,
           fontFamily: theme.headlineFont,
           fontWeight: 900,
           color: theme.white,
           fontSize: 140,
-          letterSpacing: 4,
+          letterSpacing: 4 + tracking,
           textTransform: "uppercase",
           textShadow: `0 0 ${glow}px ${theme.red}`,
         }}
