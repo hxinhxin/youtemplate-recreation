@@ -7,9 +7,8 @@ import {
   OPENING_DURATION,
   REVEAL_PAUSE_DURATION,
   TRANSITION_DURATION,
-  TYPOGRAPHY_WORDS,
-  TYPOGRAPHY_WORD_DURATION,
 } from "./durations";
+import { TYPOGRAPHY_BEATS } from "./typographyBeats";
 
 export type TimelineEntry = { start: number; duration: number };
 
@@ -32,7 +31,7 @@ const itemDurations = [
   BUILDUP_DURATION,
   JOY_STATION_DURATION,
   REVEAL_PAUSE_DURATION,
-  ...TYPOGRAPHY_WORDS.map(() => TYPOGRAPHY_WORD_DURATION),
+  ...TYPOGRAPHY_BEATS.map((b) => b.duration),
   FINAL_DAYS_CARD_DURATION,
   FINAL_TITLE_DURATION,
 ];
@@ -44,6 +43,6 @@ export const daysHeroTimeline = timeline[1];
 export const buildupTimeline = timeline[2];
 export const joyStationTimeline = timeline[3];
 export const revealPauseTimeline = timeline[4];
-export const typographyTimelines = timeline.slice(5, 5 + TYPOGRAPHY_WORDS.length);
-export const finalDaysCardTimeline = timeline[5 + TYPOGRAPHY_WORDS.length];
-export const finalTitleTimeline = timeline[6 + TYPOGRAPHY_WORDS.length];
+export const typographyTimelines = timeline.slice(5, 5 + TYPOGRAPHY_BEATS.length);
+export const finalDaysCardTimeline = timeline[5 + TYPOGRAPHY_BEATS.length];
+export const finalTitleTimeline = timeline[6 + TYPOGRAPHY_BEATS.length];

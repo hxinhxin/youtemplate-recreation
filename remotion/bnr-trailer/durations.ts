@@ -1,3 +1,5 @@
+import { TYPOGRAPHY_BEATS } from "./typographyBeats";
+
 export const FPS = 30;
 export const WIDTH = 1080;
 export const HEIGHT = 1920;
@@ -20,10 +22,11 @@ export const BUILDUP_DURATION = BUILDUP_SLICE_DURATIONS.reduce((a, b) => a + b, 
 export const JOY_STATION_DURATION = 80;
 
 // Scene 5 — BNR reveal (19-21s target): a brief cinematic pause on the
-// event, then each word appears on its own beat.
+// event, then each word appears on its own beat (see typographyBeats.ts
+// for the per-word duration/variant/voiceover).
 export const REVEAL_PAUSE_DURATION = 16;
-export const TYPOGRAPHY_WORD_DURATION = 28;
-export const TYPOGRAPHY_WORDS = ["BNR", "SOFIA", "JOY STATION", "SATURDAY"] as const;
+export const TYPOGRAPHY_WORDS = TYPOGRAPHY_BEATS.map((b) => b.word);
+const TYPOGRAPHY_TOTAL_DURATION = TYPOGRAPHY_BEATS.reduce((a, b) => a + b.duration, 0);
 
 // Scene 6 — final card (21-25s target): the countdown returns, then the
 // ticket info.
@@ -33,7 +36,7 @@ export const FINAL_TITLE_DURATION = 85;
 // Total item count in the top-level TransitionSeries: opening(1) +
 // daysHero(1) + buildup(1) + joyStation(1) + revealPause(1) +
 // typography(4) + finalDaysCard(1) + finalTitle(1).
-const TOTAL_ITEM_COUNT = 1 + 1 + 1 + 1 + 1 + TYPOGRAPHY_WORDS.length + 1 + 1;
+const TOTAL_ITEM_COUNT = 1 + 1 + 1 + 1 + 1 + TYPOGRAPHY_BEATS.length + 1 + 1;
 const numTransitions = TOTAL_ITEM_COUNT - 1;
 const ALL_DURATIONS_SUM =
   OPENING_DURATION +
@@ -41,7 +44,7 @@ const ALL_DURATIONS_SUM =
   BUILDUP_DURATION +
   JOY_STATION_DURATION +
   REVEAL_PAUSE_DURATION +
-  TYPOGRAPHY_WORDS.length * TYPOGRAPHY_WORD_DURATION +
+  TYPOGRAPHY_TOTAL_DURATION +
   FINAL_DAYS_CARD_DURATION +
   FINAL_TITLE_DURATION;
 

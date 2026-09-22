@@ -26,9 +26,8 @@ import {
   REVEAL_PAUSE_DURATION,
   TOTAL_DURATION,
   TRANSITION_DURATION,
-  TYPOGRAPHY_WORDS,
-  TYPOGRAPHY_WORD_DURATION,
 } from "./durations";
+import { TYPOGRAPHY_BEATS } from "./typographyBeats";
 import {
   buildupTimeline,
   daysHeroTimeline,
@@ -169,12 +168,15 @@ export const BnrTrailer: React.FC = () => {
 
         {strobeCut("pause-to-typography")}
 
-        {TYPOGRAPHY_WORDS.map((word, i) => (
-          <Fragment key={word}>
-            <TransitionSeries.Sequence durationInFrames={TYPOGRAPHY_WORD_DURATION}>
-              <TextBeat word={word} durationInFrames={TYPOGRAPHY_WORD_DURATION} />
+        {TYPOGRAPHY_BEATS.map((beat, i) => (
+          <Fragment key={beat.word}>
+            <TransitionSeries.Sequence durationInFrames={beat.duration}>
+              <>
+                <TextBeat word={beat.word} durationInFrames={beat.duration} variant={beat.variant} />
+                {beat.voiceover && <Audio src={staticFile(`audio/${beat.voiceover}`)} />}
+              </>
             </TransitionSeries.Sequence>
-            {i < TYPOGRAPHY_WORDS.length - 1 && strobeCut(`typography-${i}`)}
+            {i < TYPOGRAPHY_BEATS.length - 1 && strobeCut(`typography-${i}`)}
           </Fragment>
         ))}
 
