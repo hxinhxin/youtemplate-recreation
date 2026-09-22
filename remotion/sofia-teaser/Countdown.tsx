@@ -1,9 +1,13 @@
 import { AbsoluteFill, Easing, interpolate, useCurrentFrame } from "remotion";
 import { concertInfo } from "./concertInfo";
 import { theme } from "../concert-promo/theme";
+import { CLIPS } from "../concert-promo/clips";
 import { LightBurst } from "./LightBurst";
 import { ImpactFlash } from "./ImpactFlash";
 import { RadialRays } from "./RadialRays";
+import { VideoFilledText } from "./VideoFilledText";
+
+const heroClip = CLIPS[0];
 
 // Computed once at module load — a snapshot of "time remaining" as of
 // whenever this is rendered, since the video itself is a fixed export.
@@ -77,17 +81,15 @@ export const Countdown: React.FC = () => {
           transform: `scale(${settle}) translate(${shakeX}px, ${shakeY}px)`,
         }}
       >
-        <div
-          style={{
-            fontFamily: theme.headlineFont,
-            fontWeight: 900,
-            color: theme.text,
-            fontSize: 220,
-            lineHeight: 1,
-            textShadow: `0 0 ${glow}px ${theme.accent}`,
-          }}
-        >
-          {pad(days)}
+        <div style={{ filter: `drop-shadow(0 0 ${glow}px ${theme.accent})` }}>
+          <VideoFilledText
+            text={pad(days)}
+            fontSize={220}
+            width={620}
+            height={260}
+            clipId="countdown-days-clip"
+            videoSrc={heroClip.src}
+          />
         </div>
         <div
           style={{
@@ -101,16 +103,16 @@ export const Countdown: React.FC = () => {
         >
           DAYS TO GO
         </div>
-        <div
-          style={{
-            fontFamily: theme.headlineFont,
-            fontWeight: 900,
-            color: theme.textMuted,
-            fontSize: 58,
-            marginTop: 32,
-          }}
-        >
-          {pad(hours)}:{pad(minutes)}
+        <div style={{ marginTop: 32 }}>
+          <VideoFilledText
+            text={`${pad(hours)}:${pad(minutes)}`}
+            fontSize={58}
+            width={340}
+            height={80}
+            clipId="countdown-hhmm-clip"
+            videoSrc={heroClip.src}
+            videoStartFrom={60}
+          />
         </div>
         <div
           style={{
