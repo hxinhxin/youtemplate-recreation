@@ -17,9 +17,12 @@ export const DRONE_OPEN_DURATION = 36;
 export const OPENING_DURATION = 110;
 
 // Scene 2 — the days-left hero reveal (4-10s target): light sweep +
-// masked video number + bass-hit climax. Trimmed from 160 -> 110: the
-// number was holding on screen too long.
-export const DAYS_HERO_DURATION = 110;
+// masked video number + bass-hit climax. Trimmed from 160 -> 110 (the
+// number was holding on screen too long), then bumped to 134: the "UNTIL
+// BANDATA NA RUBA" subtitle fades in at frame 42, so at 110 it was only
+// visible for 68 frames (~2.3s) before the cut — now visible for at
+// least 90 frames (3s).
+export const DAYS_HERO_DURATION = 134;
 
 // Scene 3 — build-up / crowd-explosion montage (10-16s target): very
 // short slices (~0.2-0.6s each = 6-18 frames at 30fps).

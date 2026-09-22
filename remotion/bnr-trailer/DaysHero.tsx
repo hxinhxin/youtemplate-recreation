@@ -81,21 +81,30 @@ export const DaysHero: React.FC<{ videoSrc: string; durationInFrames: number }> 
         >
           DAYS LEFT
         </div>
+      </div>
 
-        <div
-          style={{
-            marginTop: 14,
-            opacity: labelOpacity,
-            fontFamily: theme.bodyFont,
-            fontWeight: 700,
-            color: theme.white,
-            fontSize: 22,
-            letterSpacing: 4,
-            textTransform: "uppercase",
-          }}
-        >
-          UNTIL {concertInfo.brand}
-        </div>
+      {/* Positioned absolutely (not in the flex-centered flow above) —
+          a plain in-flow sibling here was mysteriously never painting,
+          seemingly a layout/compositing quirk with this scene's
+          transform-heavy content; an absolutely-positioned element right
+          under the "DAYS LEFT" label renders reliably. */}
+      <div
+        style={{
+          position: "absolute",
+          top: 1460,
+          left: 0,
+          right: 0,
+          textAlign: "center",
+          opacity: labelOpacity,
+          fontFamily: theme.bodyFont,
+          fontWeight: 700,
+          color: theme.white,
+          fontSize: 22,
+          letterSpacing: 4,
+          textTransform: "uppercase",
+        }}
+      >
+        UNTIL {concertInfo.brand}
       </div>
 
       <FilmGrain opacity={0.04} />
