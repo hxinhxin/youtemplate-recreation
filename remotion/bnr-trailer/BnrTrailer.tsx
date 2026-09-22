@@ -172,35 +172,13 @@ export const BnrTrailer: React.FC = () => {
           <QuickCutMontage sliceDurations={BUILDUP_SLICE_DURATIONS} />
         </TransitionSeries.Sequence>
 
-        {strobeCut("buildup-to-spiderman")}
+        {strobeCut("buildup-to-pause")}
 
-        {/* SCENE 3.5a — dedicated feature shot for bnr-clip-02 (the
-            costumed performer crowd-surfing), held well over a second
-            instead of the quick-cut flash it got in the buildup montage. */}
-        <TransitionSeries.Sequence durationInFrames={SPIDERMAN_FEATURE_DURATION}>
-          <RevealClip clip={CLIPS[11]} index={0} durationInFrames={SPIDERMAN_FEATURE_DURATION} />
-        </TransitionSeries.Sequence>
-
-        {strobeCut("spiderman-to-confetti")}
-
-        {/* SCENE 3.5b — dedicated feature shot for bnr-clip-03 (the
-            fisheye confetti/CO2 blast), same treatment. */}
-        <TransitionSeries.Sequence durationInFrames={CONFETTI_FEATURE_DURATION}>
-          <RevealClip clip={CLIPS[12]} index={1} durationInFrames={CONFETTI_FEATURE_DURATION} />
-        </TransitionSeries.Sequence>
-
-        {strobeCut("confetti-to-venue")}
-
-        {/* SCENE 4 — JOY STATION / SOFIA venue reveal, a major visual
-            element in its own right. */}
-        <TransitionSeries.Sequence durationInFrames={JOY_STATION_DURATION}>
-          <JoyStationReveal durationInFrames={JOY_STATION_DURATION} />
-        </TransitionSeries.Sequence>
-
-        {strobeCut("venue-to-pause")}
-
-        {/* SCENE 5 — everything slows down: one cinematic pause on the
-            event, then BNR / SOFIA / JOY STATION / SATURDAY one at a time. */}
+        {/* SCENE 5 (moved earlier) — everything slows down: one cinematic
+            pause on the event, then BANDATA NA RUBA / SOFIA / JOY STATION /
+            SATURDAY one at a time. Moved up from after the venue reveal so
+            the event name/venue/date show up much sooner in the trailer
+            instead of being backloaded near the very end. */}
         <TransitionSeries.Sequence durationInFrames={REVEAL_PAUSE_DURATION}>
           <RevealClip
             clip={{ ...CLIPS[HERO_CLIP_INDEX], startFrom: 270 }}
@@ -227,7 +205,33 @@ export const BnrTrailer: React.FC = () => {
           </Fragment>
         ))}
 
-        {strobeCut("typography-to-final")}
+        {strobeCut("typography-to-spiderman")}
+
+        {/* SCENE 3.5a — dedicated feature shot for bnr-clip-02 (the
+            costumed performer crowd-surfing), held well over a second
+            instead of the quick-cut flash it got in the buildup montage. */}
+        <TransitionSeries.Sequence durationInFrames={SPIDERMAN_FEATURE_DURATION}>
+          <RevealClip clip={CLIPS[11]} index={0} durationInFrames={SPIDERMAN_FEATURE_DURATION} />
+        </TransitionSeries.Sequence>
+
+        {strobeCut("spiderman-to-confetti")}
+
+        {/* SCENE 3.5b — dedicated feature shot for bnr-clip-03 (the
+            fisheye confetti/CO2 blast), same treatment. */}
+        <TransitionSeries.Sequence durationInFrames={CONFETTI_FEATURE_DURATION}>
+          <RevealClip clip={CLIPS[12]} index={1} durationInFrames={CONFETTI_FEATURE_DURATION} />
+        </TransitionSeries.Sequence>
+
+        {strobeCut("confetti-to-venue")}
+
+        {/* SCENE 4 — JOY STATION / SOFIA venue reveal, a major visual
+            element in its own right — now confirms what the typography
+            beats already teased, instead of introducing it. */}
+        <TransitionSeries.Sequence durationInFrames={JOY_STATION_DURATION}>
+          <JoyStationReveal durationInFrames={JOY_STATION_DURATION} />
+        </TransitionSeries.Sequence>
+
+        {strobeCut("venue-to-final")}
 
         {/* SCENE 6 — the countdown returns as the strongest visual, then
             the ticket card. */}

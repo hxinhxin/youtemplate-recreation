@@ -9,9 +9,9 @@ export const TRANSITION_DURATION = 8;
 // Scene 0 — drone establishing shot: a wide aerial of the crowd pouring
 // into the venue, as the very first thing the viewer sees. Source clip is
 // only ~2.8s (84 frames), so this stays short rather than freezing/looping.
-// Trimmed from 70 -> 52: it was lingering too long before the trailer
+// Trimmed 70 -> 52 -> 36: still lingering too long before the trailer
 // actually gets going.
-export const DRONE_OPEN_DURATION = 52;
+export const DRONE_OPEN_DURATION = 36;
 
 // Scene 1 — opening tension (0-4s target): near-black glimpses.
 export const OPENING_DURATION = 110;

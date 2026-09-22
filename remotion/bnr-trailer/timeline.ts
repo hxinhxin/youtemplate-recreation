@@ -28,16 +28,21 @@ const buildTimeline = (durations: number[]): TimelineEntry[] => {
   });
 };
 
+// Reveal-pause + typography beats (the "Bandata na Ruba / Sofia / Joy
+// Station / Saturday" text reveal) moved earlier — right after the
+// buildup montage — instead of after the feature clips and venue
+// reveal, so the event's name/venue/date show up much sooner rather
+// than being backloaded near the very end of the trailer.
 const itemDurations = [
   DRONE_OPEN_DURATION,
   OPENING_DURATION,
   DAYS_HERO_DURATION,
   BUILDUP_DURATION,
+  REVEAL_PAUSE_DURATION,
+  ...TYPOGRAPHY_BEATS.map((b) => b.duration),
   SPIDERMAN_FEATURE_DURATION,
   CONFETTI_FEATURE_DURATION,
   JOY_STATION_DURATION,
-  REVEAL_PAUSE_DURATION,
-  ...TYPOGRAPHY_BEATS.map((b) => b.duration),
   FINAL_DAYS_CARD_DURATION,
   FINAL_TITLE_DURATION,
 ];
@@ -48,10 +53,10 @@ export const droneOpenTimeline = timeline[0];
 export const openingTimeline = timeline[1];
 export const daysHeroTimeline = timeline[2];
 export const buildupTimeline = timeline[3];
-export const spidermanFeatureTimeline = timeline[4];
-export const confettiFeatureTimeline = timeline[5];
-export const joyStationTimeline = timeline[6];
-export const revealPauseTimeline = timeline[7];
-export const typographyTimelines = timeline.slice(8, 8 + TYPOGRAPHY_BEATS.length);
+export const revealPauseTimeline = timeline[4];
+export const typographyTimelines = timeline.slice(5, 5 + TYPOGRAPHY_BEATS.length);
+export const spidermanFeatureTimeline = timeline[5 + TYPOGRAPHY_BEATS.length];
+export const confettiFeatureTimeline = timeline[6 + TYPOGRAPHY_BEATS.length];
+export const joyStationTimeline = timeline[7 + TYPOGRAPHY_BEATS.length];
 export const finalDaysCardTimeline = timeline[8 + TYPOGRAPHY_BEATS.length];
 export const finalTitleTimeline = timeline[9 + TYPOGRAPHY_BEATS.length];
