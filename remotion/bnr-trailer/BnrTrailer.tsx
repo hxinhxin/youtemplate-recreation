@@ -192,8 +192,12 @@ export const BnrTrailer: React.FC = () => {
             name/date show up much sooner in the trailer instead of being
             backloaded near the very end. */}
         <TransitionSeries.Sequence durationInFrames={REVEAL_PAUSE_DURATION}>
+          {/* clip-08 (index 6) rather than the hero clip — DaysHero,
+              the typography beats and FinalTitle already each have their
+              own dedicated clip, so this pause gets its own too instead
+              of repeating footage already shown. */}
           <RevealClip
-            clip={{ ...CLIPS[HERO_CLIP_INDEX], startFrom: 270 }}
+            clip={{ ...CLIPS[6], startFrom: 150 }}
             index={0}
             durationInFrames={REVEAL_PAUSE_DURATION}
           />

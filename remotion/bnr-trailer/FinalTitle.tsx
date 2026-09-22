@@ -4,11 +4,14 @@ import { concertInfo } from "./concertInfo";
 import { theme } from "./theme";
 import { FINAL_TITLE_DURATION } from "./durations";
 import { FilmGrain } from "./FilmGrain";
-import { HERO_CLIP_INDEX } from "./energyOrder";
 
 // Was hardcoded to CLIPS[0] (the static DJ-gear clip, no crowd) — switched
-// to the ranked hero clip so the final card's backdrop is actually alive.
-const heroClip = CLIPS[HERO_CLIP_INDEX];
+// to real crowd footage so the final card's backdrop is actually alive.
+// Uses clip-03 (index 2) specifically rather than the hero clip (clip-04)
+// — that one's already the dedicated backdrop for DaysHero, the reveal
+// pause and the typography beats, so the final card gets its own instead
+// of repeating footage seen several times already.
+const heroClip = CLIPS[2];
 
 export const FinalTitle: React.FC = () => {
   const frame = useCurrentFrame();
