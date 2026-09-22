@@ -32,12 +32,13 @@ import {
 import { TYPOGRAPHY_BEATS } from "./typographyBeats";
 import {
   buildupTimeline,
+  confettiFeatureTimeline,
   daysHeroTimeline,
-  droneOpenTimeline,
   finalTitleTimeline,
   joyStationTimeline,
   openingTimeline,
   revealPauseTimeline,
+  spidermanFeatureTimeline,
   typographyTimelines,
 } from "./timeline";
 import { buildVolumeCurve } from "./volumeCurve";
@@ -68,29 +69,37 @@ const daysHeroClimax = daysHeroTimeline.start + DAYS_HERO_DURATION - 18;
 const bnrBeat = typographyTimelines[0].start;
 const finalCtaBeat = finalTitleTimeline.start + 26;
 
-// One continuous track, not several songs stitched together — we only
-// have the one piece of music. "DJ-style" movement instead comes from
-// ducking it under crowd audio and layering riser/impact hits at the
-// beats, rather than crossfading between different songs. Points are
-// sorted and de-collided by buildVolumeCurve, so referencing each scene's
-// own .start (safe by construction) instead of hand-computed end frames
-// avoids the overlap math going wrong.
+// Redesigned for a clean, "one thing at a time" cinematic mix instead of
+// everything playing simultaneously. Only TWO moments get a full
+// riser+impact+crowd-reaction stack (the DaysHero climax and the final
+// drop) — every other beat is the music alone, breathing up and down.
+// Each build has real space beforehand (a genuine low point, not just a
+// small dip) so the impact actually lands, and volume points sit a few
+// frames ahead of the visual cut they lead into rather than lining up
+// exactly, so the next section audibly starts before the cut lands.
 const { frames: volumeFrames, values: volumeValues } = buildVolumeCurve([
   [0, 0],
-  [droneOpenTimeline.start + 20, 0.25], // stay low under the drone shot's own crowd sound
-  [openingTimeline.start + 90, 0.8],
-  [daysHeroClimax - 30, 0.8],
-  [daysHeroClimax, 0.5],
-  [daysHeroClimax + 9, 0.85],
-  [buildupTimeline.start, 0.6], // duck under the crowd-explosion montage
-  [joyStationTimeline.start, 0.75],
-  [revealPauseTimeline.start, 0.85],
-  [bnrBeat, 0.5], // duck for the BNR impact hit
-  [bnrBeat + 10, 0.88],
-  [finalCtaBeat - 2, 0.88],
-  [finalCtaBeat, 0.55], // duck for the final drop
-  [finalCtaBeat + 10, 0.92],
-  [TOTAL_DURATION - 8, 0.92],
+  [10, 0.22], // low, atmospheric under the drone open
+  [joyStationTimeline.start + 26, 0.5], // rising through the venue reveal
+  [daysHeroTimeline.start + 12, 0.72], // building through the countdown
+  [daysHeroClimax - 32, 0.72], // hold before pulling back
+  [daysHeroClimax - 22, 0.25], // SPACE — short tension, let the riser breathe
+  [daysHeroClimax, 0.2], // duck hard so the impact cuts through clean
+  [daysHeroClimax + 18, 0.78], // recover strong, leads into the next scene
+  [openingTimeline.start + 26, 0.45], // pull back for the quiet tension scene
+  [buildupTimeline.start - 6, 0.52], // lean into the crowd-explosion a beat early
+  [buildupTimeline.start + 14, 0.62], // ducked a little — this is the crowd's moment
+  [buildupTimeline.start + 100, 0.68],
+  [revealPauseTimeline.start - 4, 0.48], // breathe out for the cinematic pause
+  [bnrBeat + 6, 0.55],
+  [typographyTimelines[1].start + 4, 0.62],
+  [spidermanFeatureTimeline.start + 12, 0.72], // rebuilding energy
+  [confettiFeatureTimeline.start + 6, 0.78],
+  [finalCtaBeat - 32, 0.78], // hold before the final pull-back
+  [finalCtaBeat - 20, 0.3], // SPACE — short tension before the final riser
+  [finalCtaBeat, 0.22], // duck hard for the final impact
+  [finalCtaBeat + 16, 0.5], // stay low while the crowd reaction owns the moment
+  [finalCtaBeat + 32, 0.85], // big final recovery for the closing CTA hold
   [TOTAL_DURATION, 0], // hard cut to black, not a slow fade
 ]);
 const trackVolume = (f: number) =>
@@ -105,37 +114,34 @@ export const BnrTrailer: React.FC = () => {
           rather than crossfaded between multiple songs (we only have one). */}
       <Audio src={staticFile(audioConfig.src)} volume={trackVolume(frame)} />
 
-      {/* Crowd audio bed — ONE single source's embedded audio, playing
-          continuously under the whole trailer, kept low enough that the
-          mp3 track is unmistakably the main audio. Previously this
-          switched between 5 different clips' own audio (each a different
-          moment of the live DJ set), which meant several different
-          pieces of music colliding with the main track at once — that
-          was the actual cause of the mix sounding cacophonic, not just
-          the volume levels. One continuous source avoids that clash
-          entirely. Lowered 0.14 -> 0.07 so it reads as background crowd
-          texture (some screaming still audible) rather than a second
-          competing track. */}
-      <Sequence from={droneOpenTimeline.start} durationInFrames={TOTAL_DURATION - droneOpenTimeline.start}>
-        <CrowdAudio
-          src={CLIPS[HERO_CLIP_INDEX].src}
-          durationInFrames={TOTAL_DURATION - droneOpenTimeline.start}
-          volume={0.07}
-          fadeFrames={40}
-        />
+      {/* Crowd audio — no longer a continuous bed under the whole trailer.
+          Playing it the entire time meant it was ALWAYS competing with the
+          music, which was a real part of what made the mix feel
+          cacophonic. Now it only surges at two key crowd moments, silent
+          everywhere else: the crowd-explosion montage (moderate), and the
+          final drop (the strongest scream, reserved for the trailer's
+          biggest visual moment instead of spread throughout). */}
+      <Sequence from={buildupTimeline.start - 6} durationInFrames={120}>
+        <CrowdAudio src={CLIPS[HERO_CLIP_INDEX].src} startFrom={120} durationInFrames={120} volume={0.3} fadeFrames={24} />
+      </Sequence>
+      <Sequence from={finalCtaBeat - 4} durationInFrames={44}>
+        <CrowdAudio src={CLIPS[HERO_CLIP_INDEX].src} startFrom={480} durationInFrames={44} volume={0.55} fadeFrames={16} />
       </Sequence>
 
-      {/* Riser + impact hits at the signature beats. */}
+      {/* Riser + impact hits — only at the two real climaxes now. There
+          used to be a third, bare impact hit at the BNR typography beat
+          with no riser leading into it; the beat already has its own
+          visual "slam" entrance, so the extra hit was noise without a
+          clear purpose rather than an intentional beat. Each riser is
+          exactly riser.wav's own length (36 frames) so it plays out in
+          full instead of getting cut off mid-swell. */}
       <Sequence from={daysHeroClimax - 30} durationInFrames={36}>
-        <AudioHit kind="riser" volume={0.55} />
+        <AudioHit kind="riser" volume={0.5} />
       </Sequence>
       <Sequence from={daysHeroClimax} durationInFrames={20}>
         <AudioHit kind="impact" volume={0.6} />
       </Sequence>
-      <Sequence from={bnrBeat} durationInFrames={20}>
-        <AudioHit kind="impact" volume={0.5} />
-      </Sequence>
-      <Sequence from={finalCtaBeat - 30} durationInFrames={30}>
+      <Sequence from={finalCtaBeat - 30} durationInFrames={36}>
         <AudioHit kind="riser" volume={0.5} />
       </Sequence>
       <Sequence from={finalCtaBeat} durationInFrames={20}>

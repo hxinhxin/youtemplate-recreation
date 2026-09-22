@@ -1,4 +1,4 @@
-import { AbsoluteFill, interpolate, OffthreadVideo, useCurrentFrame } from "remotion";
+import { AbsoluteFill, Easing, interpolate, OffthreadVideo, useCurrentFrame } from "remotion";
 import { theme } from "./theme";
 import { DAYS_LEFT } from "./daysLeft";
 import { LightSweep } from "./LightSweep";
@@ -7,11 +7,13 @@ import { FilmGrain } from "./FilmGrain";
 
 // Scene 2 — the trailer's signature shot: a light sweep cues the reveal,
 // then the huge DAYS_LEFT number appears with concert footage moving
-// inside it, "DAYS LEFT" spaced out underneath, and a bass-hit climax
-// where the number expands and pushes through into the crowd (breakApart)
-// — never a flat cut from a static card. The backdrop is always dim,
-// blurred concert footage, never a solid color, so the frame stays alive
-// even outside the glyph.
+// inside it, "DAYS LEFT" spaced out underneath, then "ЗАВРЪЩАНЕТО" lands
+// as its own hero typographic beat (same scale/weight family as JOY
+// STATION, not a small subtitle), and a bass-hit climax where the number
+// expands and pushes through into the crowd (breakApart) — never a flat
+// cut from a static card. The backdrop is always dim, blurred concert
+// footage, never a solid color, so the frame stays alive even outside
+// the glyph.
 export const DaysHero: React.FC<{ videoSrc: string; durationInFrames: number }> = ({
   videoSrc,
   durationInFrames,
@@ -28,6 +30,21 @@ export const DaysHero: React.FC<{ videoSrc: string; durationInFrames: number }> 
     extrapolateRight: "clamp",
   });
   const labelY = interpolate(frame, [30, 42], [20, 0], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+  });
+
+  // "ЗАВРЪЩАНЕТО" is a second hero typographic beat in this scene, not a
+  // small subtitle — same "slam" entrance language as JOY STATION
+  // (scale overshoot + settle, pulsing glow), just timed to land a beat
+  // after "ДНИ ОСТАВАТ" settles instead of appearing simultaneously.
+  const heroWordScale = interpolate(frame, [34, 44, 50, durationInFrames], [0.55, 1.15, 1, 1.04], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+    easing: Easing.out(Easing.back(3)),
+  });
+  const heroWordOpacity = interpolate(frame, [34, 42], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+  const heroWordGlow = interpolate(frame, [34, 44, 60], [0, 45, 18], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
   });
@@ -86,26 +103,31 @@ export const DaysHero: React.FC<{ videoSrc: string; durationInFrames: number }> 
           a plain in-flow sibling here was mysteriously never painting,
           seemingly a layout/compositing quirk with this scene's
           transform-heavy content; an absolutely-positioned element right
-          under the "DAYS LEFT" label renders reliably. */}
+          under the "DAYS LEFT" label renders reliably. Sized and treated
+          as a hero word (same fontSize/weight/glow family as JOY
+          STATION), not a small subtitle. */}
       <div
         style={{
           position: "absolute",
-          top: 1455,
+          top: 1480,
           left: 0,
           right: 0,
           textAlign: "center",
-          opacity: labelOpacity,
-          fontFamily: theme.bodyFont,
-          fontWeight: 700,
-          WebkitTextStroke: `1.5px ${theme.white}`,
+          padding: "0 30px",
+          transform: `scale(${heroWordScale})`,
+          opacity: heroWordOpacity,
+          fontFamily: theme.headlineFont,
+          fontWeight: 900,
+          WebkitTextStroke: `2px ${theme.white}`,
           color: theme.white,
-          fontSize: 34,
-          letterSpacing: 4,
+          fontSize: 80,
+          lineHeight: 1.02,
+          letterSpacing: 1,
           textTransform: "uppercase",
-          textShadow: `0 0 30px ${theme.red}`,
+          textShadow: `0 0 ${heroWordGlow}px ${theme.red}`,
         }}
       >
-        ДО ЗАВРЪЩАНЕТО
+        ЗАВРЪЩАНЕТО
       </div>
 
       <FilmGrain opacity={0.04} />
