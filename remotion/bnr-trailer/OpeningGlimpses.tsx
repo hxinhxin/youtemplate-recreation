@@ -25,11 +25,15 @@ const CUT_STARTS = [0, 20, 38, 54, 68, 80, 90, 100];
 const Cut: React.FC<{ clipIndex: number }> = ({ clipIndex }) => {
   const localFrame = useCurrentFrame();
 
-  const cutBlur = interpolate(localFrame, [0, 4], [10, 0], {
+  // Blur/flash peaks lowered (10px/0.55 -> 6px/0.25) — at full strength,
+  // the very first frame of every cut (max blur + near-solid-white flash
+  // simultaneously) was blowing out to an almost-solid white frame,
+  // reading as a static "photo" flash rather than a video cut.
+  const cutBlur = interpolate(localFrame, [0, 4], [6, 0], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
   });
-  const flashPulse = interpolate(localFrame, [0, 1, 6], [0.55, 0.2, 0], {
+  const flashPulse = interpolate(localFrame, [0, 1, 6], [0.25, 0.12, 0], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
   });

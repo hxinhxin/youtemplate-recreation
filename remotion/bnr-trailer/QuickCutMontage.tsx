@@ -19,7 +19,11 @@ const Slice: React.FC<{ clipSrc: string; clipStartFrom: number; sliceIndex: numb
 }) => {
   const localFrame = useCurrentFrame();
 
-  const blur = interpolate(localFrame, [0, 3], [8, 0], {
+  // Blur/flash peaks lowered (8px/0.7 -> 5px/0.3) — the very first frame
+  // of every slice (max blur + a near-solid-white flash at once) was
+  // blowing out to an almost-solid white frame, reading as a static
+  // "photo" flash rather than a video cut.
+  const blur = interpolate(localFrame, [0, 3], [5, 0], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
   });
@@ -27,7 +31,7 @@ const Slice: React.FC<{ clipSrc: string; clipStartFrom: number; sliceIndex: numb
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
   });
-  const flashOpacity = interpolate(localFrame, [0, 1, 3], [0.7, 0.25, 0], {
+  const flashOpacity = interpolate(localFrame, [0, 1, 3], [0.3, 0.12, 0], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
   });
