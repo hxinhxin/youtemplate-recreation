@@ -4,9 +4,11 @@ import { WIDTH, HEIGHT } from "./durations";
 
 // The hero countdown digit: concert footage clipped to the shape of the
 // glyph via an SVG clipPath (the video exists INSIDE the number, not
-// behind a transparent layer on top of it). Restrained on purpose — a
-// thin white outline, a soft sheen, one static reflection band, a subtle
-// red accent glow, and film grain. No chromatic-aberration/glitch tricks.
+// behind a transparent layer on top of it). A thin white outline, a soft
+// sheen, a sweeping reflection band, a subtle red accent glow, and film
+// grain — kept premium, not glitchy, but constantly moving: a breathing
+// pulse, a slow rotation wobble, a stronger camera push, and a periodic
+// light sweep on top of the one-time reveal and climax.
 export const MaskedVideoNumber: React.FC<{
   text: string;
   videoSrc: string;
@@ -20,8 +22,7 @@ export const MaskedVideoNumber: React.FC<{
   const boxH = HEIGHT * 0.5;
   const fontSize = text.length > 1 ? 620 : 900;
 
-  // Cinematic reveal: scale/opacity/blur settle in together, then a slow
-  // continuous camera push for the rest of the shot.
+  // Cinematic reveal: scale/opacity/blur settle in together.
   const revealProgress = interpolate(frame, [0, 26], [0, 1], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
@@ -31,31 +32,51 @@ export const MaskedVideoNumber: React.FC<{
   const revealOpacity = interpolate(revealProgress, [0, 1], [0, 1]);
   const revealBlur = interpolate(revealProgress, [0, 1], [18, 0]);
 
-  const pushIn = interpolate(frame, [26, durationInFrames], [1, 1.12], {
+  // Stronger, continuous camera push for the rest of the shot.
+  const pushIn = interpolate(frame, [26, durationInFrames], [1, 1.28], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
     easing: Easing.inOut(Easing.cubic),
   });
 
-  const footageZoom = interpolate(frame, [0, durationInFrames], [1, 1.12], {
+  // A subtle breathing pulse and rotation wobble on top of the push, so the
+  // number never sits perfectly still.
+  const breathe = 1 + Math.sin(frame / 14) * 0.025;
+  const wobble = Math.sin(frame / 22) * 1.6;
+
+  const footageZoom = interpolate(frame, [0, durationInFrames], [1, 1.3], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
   });
 
-  // A single subtle shake right at the climax (bass hit), not throughout.
+  // A light streak that sweeps across the glass repeatedly (not just once).
+  const streakCycle = 46;
+  const streakProgress = (frame % streakCycle) / streakCycle;
+  const streakOffset = interpolate(streakProgress, [0, 1], [-40, 140]);
+
+  // A soft rhythmic pulse on the red glow, like it's breathing with a beat.
+  const beatPulse = 22 + Math.sin(frame / 9) * 10;
+
+  // A single stronger shake + scale punch right at the climax (bass hit).
   const climax = climaxFrame ?? durationInFrames - 18;
   const climaxWindow = frame - climax;
-  const climaxShakeMag = interpolate(climaxWindow, [0, 12], [7, 0], {
+  const climaxShakeMag = interpolate(climaxWindow, [0, 14], [11, 0], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
   });
   const shakeX = climaxWindow >= 0 && climaxShakeMag > 0 ? Math.sin(frame * 8) * climaxShakeMag : 0;
+  const shakeY = climaxWindow >= 0 && climaxShakeMag > 0 ? Math.cos(frame * 7) * climaxShakeMag * 0.6 : 0;
+  const climaxPunch = interpolate(climaxWindow, [0, 6, 16], [1, 1.12, 1], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+    easing: Easing.out(Easing.back(2)),
+  });
   const climaxFlash = interpolate(climaxWindow, [0, 2, 8], [0, 0.5, 0], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
   });
 
-  const scale = revealScale * pushIn;
+  const scale = revealScale * pushIn * breathe * climaxPunch;
 
   const textProps = {
     x: boxW / 2,
@@ -73,7 +94,7 @@ export const MaskedVideoNumber: React.FC<{
         position: "relative",
         width: boxW,
         height: boxH,
-        transform: `scale(${scale}) translateX(${shakeX}px)`,
+        transform: `scale(${scale}) rotate(${wobble}deg) translate(${shakeX}px, ${shakeY}px)`,
         opacity: revealOpacity,
         filter: `blur(${revealBlur}px)`,
       }}
@@ -93,11 +114,11 @@ export const MaskedVideoNumber: React.FC<{
         </text>
       </svg>
 
-      {/* Subtle red accent glow — deliberately restrained */}
+      {/* Red accent glow — pulses gently instead of sitting static */}
       <svg
         width={boxW}
         height={boxH}
-        style={{ position: "absolute", top: 0, left: 0, filter: `drop-shadow(0 0 28px ${theme.red}66)` }}
+        style={{ position: "absolute", top: 0, left: 0, filter: `drop-shadow(0 0 ${beatPulse}px ${theme.red}66)` }}
       >
         <text {...textProps} fill={theme.red}>
           {text}
@@ -124,15 +145,15 @@ export const MaskedVideoNumber: React.FC<{
           }}
         />
 
-        {/* One static reflection band */}
+        {/* Sweeping reflection band, repeating instead of a single static pass */}
         <div
           style={{
             position: "absolute",
             top: "10%",
-            left: "-8%",
+            left: `${streakOffset}%`,
             width: "38%",
             height: "18%",
-            background: "linear-gradient(120deg, transparent, rgba(255,255,255,0.4), transparent)",
+            background: "linear-gradient(120deg, transparent, rgba(255,255,255,0.45), transparent)",
             transform: "rotate(-16deg)",
             mixBlendMode: "screen",
           }}
