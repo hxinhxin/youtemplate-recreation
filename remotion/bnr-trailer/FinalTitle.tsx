@@ -76,7 +76,11 @@ export const FinalTitle: React.FC = () => {
 
       <FilmGrain />
 
-      <AbsoluteFill style={{ justifyContent: "center", alignItems: "center", padding: "0 50px" }}>
+      {/* Split into two groups spread across the frame — packing all 4
+          lines into one tight block read as "too much text" crammed in
+          one spot at the very end. The CTA/site pair now sits down
+          toward the middle of the frame instead of hugging the title. */}
+      <AbsoluteFill style={{ flexDirection: "column", justifyContent: "space-evenly", alignItems: "center", padding: "0 50px" }}>
         <div style={{ textAlign: "center" }}>
           <div
             style={{
@@ -107,10 +111,11 @@ export const FinalTitle: React.FC = () => {
           >
             {concertInfo.day} · {concertInfo.dateLabel}
           </div>
+        </div>
 
+        <div style={{ textAlign: "center" }}>
           <div
             style={{
-              marginTop: 44,
               opacity: ctaOpacity,
               fontFamily: theme.bodyFont,
               fontWeight: 700,
