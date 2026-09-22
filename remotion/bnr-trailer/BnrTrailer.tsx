@@ -4,7 +4,7 @@ import { TransitionSeries, linearTiming } from "@remotion/transitions";
 import { pushCut } from "@remotion/transitions/push-cut";
 import { BNR_CLIPS as CLIPS } from "./clips";
 import { audioConfig } from "../concert-promo/audioConfig";
-import { DroneOpen, droneClipSrc } from "./DroneOpen";
+import { DroneOpen } from "./DroneOpen";
 import { OpeningGlimpses } from "./OpeningGlimpses";
 import { DaysHero } from "./DaysHero";
 import { QuickCutMontage } from "./QuickCutMontage";
@@ -15,7 +15,7 @@ import { FinalDaysCard } from "./FinalDaysCard";
 import { FinalTitle } from "./FinalTitle";
 import { CrowdAudio } from "./CrowdAudio";
 import { AudioHit } from "./AudioHit";
-import { HERO_CLIP_INDEX, VENUE_CLIP_INDEX } from "./energyOrder";
+import { HERO_CLIP_INDEX } from "./energyOrder";
 import {
   BUILDUP_DURATION,
   BUILDUP_SLICE_DURATIONS,
@@ -34,15 +34,12 @@ import {
 import { TYPOGRAPHY_BEATS } from "./typographyBeats";
 import {
   buildupTimeline,
-  confettiFeatureTimeline,
   daysHeroTimeline,
   droneOpenTimeline,
-  finalDaysCardTimeline,
   finalTitleTimeline,
   joyStationTimeline,
   openingTimeline,
   revealPauseTimeline,
-  spidermanFeatureTimeline,
   typographyTimelines,
 } from "./timeline";
 import { buildVolumeCurve } from "./volumeCurve";
@@ -70,14 +67,6 @@ const strobeCut = (key: string) => (
 const daysHeroClimax = daysHeroTimeline.start + DAYS_HERO_DURATION - 18;
 const bnrBeat = typographyTimelines[0].start;
 const finalCtaBeat = finalTitleTimeline.start + 26;
-
-// Crowd-audio coverage spans, computed from the timeline so the ambience
-// runs continuously across scenes instead of a few isolated windows —
-// abrupt on/off cuts were reading as the screams getting "cut out."
-const lastTypographyTimeline = typographyTimelines[typographyTimelines.length - 1];
-const revealToTypographyDuration =
-  lastTypographyTimeline.start + lastTypographyTimeline.duration - revealPauseTimeline.start;
-const finalSectionDuration = finalTitleTimeline.start + FINAL_TITLE_DURATION - finalDaysCardTimeline.start;
 
 // One continuous track, not several songs stitched together — we only
 // have the one piece of music. "DJ-style" movement instead comes from
@@ -116,37 +105,22 @@ export const BnrTrailer: React.FC = () => {
           rather than crossfaded between multiple songs (we only have one). */}
       <Audio src={staticFile(audioConfig.src)} volume={trackVolume(frame)} />
 
-      {/* Crowd audio beds — the clips' own embedded crowd/DJ sound, ducked
-          under the music so the audience is actually audible. Long fades
-          (see CrowdAudio's default) and near-continuous coverage across
-          scenes, rather than a few isolated windows, so the crowd swells
-          up/down instead of abruptly cutting. */}
-      <Sequence from={droneOpenTimeline.start} durationInFrames={DRONE_OPEN_DURATION}>
-        <CrowdAudio src={droneClipSrc} durationInFrames={DRONE_OPEN_DURATION} volume={0.22} />
-      </Sequence>
-      <Sequence from={openingTimeline.start} durationInFrames={OPENING_DURATION}>
-        <CrowdAudio src={CLIPS[HERO_CLIP_INDEX].src} durationInFrames={OPENING_DURATION} volume={0.16} />
-      </Sequence>
-      <Sequence from={daysHeroTimeline.start} durationInFrames={DAYS_HERO_DURATION}>
-        <CrowdAudio src={CLIPS[HERO_CLIP_INDEX].src} startFrom={20} durationInFrames={DAYS_HERO_DURATION} volume={0.22} />
-      </Sequence>
-      <Sequence from={buildupTimeline.start} durationInFrames={BUILDUP_DURATION}>
-        <CrowdAudio src={CLIPS[HERO_CLIP_INDEX].src} durationInFrames={BUILDUP_DURATION} volume={0.3} />
-      </Sequence>
-      <Sequence from={spidermanFeatureTimeline.start} durationInFrames={SPIDERMAN_FEATURE_DURATION}>
-        <CrowdAudio src={CLIPS[11].src} durationInFrames={SPIDERMAN_FEATURE_DURATION} volume={0.28} fadeFrames={14} />
-      </Sequence>
-      <Sequence from={confettiFeatureTimeline.start} durationInFrames={CONFETTI_FEATURE_DURATION}>
-        <CrowdAudio src={CLIPS[12].src} durationInFrames={CONFETTI_FEATURE_DURATION} volume={0.28} fadeFrames={14} />
-      </Sequence>
-      <Sequence from={joyStationTimeline.start} durationInFrames={JOY_STATION_DURATION}>
-        <CrowdAudio src={CLIPS[VENUE_CLIP_INDEX].src} startFrom={30} durationInFrames={JOY_STATION_DURATION} volume={0.22} />
-      </Sequence>
-      <Sequence from={revealPauseTimeline.start} durationInFrames={revealToTypographyDuration}>
-        <CrowdAudio src={CLIPS[HERO_CLIP_INDEX].src} startFrom={60} durationInFrames={revealToTypographyDuration} volume={0.2} />
-      </Sequence>
-      <Sequence from={finalDaysCardTimeline.start} durationInFrames={finalSectionDuration}>
-        <CrowdAudio src={CLIPS[HERO_CLIP_INDEX].src} startFrom={100} durationInFrames={finalSectionDuration} volume={0.2} />
+      {/* Crowd audio bed — ONE single source's embedded audio, playing
+          continuously under the whole trailer at a low, steady volume.
+          Previously this switched between 5 different clips' own audio
+          (each a different moment of the live DJ set), which meant
+          several different pieces of music colliding with the main
+          track at once — that was the actual cause of the mix sounding
+          cacophonic, not just the volume levels. One continuous source
+          avoids that clash entirely while still giving the crowd texture
+          underneath. */}
+      <Sequence from={droneOpenTimeline.start} durationInFrames={TOTAL_DURATION - droneOpenTimeline.start}>
+        <CrowdAudio
+          src={CLIPS[HERO_CLIP_INDEX].src}
+          durationInFrames={TOTAL_DURATION - droneOpenTimeline.start}
+          volume={0.14}
+          fadeFrames={40}
+        />
       </Sequence>
 
       {/* Riser + impact hits at the signature beats. */}
@@ -246,6 +220,7 @@ export const BnrTrailer: React.FC = () => {
                 variant={beat.variant}
                 videoSrc={CLIPS[beat.clipIndex].src}
                 videoStartFrom={150 + beat.clipIndex * 10}
+                logo={beat.logo}
               />
             </TransitionSeries.Sequence>
             {i < TYPOGRAPHY_BEATS.length - 1 && strobeCut(`typography-${i}`)}

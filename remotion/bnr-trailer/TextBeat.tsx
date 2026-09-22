@@ -1,6 +1,8 @@
-import { AbsoluteFill, Easing, interpolate, OffthreadVideo, useCurrentFrame } from "remotion";
+import { AbsoluteFill, Easing, Img, interpolate, OffthreadVideo, staticFile, useCurrentFrame } from "remotion";
 import { theme } from "./theme";
 import type { TextVariant } from "./typographyBeats";
+
+const logoSrc = staticFile("images/bnr-logo.png");
 
 // Single-word reveal card. Crowd footage plays continuously behind the
 // text (Ken Burns zoom + a partial gradient, never a solid color) so the
@@ -11,7 +13,8 @@ export const TextBeat: React.FC<{
   variant?: TextVariant;
   videoSrc: string;
   videoStartFrom?: number;
-}> = ({ word, durationInFrames, variant = "slam", videoSrc, videoStartFrom = 0 }) => {
+  logo?: boolean;
+}> = ({ word, durationInFrames, variant = "slam", videoSrc, videoStartFrom = 0, logo = false }) => {
   const frame = useCurrentFrame();
 
   const zoom = interpolate(frame, [0, durationInFrames], [1, 1.16], {
@@ -71,6 +74,17 @@ export const TextBeat: React.FC<{
   // size so they never overflow the 1080px canvas.
   const fontSize = word.length > 12 ? 70 : word.length > 8 ? 92 : word.length > 5 ? 118 : 140;
 
+  // Event logo, faded up behind the word — settles in just behind the
+  // text's own entrance, with a slow continuous drift so it isn't static.
+  const logoOpacity = interpolate(frame, [4, 14], [0, 0.9], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+  });
+  const logoScale = interpolate(frame, [0, durationInFrames], [1.05, 1.16], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+  });
+
   return (
     <AbsoluteFill style={{ backgroundColor: theme.background, overflow: "hidden" }}>
       <OffthreadVideo
@@ -92,6 +106,20 @@ export const TextBeat: React.FC<{
             "linear-gradient(180deg, rgba(5,5,5,0.38) 0%, rgba(5,5,5,0.12) 40%, rgba(5,5,5,0.4) 100%)",
         }}
       />
+
+      {logo && (
+        <AbsoluteFill style={{ justifyContent: "center", alignItems: "center" }}>
+          <Img
+            src={logoSrc}
+            style={{
+              width: "62%",
+              opacity: logoOpacity,
+              transform: `scale(${logoScale})`,
+              filter: "drop-shadow(0 0 30px rgba(0,0,0,0.6))",
+            }}
+          />
+        </AbsoluteFill>
+      )}
 
       <AbsoluteFill style={{ justifyContent: "center", alignItems: "center" }}>
         <div
