@@ -52,20 +52,27 @@ export const FinalDaysCard: React.FC<{ durationInFrames: number }> = ({ duration
           durationInFrames={durationInFrames}
           climaxFrame={durationInFrames - 10}
         />
+      </div>
 
-        <div
-          style={{
-            marginTop: -14,
-            opacity: labelOpacity,
-            fontFamily: theme.bodyFont,
-            fontWeight: 700,
-            color: theme.white,
-            fontSize: 30,
-            letterSpacing: 9,
-          }}
-        >
-          DAYS LEFT
-        </div>
+      {/* Positioned absolutely rather than as a plain in-flow sibling
+          below MaskedVideoNumber — same rendering quirk as DaysHero.tsx:
+          an in-flow div there silently never painted. */}
+      <div
+        style={{
+          position: "absolute",
+          top: 1370,
+          left: 0,
+          right: 0,
+          textAlign: "center",
+          opacity: labelOpacity,
+          fontFamily: theme.bodyFont,
+          fontWeight: 700,
+          color: theme.white,
+          fontSize: 30,
+          letterSpacing: 9,
+        }}
+      >
+        DAYS LEFT
       </div>
 
       <FilmGrain opacity={0.05} />
