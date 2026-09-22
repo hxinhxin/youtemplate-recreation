@@ -46,7 +46,14 @@ const Cut: React.FC<{ clipIndex: number }> = ({ clipIndex }) => {
     <AbsoluteFill>
       <OffthreadVideo
         src={CLIPS[clipIndex].src}
-        startFrom={150 + clipIndex * 15}
+        // Was `150 + clipIndex * 15` — for the two shortest clips in the
+        // pool (clip-11 at 81 frames, clip-10 at 130 frames) that landed
+        // well past the end of the source, so OffthreadVideo just held on
+        // the last available frame for the whole cut: a real freeze, not
+        // just calm footage. Bounded to a small window (10-49) that's
+        // safe even for the shortest clip in the pool, with margin for
+        // the longest cut (20 frames) on top.
+        startFrom={10 + ((clipIndex * 20) % 40)}
         style={{
           width: "100%",
           height: "100%",
