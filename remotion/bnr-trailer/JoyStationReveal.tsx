@@ -7,8 +7,9 @@ import { FilmGrain } from "./FilmGrain";
 
 // Scene 4 — after the crowd-explosion montage, everything briefly slows
 // down for a dedicated venue reveal: JOY STATION as a major visual
-// element (not a small subtitle), then SOFIA underneath, over a strong
-// wide stage/crowd shot.
+// element (not a small subtitle), then SOFIA underneath (bolded with a
+// text-stroke since there's no heavier Cyrillic weight available), over
+// a strong wide stage/crowd shot.
 export const JoyStationReveal: React.FC<{ durationInFrames: number }> = ({ durationInFrames }) => {
   const frame = useCurrentFrame();
   const clip = CLIPS[VENUE_CLIP_INDEX];
@@ -42,19 +43,6 @@ export const JoyStationReveal: React.FC<{ durationInFrames: number }> = ({ durat
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
   });
-
-  // "СЪВСЕМ СКОРО" lands after the venue/city settle, as the closing beat
-  // of this scene — a pulsing glow rather than a static caption.
-  const verySoonOpacity = interpolate(frame, [36, 44], [0, 1], {
-    extrapolateLeft: "clamp",
-    extrapolateRight: "clamp",
-  });
-  const verySoonScale = interpolate(frame, [36, 44, 50], [0.8, 1.08, 1], {
-    extrapolateLeft: "clamp",
-    extrapolateRight: "clamp",
-    easing: Easing.out(Easing.back(3)),
-  });
-  const verySoonPulse = 18 + Math.sin(frame / 6) * 10;
 
   return (
     <AbsoluteFill style={{ backgroundColor: theme.background, overflow: "hidden" }}>
@@ -106,6 +94,7 @@ export const JoyStationReveal: React.FC<{ durationInFrames: number }> = ({ durat
               transform: `translateY(${cityY}px)`,
               fontFamily: theme.bodyFont,
               fontWeight: 700,
+              WebkitTextStroke: `1.5px ${theme.white}`,
               color: theme.white,
               fontSize: 40,
               letterSpacing: 10,
@@ -113,23 +102,6 @@ export const JoyStationReveal: React.FC<{ durationInFrames: number }> = ({ durat
             }}
           >
             {concertInfo.city}
-          </div>
-
-          <div
-            style={{
-              marginTop: 30,
-              opacity: verySoonOpacity,
-              transform: `scale(${verySoonScale})`,
-              fontFamily: theme.headlineFont,
-              fontWeight: 900,
-              color: theme.white,
-              fontSize: 30,
-              letterSpacing: 14,
-              textTransform: "uppercase",
-              textShadow: `0 0 ${verySoonPulse}px ${theme.red}`,
-            }}
-          >
-            Съвсем скоро
           </div>
         </div>
       </AbsoluteFill>

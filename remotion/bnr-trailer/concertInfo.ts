@@ -8,6 +8,6 @@ export const concertInfo = {
   // ISO datetime the countdown counts down to.
   targetDate: "2026-09-26T23:00:00+03:00",
   venue: "JOY STATION",
-  cta: "БИЛЕТИ НАЛИЧНИ СЕГА",
+  cta: "БИЛЕТИ",
   ticketSite: "TICKORA.EU",
 };

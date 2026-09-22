@@ -1,6 +1,5 @@
 import { AbsoluteFill, interpolate, OffthreadVideo, useCurrentFrame } from "remotion";
 import { theme } from "./theme";
-import { concertInfo } from "./concertInfo";
 import { DAYS_LEFT } from "./daysLeft";
 import { LightSweep } from "./LightSweep";
 import { MaskedVideoNumber } from "./MaskedVideoNumber";
@@ -98,13 +97,14 @@ export const DaysHero: React.FC<{ videoSrc: string; durationInFrames: number }> 
           opacity: labelOpacity,
           fontFamily: theme.bodyFont,
           fontWeight: 700,
+          WebkitTextStroke: `1px ${theme.white}`,
           color: theme.white,
           fontSize: 22,
           letterSpacing: 4,
           textTransform: "uppercase",
         }}
       >
-        ДО {concertInfo.brand}
+        ДО ЗАВРЪЩАНЕТО
       </div>
 
       <FilmGrain opacity={0.04} />
