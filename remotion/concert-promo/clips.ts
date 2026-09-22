@@ -18,4 +18,5 @@ export const CLIPS: ClipConfig[] = [
   { src: staticFile("videos/clip-04.mov"), durationInFrames: 75 },
   { src: staticFile("videos/clip-05.mov"), durationInFrames: 75 },
   { src: staticFile("videos/clip-06.mov"), durationInFrames: 75 },
+  { src: staticFile("videos/clip-08.mov"), durationInFrames: 75 },
 ];
