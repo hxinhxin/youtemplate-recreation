@@ -6,4 +6,4 @@ import { concertInfo } from "./concertInfo";
 //   export const DAYS_LEFT = 7;
 const target = new Date(concertInfo.targetDate).getTime();
 const diffMs = Math.max(target - Date.now(), 0);
-export const DAYS_LEFT = Math.max(1, Math.ceil(diffMs / (1000 * 60 * 60 * 24)));
+export const DAYS_LEFT = Math.max(1, Math.floor(diffMs / (1000 * 60 * 60 * 24)));
