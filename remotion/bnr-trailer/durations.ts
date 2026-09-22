@@ -10,8 +10,9 @@ export const TRANSITION_DURATION = 8;
 export const OPENING_DURATION = 110;
 
 // Scene 2 — the days-left hero reveal (4-10s target): light sweep +
-// masked video number + bass-hit climax.
-export const DAYS_HERO_DURATION = 160;
+// masked video number + bass-hit climax. Trimmed from 160 -> 110: the
+// number was holding on screen too long.
+export const DAYS_HERO_DURATION = 110;
 
 // Scene 3 — build-up / crowd-explosion montage (10-16s target): very
 // short slices (~0.2-0.6s each = 6-18 frames at 30fps).
@@ -29,8 +30,8 @@ export const TYPOGRAPHY_WORDS = TYPOGRAPHY_BEATS.map((b) => b.word);
 const TYPOGRAPHY_TOTAL_DURATION = TYPOGRAPHY_BEATS.reduce((a, b) => a + b.duration, 0);
 
 // Scene 6 — final card (21-25s target): the countdown returns, then the
-// ticket info.
-export const FINAL_DAYS_CARD_DURATION = 45;
+// ticket info. Also trimmed, same reasoning as Scene 2.
+export const FINAL_DAYS_CARD_DURATION = 34;
 export const FINAL_TITLE_DURATION = 85;
 
 // Total item count in the top-level TransitionSeries: opening(1) +
