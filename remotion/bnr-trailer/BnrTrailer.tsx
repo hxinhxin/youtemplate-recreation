@@ -79,20 +79,20 @@ const finalCtaBeat = finalTitleTimeline.start + 26;
 // avoids the overlap math going wrong.
 const { frames: volumeFrames, values: volumeValues } = buildVolumeCurve([
   [0, 0],
-  [droneOpenTimeline.start + 20, 0.18], // stay low under the drone shot's own crowd sound
-  [openingTimeline.start + 90, 0.65],
-  [daysHeroClimax - 30, 0.65],
-  [daysHeroClimax, 0.35],
-  [daysHeroClimax + 9, 0.7],
-  [buildupTimeline.start, 0.45], // duck under the crowd-explosion montage
-  [joyStationTimeline.start, 0.58],
-  [revealPauseTimeline.start, 0.68],
-  [bnrBeat, 0.35], // duck for the BNR impact hit
-  [bnrBeat + 10, 0.72],
-  [finalCtaBeat - 2, 0.72],
-  [finalCtaBeat, 0.4], // duck for the final drop
-  [finalCtaBeat + 10, 0.78],
-  [TOTAL_DURATION - 8, 0.78],
+  [droneOpenTimeline.start + 20, 0.25], // stay low under the drone shot's own crowd sound
+  [openingTimeline.start + 90, 0.8],
+  [daysHeroClimax - 30, 0.8],
+  [daysHeroClimax, 0.5],
+  [daysHeroClimax + 9, 0.85],
+  [buildupTimeline.start, 0.6], // duck under the crowd-explosion montage
+  [joyStationTimeline.start, 0.75],
+  [revealPauseTimeline.start, 0.85],
+  [bnrBeat, 0.5], // duck for the BNR impact hit
+  [bnrBeat + 10, 0.88],
+  [finalCtaBeat - 2, 0.88],
+  [finalCtaBeat, 0.55], // duck for the final drop
+  [finalCtaBeat + 10, 0.92],
+  [TOTAL_DURATION - 8, 0.92],
   [TOTAL_DURATION, 0], // hard cut to black, not a slow fade
 ]);
 const trackVolume = (f: number) =>
@@ -108,19 +108,21 @@ export const BnrTrailer: React.FC = () => {
       <Audio src={staticFile(audioConfig.src)} volume={trackVolume(frame)} />
 
       {/* Crowd audio bed — ONE single source's embedded audio, playing
-          continuously under the whole trailer at a low, steady volume.
-          Previously this switched between 5 different clips' own audio
-          (each a different moment of the live DJ set), which meant
-          several different pieces of music colliding with the main
-          track at once — that was the actual cause of the mix sounding
-          cacophonic, not just the volume levels. One continuous source
-          avoids that clash entirely while still giving the crowd texture
-          underneath. */}
+          continuously under the whole trailer, kept low enough that the
+          mp3 track is unmistakably the main audio. Previously this
+          switched between 5 different clips' own audio (each a different
+          moment of the live DJ set), which meant several different
+          pieces of music colliding with the main track at once — that
+          was the actual cause of the mix sounding cacophonic, not just
+          the volume levels. One continuous source avoids that clash
+          entirely. Lowered 0.14 -> 0.07 so it reads as background crowd
+          texture (some screaming still audible) rather than a second
+          competing track. */}
       <Sequence from={droneOpenTimeline.start} durationInFrames={TOTAL_DURATION - droneOpenTimeline.start}>
         <CrowdAudio
           src={CLIPS[HERO_CLIP_INDEX].src}
           durationInFrames={TOTAL_DURATION - droneOpenTimeline.start}
-          volume={0.14}
+          volume={0.07}
           fadeFrames={40}
         />
       </Sequence>
