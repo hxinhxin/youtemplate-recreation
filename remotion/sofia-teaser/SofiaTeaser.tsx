@@ -27,8 +27,8 @@ const punch = (key: string) => (
     timing={linearTiming({ durationInFrames: TRANSITION_DURATION })}
     presentation={pushCut({
       flashOpacity: 0,
-      outgoingScale: 1.1,
-      incomingStartScale: 1.18,
+      outgoingScale: 1.16,
+      incomingStartScale: 1.28,
       incomingEndScale: 1.0,
     })}
   />

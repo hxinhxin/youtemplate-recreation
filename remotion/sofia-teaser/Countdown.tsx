@@ -2,6 +2,8 @@ import { AbsoluteFill, Easing, interpolate, useCurrentFrame } from "remotion";
 import { concertInfo } from "./concertInfo";
 import { theme } from "../concert-promo/theme";
 import { LightBurst } from "./LightBurst";
+import { ImpactFlash } from "./ImpactFlash";
+import { RadialRays } from "./RadialRays";
 
 // Computed once at module load — a snapshot of "time remaining" as of
 // whenever this is rendered, since the video itself is a fixed export.
@@ -30,16 +32,16 @@ export const Countdown: React.FC = () => {
   const hours = progress * totalHours;
   const minutes = progress * totalMinutes;
 
-  // Harder overshoot on landing — punches out past 1.25x before settling.
-  const settle = interpolate(frame, [LANDING_FRAME, LANDING_FRAME + 5, LANDING_FRAME + 14], [1, 1.25, 1], {
+  // Bigger overshoot on landing — punches out past 1.4x before settling.
+  const settle = interpolate(frame, [LANDING_FRAME, LANDING_FRAME + 5, LANDING_FRAME + 16], [1, 1.4, 1], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
-    easing: Easing.out(Easing.back(2)),
+    easing: Easing.out(Easing.back(3)),
   });
 
-  // Quick screen shake right on impact.
+  // Bigger, longer screen shake right on impact.
   const shakeWindow = frame - LANDING_FRAME;
-  const shakeMag = interpolate(shakeWindow, [0, 10], [10, 0], {
+  const shakeMag = interpolate(shakeWindow, [0, 18], [22, 0], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
   });
@@ -51,7 +53,7 @@ export const Countdown: React.FC = () => {
     extrapolateRight: "clamp",
   });
 
-  const glow = interpolate(frame, [LANDING_FRAME, LANDING_FRAME + 5, LANDING_FRAME + 20], [0, 40, 14], {
+  const glow = interpolate(frame, [LANDING_FRAME, LANDING_FRAME + 5, LANDING_FRAME + 20], [0, 60, 20], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
   });
@@ -62,9 +64,12 @@ export const Countdown: React.FC = () => {
         backgroundColor: theme.background,
         justifyContent: "center",
         alignItems: "center",
+        overflow: "hidden",
       }}
     >
+      <RadialRays />
       <LightBurst triggerFrame={LANDING_FRAME} />
+      <ImpactFlash triggerFrame={LANDING_FRAME} />
 
       <div
         style={{
@@ -77,7 +82,7 @@ export const Countdown: React.FC = () => {
             fontFamily: theme.headlineFont,
             fontWeight: 900,
             color: theme.text,
-            fontSize: 200,
+            fontSize: 220,
             lineHeight: 1,
             textShadow: `0 0 ${glow}px ${theme.accent}`,
           }}
@@ -89,8 +94,8 @@ export const Countdown: React.FC = () => {
             fontFamily: theme.bodyFont,
             fontWeight: 700,
             color: theme.accent,
-            fontSize: 36,
-            letterSpacing: 8,
+            fontSize: 38,
+            letterSpacing: 9,
             marginTop: 8,
           }}
         >
@@ -101,7 +106,7 @@ export const Countdown: React.FC = () => {
             fontFamily: theme.headlineFont,
             fontWeight: 900,
             color: theme.textMuted,
-            fontSize: 56,
+            fontSize: 58,
             marginTop: 32,
           }}
         >
