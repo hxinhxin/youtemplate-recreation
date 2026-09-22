@@ -90,18 +90,19 @@ export const DaysHero: React.FC<{ videoSrc: string; durationInFrames: number }> 
       <div
         style={{
           position: "absolute",
-          top: 1460,
+          top: 1455,
           left: 0,
           right: 0,
           textAlign: "center",
           opacity: labelOpacity,
           fontFamily: theme.bodyFont,
           fontWeight: 700,
-          WebkitTextStroke: `1px ${theme.white}`,
+          WebkitTextStroke: `1.5px ${theme.white}`,
           color: theme.white,
-          fontSize: 22,
+          fontSize: 34,
           letterSpacing: 4,
           textTransform: "uppercase",
+          textShadow: `0 0 30px ${theme.red}`,
         }}
       >
         ДО ЗАВРЪЩАНЕТО

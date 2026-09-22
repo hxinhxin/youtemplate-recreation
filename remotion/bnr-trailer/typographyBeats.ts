@@ -16,7 +16,9 @@ export type TypographyBeat = {
 // single dedicated clip (DaysHero/reveal-pause/FinalTitle use clip-04,
 // JoyStationReveal uses clip-06) — index 10 (bnr-clip-01) even shows the
 // actual "БАНДАТА НА РЪБА" branded backdrop, a natural fit for that beat.
+// Duration trimmed 28 -> 24 per beat to shorten the overall trailer —
+// the "slam" entrance settles by frame 14, still leaving a solid hold.
 export const TYPOGRAPHY_BEATS: TypographyBeat[] = [
-  { word: "Бандата на ръба", duration: 28, variant: "slam", clipIndex: 10, logo: true },
-  { word: "ТАЗИ СЪБОТА", duration: 28, variant: "slam", clipIndex: 4 },
+  { word: "Бандата на ръба", duration: 24, variant: "slam", clipIndex: 10, logo: true },
+  { word: "ТАЗИ СЪБОТА", duration: 24, variant: "slam", clipIndex: 4 },
 ];

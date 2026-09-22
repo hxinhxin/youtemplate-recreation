@@ -13,8 +13,11 @@ export const TRANSITION_DURATION = 8;
 // actually gets going.
 export const DRONE_OPEN_DURATION = 36;
 
-// Scene 1 — opening tension (0-4s target): near-black glimpses.
-export const OPENING_DURATION = 110;
+// Scene 1 — opening tension (0-4s target): near-black glimpses. Trimmed
+// 110 -> 100 to shorten the overall trailer a bit — still lands exactly
+// on OpeningGlimpses' last cut start (100), so every cut keeps its full
+// floor duration (10 frames), no truncated/flickery final cut.
+export const OPENING_DURATION = 100;
 
 // Scene 2 — the days-left hero reveal (4-10s target): light sweep +
 // masked video number + bass-hit climax. Trimmed from 160 -> 110 (the
@@ -35,12 +38,15 @@ export const BUILDUP_DURATION = BUILDUP_SLICE_DURATIONS.reduce((a, b) => a + b, 
 // Scene 3.5 — two dedicated feature shots for bnr-clip-02/03 (the
 // costumed-performer crowd-surf and the fisheye confetti blast), each
 // held well over a second rather than the ~0.3-0.5s flash they got as
-// buildup-montage slices.
-export const SPIDERMAN_FEATURE_DURATION = 45;
-export const CONFETTI_FEATURE_DURATION = 42;
+// buildup-montage slices. Trimmed slightly (45->36, 42->34) to shorten
+// the overall trailer — still well over a second each.
+export const SPIDERMAN_FEATURE_DURATION = 36;
+export const CONFETTI_FEATURE_DURATION = 34;
 
-// Scene 4 — JOY STATION / SOFIA venue reveal (16-19s target).
-export const JOY_STATION_DURATION = 80;
+// Scene 4 — JOY STATION / SOFIA venue reveal (16-19s target). Trimmed
+// 80 -> 68 to shorten the overall trailer — city text is fully settled
+// by frame 24, still leaving a comfortable hold before the cut.
+export const JOY_STATION_DURATION = 68;
 
 // Scene 5 — BNR reveal (19-21s target): a brief cinematic pause on the
 // event, then each word appears on its own beat (see typographyBeats.ts
@@ -53,7 +59,9 @@ const TYPOGRAPHY_TOTAL_DURATION = TYPOGRAPHY_BEATS.reduce((a, b) => a + b.durati
 // back here too ("DAYS LEFT" a second time), but that was one repeat
 // too many — DaysHero already delivers that beat, so this scene was
 // removed and the confetti feature now cuts straight to FinalTitle.
-export const FINAL_TITLE_DURATION = 85;
+// Trimmed 85 -> 72 to shorten the overall trailer — the CTA/site lines
+// finish fading in by frame 50, still leaving a solid hold.
+export const FINAL_TITLE_DURATION = 72;
 
 // Total item count in the top-level TransitionSeries: droneOpen(1) +
 // opening(1) + daysHero(1) + buildup(1) + spidermanFeature(1) +
