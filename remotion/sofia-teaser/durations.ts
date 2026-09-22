@@ -1,4 +1,4 @@
-import { CLIPS } from "../concert-promo/clips";
+import { SOFIA_CLIPS as CLIPS } from "./clips";
 
 export const FPS = 30;
 export const WIDTH = 1080;

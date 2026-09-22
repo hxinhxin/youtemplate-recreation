@@ -3,7 +3,7 @@ import { AbsoluteFill, Audio, interpolate, Sequence, staticFile, useVideoConfig 
 import { TransitionSeries, linearTiming } from "@remotion/transitions";
 import { iris } from "@remotion/transitions/iris";
 import { pushCut } from "@remotion/transitions/push-cut";
-import { CLIPS } from "../concert-promo/clips";
+import { SOFIA_CLIPS as CLIPS } from "./clips";
 import { Sticker } from "../concert-promo/Sticker";
 import { audioConfig } from "../concert-promo/audioConfig";
 import { Countdown } from "./Countdown";

@@ -1,4 +1,4 @@
-import { CLIPS } from "../concert-promo/clips";
+import { SOFIA_CLIPS as CLIPS } from "./clips";
 import { COUNTDOWN_DURATION, INTRO_DURATION, OUTRO_DURATION, TRANSITION_DURATION } from "./durations";
 
 export type TimelineEntry = { start: number; duration: number };
