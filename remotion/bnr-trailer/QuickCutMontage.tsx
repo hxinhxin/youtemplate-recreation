@@ -69,7 +69,7 @@ export const QuickCutMontage: React.FC<{
       {/* Dark/red vignette — mood accent without regrading the footage itself */}
       <AbsoluteFill
         style={{
-          background: `radial-gradient(ellipse at center, transparent 45%, rgba(5,5,5,0.7) 100%), linear-gradient(to top, ${theme.redDeep}26 0%, transparent 30%)`,
+          background: `radial-gradient(ellipse at center, transparent 55%, rgba(5,5,5,0.4) 100%), linear-gradient(to top, ${theme.redDeep}26 0%, transparent 30%)`,
         }}
       />
 

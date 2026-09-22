@@ -62,7 +62,7 @@ export const FinalTitle: React.FC = () => {
 
       <AbsoluteFill
         style={{
-          background: `linear-gradient(to top, rgba(5,5,5,0.78) 0%, rgba(5,5,5,0.35) 55%, rgba(5,5,5,0.72) 100%)`,
+          background: `linear-gradient(to top, rgba(5,5,5,0.48) 0%, rgba(5,5,5,0.18) 55%, rgba(5,5,5,0.42) 100%)`,
         }}
       />
 

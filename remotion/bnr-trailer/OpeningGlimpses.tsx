@@ -35,8 +35,9 @@ export const OpeningGlimpses: React.FC<{ durationInFrames: number }> = ({ durati
   });
 
   // Base darkness eases up slightly as the section builds (tension ->
-  // anticipation), but never goes fully black.
-  const darkness = interpolate(frame, [0, durationInFrames], [0.6, 0.4], {
+  // anticipation), but never goes fully black. Lightened from 0.6/0.4 —
+  // it was crushing the footage too dark.
+  const darkness = interpolate(frame, [0, durationInFrames], [0.32, 0.16], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
   });
@@ -89,7 +90,7 @@ export const OpeningGlimpses: React.FC<{ durationInFrames: number }> = ({ durati
       <AbsoluteFill style={{ backgroundColor: "#000000", opacity: darkness }} />
       <AbsoluteFill
         style={{
-          background: "radial-gradient(ellipse at center, transparent 25%, rgba(5,5,5,0.75) 100%)",
+          background: "radial-gradient(ellipse at center, transparent 35%, rgba(5,5,5,0.42) 100%)",
         }}
       />
 

@@ -89,7 +89,7 @@ export const TextBeat: React.FC<{
       <AbsoluteFill
         style={{
           background:
-            "linear-gradient(180deg, rgba(5,5,5,0.6) 0%, rgba(5,5,5,0.25) 40%, rgba(5,5,5,0.65) 100%)",
+            "linear-gradient(180deg, rgba(5,5,5,0.38) 0%, rgba(5,5,5,0.12) 40%, rgba(5,5,5,0.4) 100%)",
         }}
       />
 

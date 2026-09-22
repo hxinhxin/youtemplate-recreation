@@ -62,7 +62,7 @@ export const JoyStationReveal: React.FC<{ durationInFrames: number }> = ({ durat
       <AbsoluteFill
         style={{
           background:
-            "linear-gradient(to top, rgba(5,5,5,0.9) 0%, rgba(5,5,5,0.4) 45%, rgba(5,5,5,0.75) 100%)",
+            "linear-gradient(to top, rgba(5,5,5,0.55) 0%, rgba(5,5,5,0.2) 45%, rgba(5,5,5,0.45) 100%)",
         }}
       />
 

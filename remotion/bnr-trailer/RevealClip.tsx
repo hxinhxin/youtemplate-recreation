@@ -40,7 +40,7 @@ export const RevealClip: React.FC<{ clip: ClipConfig; index: number; durationInF
 
       <AbsoluteFill
         style={{
-          background: `radial-gradient(ellipse at center, transparent 45%, rgba(5,5,5,0.7) 100%), linear-gradient(to top, ${theme.redDeep}2b 0%, transparent 35%)`,
+          background: `radial-gradient(ellipse at center, transparent 55%, rgba(5,5,5,0.4) 100%), linear-gradient(to top, ${theme.redDeep}2b 0%, transparent 35%)`,
         }}
       />
     </AbsoluteFill>

@@ -37,11 +37,11 @@ export const FinalDaysCard: React.FC<{ durationInFrames: number }> = ({ duration
           height: "100%",
           objectFit: "cover",
           transform: `scale(${bgZoom})`,
-          filter: "blur(7px) brightness(0.55) saturate(1.2)",
+          filter: "blur(6px) brightness(0.8) saturate(1.2)",
         }}
       />
       <AbsoluteFill
-        style={{ background: "radial-gradient(ellipse at center, transparent 32%, rgba(5,5,5,0.7) 100%)" }}
+        style={{ background: "radial-gradient(ellipse at center, transparent 36%, rgba(5,5,5,0.4) 100%)" }}
       />
 
       <div style={{ textAlign: "center" }}>

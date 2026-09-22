@@ -12,12 +12,12 @@ export const droneClipSrc = staticFile("videos/bnr-drone-01.mov");
 export const DroneOpen: React.FC<{ durationInFrames: number }> = ({ durationInFrames }) => {
   const frame = useCurrentFrame();
 
-  const fadeIn = interpolate(frame, [0, 10], [0, 1], {
+  const fadeIn = interpolate(frame, [0, 6], [0, 1], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
   });
 
-  const zoom = interpolate(frame, [0, durationInFrames], [1, 1.18], {
+  const zoom = interpolate(frame, [0, durationInFrames], [1, 1.26], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
   });
@@ -41,7 +41,7 @@ export const DroneOpen: React.FC<{ durationInFrames: number }> = ({ durationInFr
       <AbsoluteFill
         style={{
           background:
-            "radial-gradient(ellipse at center, transparent 55%, rgba(5,5,5,0.55) 100%), linear-gradient(to top, rgba(5,5,5,0.5) 0%, transparent 30%)",
+            "radial-gradient(ellipse at center, transparent 60%, rgba(5,5,5,0.3) 100%), linear-gradient(to top, rgba(5,5,5,0.28) 0%, transparent 30%)",
           opacity: fadeIn,
         }}
       />

@@ -88,20 +88,20 @@ const finalSectionDuration = finalTitleTimeline.start + FINAL_TITLE_DURATION - f
 // avoids the overlap math going wrong.
 const { frames: volumeFrames, values: volumeValues } = buildVolumeCurve([
   [0, 0],
-  [droneOpenTimeline.start + 20, 0.25], // stay low under the drone shot's own crowd sound
-  [openingTimeline.start + 90, 0.85],
-  [daysHeroClimax - 30, 0.85],
-  [daysHeroClimax, 0.5],
-  [daysHeroClimax + 9, 0.9],
-  [buildupTimeline.start, 0.6], // duck under the crowd-explosion montage
-  [joyStationTimeline.start, 0.78],
-  [revealPauseTimeline.start, 0.88],
-  [bnrBeat, 0.5], // duck for the BNR impact hit
-  [bnrBeat + 10, 0.95],
-  [finalCtaBeat - 2, 0.95],
-  [finalCtaBeat, 0.55], // duck for the final drop
-  [finalCtaBeat + 10, 1],
-  [TOTAL_DURATION - 8, 1],
+  [droneOpenTimeline.start + 20, 0.18], // stay low under the drone shot's own crowd sound
+  [openingTimeline.start + 90, 0.65],
+  [daysHeroClimax - 30, 0.65],
+  [daysHeroClimax, 0.35],
+  [daysHeroClimax + 9, 0.7],
+  [buildupTimeline.start, 0.45], // duck under the crowd-explosion montage
+  [joyStationTimeline.start, 0.58],
+  [revealPauseTimeline.start, 0.68],
+  [bnrBeat, 0.35], // duck for the BNR impact hit
+  [bnrBeat + 10, 0.72],
+  [finalCtaBeat - 2, 0.72],
+  [finalCtaBeat, 0.4], // duck for the final drop
+  [finalCtaBeat + 10, 0.78],
+  [TOTAL_DURATION - 8, 0.78],
   [TOTAL_DURATION, 0], // hard cut to black, not a slow fade
 ]);
 const trackVolume = (f: number) =>
@@ -122,48 +122,48 @@ export const BnrTrailer: React.FC = () => {
           scenes, rather than a few isolated windows, so the crowd swells
           up/down instead of abruptly cutting. */}
       <Sequence from={droneOpenTimeline.start} durationInFrames={DRONE_OPEN_DURATION}>
-        <CrowdAudio src={droneClipSrc} durationInFrames={DRONE_OPEN_DURATION} volume={0.4} />
+        <CrowdAudio src={droneClipSrc} durationInFrames={DRONE_OPEN_DURATION} volume={0.22} />
       </Sequence>
       <Sequence from={openingTimeline.start} durationInFrames={OPENING_DURATION}>
-        <CrowdAudio src={CLIPS[HERO_CLIP_INDEX].src} durationInFrames={OPENING_DURATION} volume={0.3} />
+        <CrowdAudio src={CLIPS[HERO_CLIP_INDEX].src} durationInFrames={OPENING_DURATION} volume={0.16} />
       </Sequence>
       <Sequence from={daysHeroTimeline.start} durationInFrames={DAYS_HERO_DURATION}>
-        <CrowdAudio src={CLIPS[HERO_CLIP_INDEX].src} startFrom={20} durationInFrames={DAYS_HERO_DURATION} volume={0.4} />
+        <CrowdAudio src={CLIPS[HERO_CLIP_INDEX].src} startFrom={20} durationInFrames={DAYS_HERO_DURATION} volume={0.22} />
       </Sequence>
       <Sequence from={buildupTimeline.start} durationInFrames={BUILDUP_DURATION}>
-        <CrowdAudio src={CLIPS[HERO_CLIP_INDEX].src} durationInFrames={BUILDUP_DURATION} volume={0.55} />
+        <CrowdAudio src={CLIPS[HERO_CLIP_INDEX].src} durationInFrames={BUILDUP_DURATION} volume={0.3} />
       </Sequence>
       <Sequence from={spidermanFeatureTimeline.start} durationInFrames={SPIDERMAN_FEATURE_DURATION}>
-        <CrowdAudio src={CLIPS[11].src} durationInFrames={SPIDERMAN_FEATURE_DURATION} volume={0.5} fadeFrames={14} />
+        <CrowdAudio src={CLIPS[11].src} durationInFrames={SPIDERMAN_FEATURE_DURATION} volume={0.28} fadeFrames={14} />
       </Sequence>
       <Sequence from={confettiFeatureTimeline.start} durationInFrames={CONFETTI_FEATURE_DURATION}>
-        <CrowdAudio src={CLIPS[12].src} durationInFrames={CONFETTI_FEATURE_DURATION} volume={0.5} fadeFrames={14} />
+        <CrowdAudio src={CLIPS[12].src} durationInFrames={CONFETTI_FEATURE_DURATION} volume={0.28} fadeFrames={14} />
       </Sequence>
       <Sequence from={joyStationTimeline.start} durationInFrames={JOY_STATION_DURATION}>
-        <CrowdAudio src={CLIPS[VENUE_CLIP_INDEX].src} startFrom={30} durationInFrames={JOY_STATION_DURATION} volume={0.4} />
+        <CrowdAudio src={CLIPS[VENUE_CLIP_INDEX].src} startFrom={30} durationInFrames={JOY_STATION_DURATION} volume={0.22} />
       </Sequence>
       <Sequence from={revealPauseTimeline.start} durationInFrames={revealToTypographyDuration}>
-        <CrowdAudio src={CLIPS[HERO_CLIP_INDEX].src} startFrom={60} durationInFrames={revealToTypographyDuration} volume={0.35} />
+        <CrowdAudio src={CLIPS[HERO_CLIP_INDEX].src} startFrom={60} durationInFrames={revealToTypographyDuration} volume={0.2} />
       </Sequence>
       <Sequence from={finalDaysCardTimeline.start} durationInFrames={finalSectionDuration}>
-        <CrowdAudio src={CLIPS[HERO_CLIP_INDEX].src} startFrom={100} durationInFrames={finalSectionDuration} volume={0.35} />
+        <CrowdAudio src={CLIPS[HERO_CLIP_INDEX].src} startFrom={100} durationInFrames={finalSectionDuration} volume={0.2} />
       </Sequence>
 
       {/* Riser + impact hits at the signature beats. */}
       <Sequence from={daysHeroClimax - 30} durationInFrames={36}>
-        <AudioHit kind="riser" />
+        <AudioHit kind="riser" volume={0.55} />
       </Sequence>
       <Sequence from={daysHeroClimax} durationInFrames={20}>
-        <AudioHit kind="impact" />
+        <AudioHit kind="impact" volume={0.6} />
       </Sequence>
       <Sequence from={bnrBeat} durationInFrames={20}>
-        <AudioHit kind="impact" volume={0.85} />
+        <AudioHit kind="impact" volume={0.5} />
       </Sequence>
       <Sequence from={finalCtaBeat - 30} durationInFrames={30}>
-        <AudioHit kind="riser" volume={0.8} />
+        <AudioHit kind="riser" volume={0.5} />
       </Sequence>
       <Sequence from={finalCtaBeat} durationInFrames={20}>
-        <AudioHit kind="impact" />
+        <AudioHit kind="impact" volume={0.6} />
       </Sequence>
 
       <TransitionSeries>

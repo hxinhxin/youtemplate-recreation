@@ -48,11 +48,11 @@ export const DaysHero: React.FC<{ videoSrc: string; durationInFrames: number }> 
           height: "100%",
           objectFit: "cover",
           transform: `scale(${bgZoom})`,
-          filter: "blur(8px) brightness(0.6) saturate(1.2)",
+          filter: "blur(6px) brightness(0.85) saturate(1.2)",
         }}
       />
       <AbsoluteFill
-        style={{ background: "radial-gradient(ellipse at center, transparent 32%, rgba(5,5,5,0.72) 100%)" }}
+        style={{ background: "radial-gradient(ellipse at center, transparent 36%, rgba(5,5,5,0.4) 100%)" }}
       />
 
       <LightSweep startFrame={8} durationInFrames={20} />
