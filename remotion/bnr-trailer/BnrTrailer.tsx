@@ -46,14 +46,16 @@ import { buildVolumeCurve } from "./volumeCurve";
 
 // Punch-cut with a flash — used at every beat so cuts feel synced to the
 // music, but kept restrained (short flash, modest scale) per the brief's
-// "avoid excessive effects."
+// "avoid excessive effects." Flash opacity lowered from 0.4 -> 0.22 — the
+// brighter flash was reading as a camera-flash "photo" freeze rather than
+// a video cut.
 const strobeCut = (key: string) => (
   <TransitionSeries.Transition
     key={key}
     timing={linearTiming({ durationInFrames: TRANSITION_DURATION })}
     presentation={pushCut({
       flashColor: "#ffffff",
-      flashOpacity: 0.4,
+      flashOpacity: 0.22,
       flashFrames: 2,
       outgoingScale: 1.05,
       incomingStartScale: 1.1,

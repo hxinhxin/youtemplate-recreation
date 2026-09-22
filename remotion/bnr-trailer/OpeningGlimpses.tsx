@@ -8,8 +8,11 @@ import { ENERGY_ORDER } from "./energyOrder";
 // Each cut gets a quick brightness pulse for a "flash of memory" feel,
 // with the base grade dark/moody for tension, but the video is always on
 // screen. Cycles through ENERGY_ORDER so the earliest cuts are the most
-// alive footage.
-const CUT_STARTS = [0, 20, 38, 54, 68, 80, 90, 98, 104];
+// alive footage. Floored at 10 frames per cut (was down to 6) — shorter
+// cuts were entirely consumed by the entry blur/flash, never settling
+// into visible motion, so they read as static "photo" flashes rather
+// than video.
+const CUT_STARTS = [0, 20, 38, 54, 68, 80, 90, 100];
 
 // One cut's video, in its own <Sequence> so useCurrentFrame() here is
 // local to this cut (resets to 0 at the cut's start) — needed because

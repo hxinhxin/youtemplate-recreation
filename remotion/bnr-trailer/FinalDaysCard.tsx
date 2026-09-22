@@ -20,7 +20,7 @@ export const FinalDaysCard: React.FC<{ durationInFrames: number }> = ({ duration
     extrapolateRight: "clamp",
   });
 
-  const labelOpacity = interpolate(frame, [18, 26], [0, 1], {
+  const labelOpacity = interpolate(frame, [14, 20], [0, 1], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
   });

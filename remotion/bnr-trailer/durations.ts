@@ -44,8 +44,10 @@ export const TYPOGRAPHY_WORDS = TYPOGRAPHY_BEATS.map((b) => b.word);
 const TYPOGRAPHY_TOTAL_DURATION = TYPOGRAPHY_BEATS.reduce((a, b) => a + b.duration, 0);
 
 // Scene 6 — final card (21-25s target): the countdown returns, then the
-// ticket info. Also trimmed, same reasoning as Scene 2.
-export const FINAL_DAYS_CARD_DURATION = 34;
+// ticket info. Bumped 34 -> 46: the "DAYS LEFT" label was fading in at
+// frame 18-26 and the scene ended at 34, so it was only on screen for
+// ~8 frames — barely long enough to register before the cut.
+export const FINAL_DAYS_CARD_DURATION = 46;
 export const FINAL_TITLE_DURATION = 85;
 
 // Total item count in the top-level TransitionSeries: droneOpen(1) +
