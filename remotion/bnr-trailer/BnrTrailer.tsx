@@ -1,5 +1,5 @@
 import { Fragment } from "react";
-import { AbsoluteFill, Audio, interpolate, staticFile } from "remotion";
+import { AbsoluteFill, Audio, interpolate, Sequence, staticFile, useCurrentFrame } from "remotion";
 import { TransitionSeries, linearTiming } from "@remotion/transitions";
 import { pushCut } from "@remotion/transitions/push-cut";
 import { CLIPS } from "../concert-promo/clips";
@@ -7,15 +7,21 @@ import { audioConfig } from "../concert-promo/audioConfig";
 import { OpeningGlimpses } from "./OpeningGlimpses";
 import { DaysHero } from "./DaysHero";
 import { QuickCutMontage } from "./QuickCutMontage";
+import { JoyStationReveal } from "./JoyStationReveal";
 import { TextBeat } from "./TextBeat";
 import { RevealClip } from "./RevealClip";
 import { FinalDaysCard } from "./FinalDaysCard";
 import { FinalTitle } from "./FinalTitle";
+import { CrowdAudio } from "./CrowdAudio";
+import { AudioHit } from "./AudioHit";
+import { HERO_CLIP_INDEX, VENUE_CLIP_INDEX } from "./energyOrder";
 import {
+  BUILDUP_DURATION,
   BUILDUP_SLICE_DURATIONS,
   DAYS_HERO_DURATION,
   FINAL_DAYS_CARD_DURATION,
   FINAL_TITLE_DURATION,
+  JOY_STATION_DURATION,
   OPENING_DURATION,
   REVEAL_PAUSE_DURATION,
   TOTAL_DURATION,
@@ -23,6 +29,15 @@ import {
   TYPOGRAPHY_WORDS,
   TYPOGRAPHY_WORD_DURATION,
 } from "./durations";
+import {
+  buildupTimeline,
+  daysHeroTimeline,
+  finalTitleTimeline,
+  joyStationTimeline,
+  revealPauseTimeline,
+  typographyTimelines,
+} from "./timeline";
+import { buildVolumeCurve } from "./volumeCurve";
 
 // Punch-cut with a flash — used at every beat so cuts feel synced to the
 // music, but kept restrained (short flash, modest scale) per the brief's
@@ -42,22 +57,76 @@ const strobeCut = (key: string) => (
   />
 );
 
+// Where the DaysHero climax (bass hit) lands, matching MaskedVideoNumber's
+// default `climaxFrame = durationInFrames - 18`.
+const daysHeroClimax = daysHeroTimeline.start + DAYS_HERO_DURATION - 18;
+const bnrBeat = typographyTimelines[0].start;
+const finalCtaBeat = finalTitleTimeline.start + 26;
+
+// One continuous track, not several songs stitched together — we only
+// have the one piece of music. "DJ-style" movement instead comes from
+// ducking it under crowd audio and layering riser/impact hits at the
+// beats, rather than crossfading between different songs. Points are
+// sorted and de-collided by buildVolumeCurve, so referencing each scene's
+// own .start (safe by construction) instead of hand-computed end frames
+// avoids the overlap math going wrong.
+const { frames: volumeFrames, values: volumeValues } = buildVolumeCurve([
+  [0, 0],
+  [90, 0.85],
+  [daysHeroClimax - 30, 0.85],
+  [daysHeroClimax, 0.5],
+  [daysHeroClimax + 9, 0.9],
+  [buildupTimeline.start, 0.6], // duck under the crowd-explosion montage
+  [joyStationTimeline.start, 0.78],
+  [revealPauseTimeline.start, 0.88],
+  [bnrBeat, 0.5], // duck for the BNR impact hit
+  [bnrBeat + 10, 0.95],
+  [finalCtaBeat - 2, 0.95],
+  [finalCtaBeat, 0.55], // duck for the final drop
+  [finalCtaBeat + 10, 1],
+  [TOTAL_DURATION - 8, 1],
+  [TOTAL_DURATION, 0], // hard cut to black, not a slow fade
+]);
+const trackVolume = (f: number) =>
+  interpolate(f, volumeFrames, volumeValues, { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+
 export const BnrTrailer: React.FC = () => {
+  const frame = useCurrentFrame();
+
   return (
     <AbsoluteFill>
-      <Audio
-        src={staticFile(audioConfig.src)}
-        volume={(f) =>
-          interpolate(
-            f,
-            // Slow ~3s ambient build before the beat comes in, per
-            // "start with silence... slowly introduce the music."
-            [0, 90, TOTAL_DURATION - audioConfig.fadeOutFrames, TOTAL_DURATION],
-            [0, 1, 1, 0],
-            { extrapolateLeft: "clamp", extrapolateRight: "clamp" },
-          )
-        }
-      />
+      {/* Main track — one continuous piece, ducked/risen at the beats
+          rather than crossfaded between multiple songs (we only have one). */}
+      <Audio src={staticFile(audioConfig.src)} volume={trackVolume(frame)} />
+
+      {/* Crowd audio beds — the clips' own embedded crowd/DJ sound, ducked
+          under the music so the audience is actually audible. */}
+      <Sequence from={daysHeroTimeline.start} durationInFrames={DAYS_HERO_DURATION}>
+        <CrowdAudio src={CLIPS[HERO_CLIP_INDEX].src} startFrom={20} durationInFrames={DAYS_HERO_DURATION} volume={0.4} />
+      </Sequence>
+      <Sequence from={buildupTimeline.start} durationInFrames={BUILDUP_DURATION}>
+        <CrowdAudio src={CLIPS[HERO_CLIP_INDEX].src} durationInFrames={BUILDUP_DURATION} volume={0.6} />
+      </Sequence>
+      <Sequence from={joyStationTimeline.start} durationInFrames={JOY_STATION_DURATION}>
+        <CrowdAudio src={CLIPS[VENUE_CLIP_INDEX].src} startFrom={30} durationInFrames={JOY_STATION_DURATION} volume={0.45} />
+      </Sequence>
+
+      {/* Riser + impact hits at the signature beats. */}
+      <Sequence from={daysHeroClimax - 30} durationInFrames={36}>
+        <AudioHit kind="riser" />
+      </Sequence>
+      <Sequence from={daysHeroClimax} durationInFrames={20}>
+        <AudioHit kind="impact" />
+      </Sequence>
+      <Sequence from={bnrBeat} durationInFrames={20}>
+        <AudioHit kind="impact" volume={0.85} />
+      </Sequence>
+      <Sequence from={finalCtaBeat - 30} durationInFrames={30}>
+        <AudioHit kind="riser" volume={0.8} />
+      </Sequence>
+      <Sequence from={finalCtaBeat} durationInFrames={20}>
+        <AudioHit kind="impact" />
+      </Sequence>
 
       <TransitionSeries>
         {/* SCENE 1 — opening tension: near-black glimpses, not a bright
@@ -68,27 +137,34 @@ export const BnrTrailer: React.FC = () => {
 
         {strobeCut("opening-to-hero")}
 
-        {/* SCENE 2 — the signature shot: DAYS_LEFT filled with concert
-            footage, light sweep reveal, bass-hit climax. */}
+        {/* SCENE 2 — the signature shot: DAYS_LEFT filled with the most
+            energetic crowd footage, light sweep reveal, bass-hit climax. */}
         <TransitionSeries.Sequence durationInFrames={DAYS_HERO_DURATION}>
-          <DaysHero videoSrc={CLIPS[0].src} durationInFrames={DAYS_HERO_DURATION} />
+          <DaysHero videoSrc={CLIPS[HERO_CLIP_INDEX].src} durationInFrames={DAYS_HERO_DURATION} />
         </TransitionSeries.Sequence>
 
         {strobeCut("hero-to-buildup")}
 
-        {/* SCENE 3 — build-up montage: very short, fast-accelerating cuts. */}
-        <TransitionSeries.Sequence
-          durationInFrames={BUILDUP_SLICE_DURATIONS.reduce((a, b) => a + b, 0)}
-        >
-          <QuickCutMontage sliceDurations={BUILDUP_SLICE_DURATIONS} clipOffset={1} />
+        {/* SCENE 3 — crowd-explosion montage: very short, fast-accelerating
+            cuts, cycling through the most energetic clips first. */}
+        <TransitionSeries.Sequence durationInFrames={BUILDUP_DURATION}>
+          <QuickCutMontage sliceDurations={BUILDUP_SLICE_DURATIONS} />
         </TransitionSeries.Sequence>
 
-        {strobeCut("buildup-to-reveal")}
+        {strobeCut("buildup-to-venue")}
 
-        {/* SCENE 4 — everything slows down: one cinematic pause on the
-            event, then BNR / SOFIA / SATURDAY one at a time. */}
+        {/* SCENE 4 — JOY STATION / SOFIA venue reveal, a major visual
+            element in its own right. */}
+        <TransitionSeries.Sequence durationInFrames={JOY_STATION_DURATION}>
+          <JoyStationReveal durationInFrames={JOY_STATION_DURATION} />
+        </TransitionSeries.Sequence>
+
+        {strobeCut("venue-to-pause")}
+
+        {/* SCENE 5 — everything slows down: one cinematic pause on the
+            event, then BNR / SOFIA / JOY STATION / SATURDAY one at a time. */}
         <TransitionSeries.Sequence durationInFrames={REVEAL_PAUSE_DURATION}>
-          <RevealClip clip={CLIPS[2 % CLIPS.length]} index={0} durationInFrames={REVEAL_PAUSE_DURATION} />
+          <RevealClip clip={CLIPS[HERO_CLIP_INDEX]} index={0} durationInFrames={REVEAL_PAUSE_DURATION} />
         </TransitionSeries.Sequence>
 
         {strobeCut("pause-to-typography")}
@@ -104,7 +180,7 @@ export const BnrTrailer: React.FC = () => {
 
         {strobeCut("typography-to-final")}
 
-        {/* SCENE 5 — the countdown returns as the strongest visual, then
+        {/* SCENE 6 — the countdown returns as the strongest visual, then
             the ticket card. */}
         <TransitionSeries.Sequence durationInFrames={FINAL_DAYS_CARD_DURATION}>
           <FinalDaysCard durationInFrames={FINAL_DAYS_CARD_DURATION} />

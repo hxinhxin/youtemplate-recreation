@@ -29,6 +29,10 @@ export const TextBeat: React.FC<{ word: string; durationInFrames: number }> = ({
     extrapolateRight: "clamp",
   });
 
+  // Longer words (e.g. "JOY STATION") get a smaller size so they never
+  // overflow the 1080px canvas.
+  const fontSize = word.length > 8 ? 92 : word.length > 5 ? 118 : 140;
+
   return (
     <AbsoluteFill
       style={{
@@ -45,10 +49,12 @@ export const TextBeat: React.FC<{ word: string; durationInFrames: number }> = ({
           fontFamily: theme.headlineFont,
           fontWeight: 900,
           color: theme.white,
-          fontSize: 140,
+          fontSize,
           letterSpacing: 4 + tracking,
           textTransform: "uppercase",
           textShadow: `0 0 ${glow}px ${theme.red}`,
+          textAlign: "center",
+          padding: "0 40px",
         }}
       >
         {word}

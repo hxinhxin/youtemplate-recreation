@@ -1,16 +1,19 @@
 import { AbsoluteFill, interpolate, OffthreadVideo, useCurrentFrame } from "remotion";
 import { CLIPS } from "../concert-promo/clips";
 import { theme } from "./theme";
+import { ENERGY_ORDER } from "./energyOrder";
 
 // Scene 3 — the build-up montage: each slice gets progressively shorter
 // (fed via `sliceDurations`, ~0.2-0.6s each), with a brief motion-blur
 // snap on entry and a white flash at every cut. Kept restrained — a
 // gentle punch-in only, no rotation wobble or heavy tint — so it reads
-// as expensive trailer editing rather than a busy effects reel.
+// as expensive trailer editing rather than a busy effects reel. Cycles
+// through clips in `clipOrder` (defaults to ENERGY_ORDER, the most alive
+// crowd footage first) rather than plain sequential order.
 export const QuickCutMontage: React.FC<{
   sliceDurations: number[];
-  clipOffset?: number;
-}> = ({ sliceDurations, clipOffset = 0 }) => {
+  clipOrder?: number[];
+}> = ({ sliceDurations, clipOrder = ENERGY_ORDER }) => {
   const frame = useCurrentFrame();
 
   let cursor = 0;
@@ -27,7 +30,7 @@ export const QuickCutMontage: React.FC<{
     localFrame = frame - cursor;
   }
 
-  const clip = CLIPS[(activeIndex + clipOffset) % CLIPS.length];
+  const clip = CLIPS[clipOrder[activeIndex % clipOrder.length]];
   const sliceDuration = sliceDurations[activeIndex];
 
   // Quick blur-to-sharp snap on every cut, mimicking a whip/motion blur.

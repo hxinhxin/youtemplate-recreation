@@ -2,13 +2,15 @@ import { AbsoluteFill, Easing, interpolate, OffthreadVideo, useCurrentFrame } fr
 import { CLIPS } from "../concert-promo/clips";
 import { theme } from "./theme";
 import { concertInfo } from "./concertInfo";
+import { ENERGY_ORDER } from "./energyOrder";
 
 type Glimpse = { start: number; duration: number; clipIndex: number };
 
 // Sparse at first, getting closer together as the section builds —
 // brief flashes of footage against near-total black, like memories
 // rather than a bright montage. Not simultaneous shots; only one glimpse
-// is ever on screen at once.
+// is ever on screen at once. Cycles through the most energetic clips
+// first (ENERGY_ORDER) so the earliest glimpses are the most alive ones.
 const GLIMPSE_STARTS = [14, 34, 52, 68, 82, 94, 104, 112];
 
 export const OpeningGlimpses: React.FC<{ durationInFrames: number }> = ({ durationInFrames }) => {
@@ -17,7 +19,7 @@ export const OpeningGlimpses: React.FC<{ durationInFrames: number }> = ({ durati
   const glimpses: Glimpse[] = GLIMPSE_STARTS.filter((s) => s < durationInFrames - 4).map((start, i) => ({
     start,
     duration: 5 + (i % 2),
-    clipIndex: i % CLIPS.length,
+    clipIndex: ENERGY_ORDER[i % ENERGY_ORDER.length],
   }));
 
   const active = glimpses.find((g) => frame >= g.start && frame < g.start + g.duration);
