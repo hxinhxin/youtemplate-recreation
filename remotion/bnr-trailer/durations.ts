@@ -24,6 +24,13 @@ export const DAYS_HERO_DURATION = 110;
 export const BUILDUP_SLICE_DURATIONS = [18, 16, 14, 12, 10, 16, 14, 12, 10, 8, 16, 12, 10];
 export const BUILDUP_DURATION = BUILDUP_SLICE_DURATIONS.reduce((a, b) => a + b, 0);
 
+// Scene 3.5 — two dedicated feature shots for bnr-clip-02/03 (the
+// costumed-performer crowd-surf and the fisheye confetti blast), each
+// held well over a second rather than the ~0.3-0.5s flash they got as
+// buildup-montage slices.
+export const SPIDERMAN_FEATURE_DURATION = 45;
+export const CONFETTI_FEATURE_DURATION = 42;
+
 // Scene 4 — JOY STATION / SOFIA venue reveal (16-19s target).
 export const JOY_STATION_DURATION = 80;
 
@@ -40,15 +47,18 @@ export const FINAL_DAYS_CARD_DURATION = 34;
 export const FINAL_TITLE_DURATION = 85;
 
 // Total item count in the top-level TransitionSeries: droneOpen(1) +
-// opening(1) + daysHero(1) + buildup(1) + joyStation(1) + revealPause(1) +
-// typography(4) + finalDaysCard(1) + finalTitle(1).
-const TOTAL_ITEM_COUNT = 1 + 1 + 1 + 1 + 1 + 1 + TYPOGRAPHY_BEATS.length + 1 + 1;
+// opening(1) + daysHero(1) + buildup(1) + spidermanFeature(1) +
+// confettiFeature(1) + joyStation(1) + revealPause(1) + typography(4) +
+// finalDaysCard(1) + finalTitle(1).
+const TOTAL_ITEM_COUNT = 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + TYPOGRAPHY_BEATS.length + 1 + 1;
 const numTransitions = TOTAL_ITEM_COUNT - 1;
 const ALL_DURATIONS_SUM =
   DRONE_OPEN_DURATION +
   OPENING_DURATION +
   DAYS_HERO_DURATION +
   BUILDUP_DURATION +
+  SPIDERMAN_FEATURE_DURATION +
+  CONFETTI_FEATURE_DURATION +
   JOY_STATION_DURATION +
   REVEAL_PAUSE_DURATION +
   TYPOGRAPHY_TOTAL_DURATION +

@@ -19,6 +19,7 @@ import { HERO_CLIP_INDEX, VENUE_CLIP_INDEX } from "./energyOrder";
 import {
   BUILDUP_DURATION,
   BUILDUP_SLICE_DURATIONS,
+  CONFETTI_FEATURE_DURATION,
   DAYS_HERO_DURATION,
   DRONE_OPEN_DURATION,
   FINAL_DAYS_CARD_DURATION,
@@ -26,12 +27,14 @@ import {
   JOY_STATION_DURATION,
   OPENING_DURATION,
   REVEAL_PAUSE_DURATION,
+  SPIDERMAN_FEATURE_DURATION,
   TOTAL_DURATION,
   TRANSITION_DURATION,
 } from "./durations";
 import { TYPOGRAPHY_BEATS } from "./typographyBeats";
 import {
   buildupTimeline,
+  confettiFeatureTimeline,
   daysHeroTimeline,
   droneOpenTimeline,
   finalDaysCardTimeline,
@@ -39,6 +42,7 @@ import {
   joyStationTimeline,
   openingTimeline,
   revealPauseTimeline,
+  spidermanFeatureTimeline,
   typographyTimelines,
 } from "./timeline";
 import { buildVolumeCurve } from "./volumeCurve";
@@ -129,6 +133,12 @@ export const BnrTrailer: React.FC = () => {
       <Sequence from={buildupTimeline.start} durationInFrames={BUILDUP_DURATION}>
         <CrowdAudio src={CLIPS[HERO_CLIP_INDEX].src} durationInFrames={BUILDUP_DURATION} volume={0.55} />
       </Sequence>
+      <Sequence from={spidermanFeatureTimeline.start} durationInFrames={SPIDERMAN_FEATURE_DURATION}>
+        <CrowdAudio src={CLIPS[11].src} durationInFrames={SPIDERMAN_FEATURE_DURATION} volume={0.5} fadeFrames={14} />
+      </Sequence>
+      <Sequence from={confettiFeatureTimeline.start} durationInFrames={CONFETTI_FEATURE_DURATION}>
+        <CrowdAudio src={CLIPS[12].src} durationInFrames={CONFETTI_FEATURE_DURATION} volume={0.5} fadeFrames={14} />
+      </Sequence>
       <Sequence from={joyStationTimeline.start} durationInFrames={JOY_STATION_DURATION}>
         <CrowdAudio src={CLIPS[VENUE_CLIP_INDEX].src} startFrom={30} durationInFrames={JOY_STATION_DURATION} volume={0.4} />
       </Sequence>
@@ -188,7 +198,24 @@ export const BnrTrailer: React.FC = () => {
           <QuickCutMontage sliceDurations={BUILDUP_SLICE_DURATIONS} />
         </TransitionSeries.Sequence>
 
-        {strobeCut("buildup-to-venue")}
+        {strobeCut("buildup-to-spiderman")}
+
+        {/* SCENE 3.5a — dedicated feature shot for bnr-clip-02 (the
+            costumed performer crowd-surfing), held well over a second
+            instead of the quick-cut flash it got in the buildup montage. */}
+        <TransitionSeries.Sequence durationInFrames={SPIDERMAN_FEATURE_DURATION}>
+          <RevealClip clip={CLIPS[11]} index={0} durationInFrames={SPIDERMAN_FEATURE_DURATION} />
+        </TransitionSeries.Sequence>
+
+        {strobeCut("spiderman-to-confetti")}
+
+        {/* SCENE 3.5b — dedicated feature shot for bnr-clip-03 (the
+            fisheye confetti/CO2 blast), same treatment. */}
+        <TransitionSeries.Sequence durationInFrames={CONFETTI_FEATURE_DURATION}>
+          <RevealClip clip={CLIPS[12]} index={1} durationInFrames={CONFETTI_FEATURE_DURATION} />
+        </TransitionSeries.Sequence>
+
+        {strobeCut("confetti-to-venue")}
 
         {/* SCENE 4 — JOY STATION / SOFIA venue reveal, a major visual
             element in its own right. */}

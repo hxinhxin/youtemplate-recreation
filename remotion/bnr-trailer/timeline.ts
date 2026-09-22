@@ -1,5 +1,6 @@
 import {
   BUILDUP_DURATION,
+  CONFETTI_FEATURE_DURATION,
   DAYS_HERO_DURATION,
   DRONE_OPEN_DURATION,
   FINAL_DAYS_CARD_DURATION,
@@ -7,6 +8,7 @@ import {
   JOY_STATION_DURATION,
   OPENING_DURATION,
   REVEAL_PAUSE_DURATION,
+  SPIDERMAN_FEATURE_DURATION,
   TRANSITION_DURATION,
 } from "./durations";
 import { TYPOGRAPHY_BEATS } from "./typographyBeats";
@@ -31,6 +33,8 @@ const itemDurations = [
   OPENING_DURATION,
   DAYS_HERO_DURATION,
   BUILDUP_DURATION,
+  SPIDERMAN_FEATURE_DURATION,
+  CONFETTI_FEATURE_DURATION,
   JOY_STATION_DURATION,
   REVEAL_PAUSE_DURATION,
   ...TYPOGRAPHY_BEATS.map((b) => b.duration),
@@ -44,8 +48,10 @@ export const droneOpenTimeline = timeline[0];
 export const openingTimeline = timeline[1];
 export const daysHeroTimeline = timeline[2];
 export const buildupTimeline = timeline[3];
-export const joyStationTimeline = timeline[4];
-export const revealPauseTimeline = timeline[5];
-export const typographyTimelines = timeline.slice(6, 6 + TYPOGRAPHY_BEATS.length);
-export const finalDaysCardTimeline = timeline[6 + TYPOGRAPHY_BEATS.length];
-export const finalTitleTimeline = timeline[7 + TYPOGRAPHY_BEATS.length];
+export const spidermanFeatureTimeline = timeline[4];
+export const confettiFeatureTimeline = timeline[5];
+export const joyStationTimeline = timeline[6];
+export const revealPauseTimeline = timeline[7];
+export const typographyTimelines = timeline.slice(8, 8 + TYPOGRAPHY_BEATS.length);
+export const finalDaysCardTimeline = timeline[8 + TYPOGRAPHY_BEATS.length];
+export const finalTitleTimeline = timeline[9 + TYPOGRAPHY_BEATS.length];
