@@ -6,15 +6,11 @@ import { LightBurst } from "./LightBurst";
 import { ImpactFlash } from "./ImpactFlash";
 import { RadialRays } from "./RadialRays";
 
+const words = concertInfo.act.split(" ");
+const STAGGER = 4;
+
 export const IntroCard: React.FC = () => {
   const frame = useCurrentFrame();
-  const opacity = interpolate(frame, [0, 8], [0, 1], { extrapolateRight: "clamp" });
-  // Hard overshoot slam-in instead of a gentle fade-up.
-  const scale = interpolate(frame, [0, 9, 16, INTRO_DURATION], [0.4, 1.3, 1, 1.08], {
-    extrapolateLeft: "clamp",
-    extrapolateRight: "clamp",
-    easing: Easing.out(Easing.back(3.5)),
-  });
 
   const shakeMag = interpolate(frame, [0, 14], [16, 0], {
     extrapolateLeft: "clamp",
@@ -23,10 +19,16 @@ export const IntroCard: React.FC = () => {
   const shakeX = shakeMag > 0 ? Math.sin(frame * 10) * shakeMag : 0;
   const shakeY = shakeMag > 0 ? Math.cos(frame * 8) * shakeMag : 0;
 
-  const barWidth = interpolate(frame, [8, 20], [0, 260], {
+  const barWidth = interpolate(frame, [8 + words.length * STAGGER, 20 + words.length * STAGGER], [0, 260], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
     easing: Easing.out(Easing.cubic),
+  });
+
+  const cityDelay = words.length * STAGGER;
+  const cityOpacity = interpolate(frame, [cityDelay + 10, cityDelay + 20], [0, 1], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
   });
 
   const glow = interpolate(frame, [0, 8, 30], [0, 55, 22], {
@@ -49,24 +51,52 @@ export const IntroCard: React.FC = () => {
 
       <div
         style={{
-          opacity,
-          transform: `scale(${scale}) translate(${shakeX}px, ${shakeY}px)`,
+          transform: `translate(${shakeX}px, ${shakeY}px)`,
           textAlign: "center",
           padding: "0 60px",
         }}
       >
         <div
           style={{
-            fontFamily: theme.headlineFont,
-            fontWeight: 900,
-            color: theme.text,
-            fontSize: 100,
-            lineHeight: 1.0,
-            textTransform: "uppercase",
-            textShadow: `0 0 ${glow}px ${theme.accent}`,
+            display: "flex",
+            flexWrap: "wrap",
+            justifyContent: "center",
+            gap: "0 22px",
           }}
         >
-          {concertInfo.act}
+          {words.map((word, i) => {
+            const start = i * STAGGER;
+            // Each word slams in on its own beat instead of the whole
+            // line moving together — a stamped, assembled-in-pieces feel.
+            const wordScale = interpolate(frame, [start, start + 8, start + 14], [0.3, 1.35, 1], {
+              extrapolateLeft: "clamp",
+              extrapolateRight: "clamp",
+              easing: Easing.out(Easing.back(4)),
+            });
+            const wordOpacity = interpolate(frame, [start, start + 5], [0, 1], {
+              extrapolateLeft: "clamp",
+              extrapolateRight: "clamp",
+            });
+            return (
+              <span
+                key={word + i}
+                style={{
+                  display: "inline-block",
+                  fontFamily: theme.headlineFont,
+                  fontWeight: 900,
+                  color: theme.text,
+                  fontSize: 100,
+                  lineHeight: 1.0,
+                  textTransform: "uppercase",
+                  textShadow: `0 0 ${glow}px ${theme.accent}`,
+                  opacity: wordOpacity,
+                  transform: `scale(${wordScale})`,
+                }}
+              >
+                {word}
+              </span>
+            );
+          })}
         </div>
         <div
           style={{
@@ -85,6 +115,7 @@ export const IntroCard: React.FC = () => {
             fontWeight: 700,
             letterSpacing: 7,
             textTransform: "uppercase",
+            opacity: cityOpacity,
           }}
         >
           {concertInfo.city}
