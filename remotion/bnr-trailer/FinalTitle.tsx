@@ -100,7 +100,7 @@ export const FinalTitle: React.FC = () => {
               opacity: dateOpacity,
               fontFamily: theme.headlineFont,
               fontWeight: 900,
-              color: theme.red,
+              color: theme.white,
               fontSize: 54,
               letterSpacing: 3,
             }}
@@ -130,7 +130,7 @@ export const FinalTitle: React.FC = () => {
               opacity: siteOpacity,
               fontFamily: theme.bodyFont,
               fontWeight: 900,
-              color: theme.red,
+              color: theme.white,
               fontSize: 30,
               letterSpacing: 3,
               textDecoration: "underline",

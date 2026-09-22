@@ -104,8 +104,10 @@ export const OpeningGlimpses: React.FC<{ durationInFrames: number }> = ({ durati
             fontFamily: theme.headlineFont,
             fontWeight: 900,
             color: theme.white,
-            fontSize: 90,
-            letterSpacing: 8,
+            fontSize: concertInfo.brand.length > 8 ? 54 : 90,
+            letterSpacing: concertInfo.brand.length > 8 ? 2 : 8,
+            textAlign: "center",
+            padding: "0 60px",
             textShadow: `0 0 30px ${theme.red}`,
           }}
         >

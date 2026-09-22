@@ -59,7 +59,7 @@ export const FinalDaysCard: React.FC<{ durationInFrames: number }> = ({ duration
             opacity: labelOpacity,
             fontFamily: theme.bodyFont,
             fontWeight: 700,
-            color: theme.red,
+            color: theme.white,
             fontSize: 30,
             letterSpacing: 9,
           }}

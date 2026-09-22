@@ -92,7 +92,7 @@ export const JoyStationReveal: React.FC<{ durationInFrames: number }> = ({ durat
               transform: `translateY(${cityY}px)`,
               fontFamily: theme.bodyFont,
               fontWeight: 700,
-              color: theme.red,
+              color: theme.white,
               fontSize: 40,
               letterSpacing: 10,
               textTransform: "uppercase",

@@ -67,9 +67,9 @@ export const TextBeat: React.FC<{
     transform = `scale(${scale}) rotate(${rotate}deg)`;
   }
 
-  // Longer words (e.g. "JOY STATION") get a smaller size so they never
-  // overflow the 1080px canvas.
-  const fontSize = word.length > 8 ? 92 : word.length > 5 ? 118 : 140;
+  // Longer words (e.g. "JOY STATION", "Bandata na Ruba") get a smaller
+  // size so they never overflow the 1080px canvas.
+  const fontSize = word.length > 12 ? 70 : word.length > 8 ? 92 : word.length > 5 ? 118 : 140;
 
   return (
     <AbsoluteFill style={{ backgroundColor: theme.background, overflow: "hidden" }}>

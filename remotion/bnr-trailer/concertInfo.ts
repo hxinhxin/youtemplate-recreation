@@ -1,6 +1,5 @@
 export const concertInfo = {
-  brand: "BNR",
-  act: "BANDATA NA RUBA",
+  brand: "Bandata na Ruba",
   city: "SOFIA",
   day: "SATURDAY",
   dateLabel: "26.09.26",
