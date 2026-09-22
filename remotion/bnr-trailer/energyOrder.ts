@@ -3,10 +3,10 @@
 // from a visual audit of every clip in the pool. Shared CLIPS has 10
 // entries (indices 0-9); bnr-clip-01 is appended after it, so it lands
 // at index 10.
-//   clip-04, clip-06, clip-09 & bnr-clip-01 — top tier: dense hands-up
-//     crowd, laser/light beams, phone lights, performer directly engaging
-//     the crowd. bnr-clip-01 also shows the actual "БАНДАТА НА РЪБА"
-//     branded stage backdrop — strong for brand visibility too.
+//   clip-04, clip-06 & bnr-clip-01 — top tier: dense hands-up crowd,
+//     laser/light beams, phone lights, performer directly engaging the
+//     crowd. bnr-clip-01 also shows the actual "БАНДАТА НА РЪБА" branded
+//     stage backdrop — strong for brand visibility too.
 //   clip-08           — costumed performer (Spider-Man) dancing energetically,
 //     crowd close in filming with phones — high energy, distinct character
 //   clip-11           — wide shot of a massive crowd with sweeping light
@@ -19,11 +19,15 @@
 //   clip-02           — packed crowd but calmer, mostly wide/venue shots
 //   clip-01           — static DJ-gear close-up, no crowd at all
 //
-// bnr-clip-02 & bnr-clip-03 (indices 11/12) aren't in this ranking — they
-// get their own dedicated full-bleed scenes (SpidermanFeature.tsx /
+// clip-09 (index 7) was pulled from the ranking entirely — a specific shot
+// from it was flagged and needed to come out of the trailer everywhere,
+// not just one scene.
+//
+// bnr-clip-02 & bnr-clip-03 (indices 11/12) aren't in this ranking either —
+// they get their own dedicated full-bleed scenes (SpidermanFeature.tsx /
 // ConfettiFeature.tsx) right after the buildup montage instead, so they
 // hold on screen well over a second rather than a quick-cut flash.
-export const ENERGY_ORDER = [3, 5, 10, 7, 6, 9, 4, 8, 2, 1, 0];
+export const ENERGY_ORDER = [3, 5, 10, 6, 9, 4, 8, 2, 1, 0];
 
 // clip-04 — the single most energetic clip, used for the hero countdown
 // number and the final countdown card.
