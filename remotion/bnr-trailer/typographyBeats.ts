@@ -1,3 +1,5 @@
+import { ENERGY_ORDER } from "./energyOrder";
+
 export type TextVariant = "slam" | "slideLeft" | "dropTop" | "scaleRotate";
 
 export type TypographyBeat = {
@@ -5,15 +7,22 @@ export type TypographyBeat = {
   duration: number;
   variant: TextVariant;
   voiceover?: string; // filename under public/audio/
+  clipIndex: number; // index into the shared CLIPS array for the background footage
 };
 
-// One consistent "slam" entrance for all 4 words (the per-word variants
-// were rejected). Voiceover uses Piper (neural, offline) instead of the
-// earlier espeak-ng pass — both clips are short enough (<1s) to fit
-// inside the original 28-frame beat without stretching it.
+// One consistent "slam" entrance for all 4 words. Each beat carries its own
+// background clip (top of ENERGY_ORDER, so the most energetic footage)
+// so the typography never sits over a plain black screen — the footage
+// keeps moving underneath/around the text.
 export const TYPOGRAPHY_BEATS: TypographyBeat[] = [
-  { word: "BNR", duration: 28, variant: "slam" },
-  { word: "SOFIA", duration: 28, variant: "slam", voiceover: "vo-sofia.wav" },
-  { word: "JOY STATION", duration: 28, variant: "slam", voiceover: "vo-joystation.wav" },
-  { word: "SATURDAY", duration: 28, variant: "slam" },
+  { word: "BNR", duration: 28, variant: "slam", clipIndex: ENERGY_ORDER[0] },
+  { word: "SOFIA", duration: 28, variant: "slam", voiceover: "vo-sofia.wav", clipIndex: ENERGY_ORDER[1] },
+  {
+    word: "JOY STATION",
+    duration: 28,
+    variant: "slam",
+    voiceover: "vo-joystation.wav",
+    clipIndex: ENERGY_ORDER[2],
+  },
+  { word: "SATURDAY", duration: 28, variant: "slam", clipIndex: ENERGY_ORDER[3] },
 ];

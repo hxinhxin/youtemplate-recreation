@@ -163,7 +163,11 @@ export const BnrTrailer: React.FC = () => {
         {/* SCENE 5 — everything slows down: one cinematic pause on the
             event, then BNR / SOFIA / JOY STATION / SATURDAY one at a time. */}
         <TransitionSeries.Sequence durationInFrames={REVEAL_PAUSE_DURATION}>
-          <RevealClip clip={CLIPS[HERO_CLIP_INDEX]} index={0} durationInFrames={REVEAL_PAUSE_DURATION} />
+          <RevealClip
+            clip={{ ...CLIPS[HERO_CLIP_INDEX], startFrom: 270 }}
+            index={0}
+            durationInFrames={REVEAL_PAUSE_DURATION}
+          />
         </TransitionSeries.Sequence>
 
         {strobeCut("pause-to-typography")}
@@ -172,7 +176,13 @@ export const BnrTrailer: React.FC = () => {
           <Fragment key={beat.word}>
             <TransitionSeries.Sequence durationInFrames={beat.duration}>
               <>
-                <TextBeat word={beat.word} durationInFrames={beat.duration} variant={beat.variant} />
+                <TextBeat
+                  word={beat.word}
+                  durationInFrames={beat.duration}
+                  variant={beat.variant}
+                  videoSrc={CLIPS[beat.clipIndex].src}
+                  videoStartFrom={150 + beat.clipIndex * 10}
+                />
                 {beat.voiceover && <Audio src={staticFile(`audio/${beat.voiceover}`)} />}
               </>
             </TransitionSeries.Sequence>

@@ -1,4 +1,4 @@
-import { AbsoluteFill, interpolate, useCurrentFrame } from "remotion";
+import { AbsoluteFill, interpolate, OffthreadVideo, useCurrentFrame } from "remotion";
 import { theme } from "./theme";
 import { concertInfo } from "./concertInfo";
 import { DAYS_LEFT } from "./daysLeft";
@@ -8,13 +8,21 @@ import { FilmGrain } from "./FilmGrain";
 
 // Scene 2 — the trailer's signature shot: a light sweep cues the reveal,
 // then the huge DAYS_LEFT number appears with concert footage moving
-// inside it, "DAYS LEFT" spaced out underneath, and a single bass-hit
-// flash near the end as it hands off into the build-up montage.
+// inside it, "DAYS LEFT" spaced out underneath, and a bass-hit climax
+// where the number expands and pushes through into the crowd (breakApart)
+// — never a flat cut from a static card. The backdrop is always dim,
+// blurred concert footage, never a solid color, so the frame stays alive
+// even outside the glyph.
 export const DaysHero: React.FC<{ videoSrc: string; durationInFrames: number }> = ({
   videoSrc,
   durationInFrames,
 }) => {
   const frame = useCurrentFrame();
+
+  const bgZoom = interpolate(frame, [0, durationInFrames], [1.1, 1.3], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+  });
 
   const labelOpacity = interpolate(frame, [30, 42], [0, 1], {
     extrapolateLeft: "clamp",
@@ -26,15 +34,37 @@ export const DaysHero: React.FC<{ videoSrc: string; durationInFrames: number }> 
   });
 
   return (
-    <AbsoluteFill style={{ backgroundColor: theme.background, justifyContent: "center", alignItems: "center" }}>
+    <AbsoluteFill style={{ backgroundColor: theme.background, justifyContent: "center", alignItems: "center", overflow: "hidden" }}>
+      {/* Dim, blurred concert footage behind everything — the backdrop is
+          never a flat color, just atmospheric rather than sharp so the
+          masked number reads as the focal point. */}
+      <OffthreadVideo
+        src={videoSrc}
+        startFrom={300}
+        style={{
+          position: "absolute",
+          inset: 0,
+          width: "100%",
+          height: "100%",
+          objectFit: "cover",
+          transform: `scale(${bgZoom})`,
+          filter: "blur(18px) brightness(0.5) saturate(1.15)",
+        }}
+      />
+      <AbsoluteFill
+        style={{ background: "radial-gradient(ellipse at center, transparent 30%, rgba(5,5,5,0.82) 100%)" }}
+      />
+
       <LightSweep startFrame={8} durationInFrames={20} />
 
       <div style={{ textAlign: "center" }}>
         <MaskedVideoNumber
           text={String(DAYS_LEFT)}
           videoSrc={videoSrc}
-          videoStartFrom={20}
+          videoStartFrom={270}
           durationInFrames={durationInFrames}
+          breakApart
+          breakApartFrames={16}
         />
 
         <div

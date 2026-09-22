@@ -1,4 +1,4 @@
-import { AbsoluteFill, interpolate, useCurrentFrame } from "remotion";
+import { AbsoluteFill, interpolate, OffthreadVideo, useCurrentFrame } from "remotion";
 import { CLIPS } from "../concert-promo/clips";
 import { theme } from "./theme";
 import { DAYS_LEFT } from "./daysLeft";
@@ -9,9 +9,16 @@ import { FilmGrain } from "./FilmGrain";
 // Scene 6, first beat — the countdown returns as the strongest visual
 // before the ticket card. Per the brief, the most energetic crowd
 // footage plays inside the number again here too (same masked treatment
-// as the Scene 2 hero reveal, just a shorter beat).
+// as the Scene 2 hero reveal), with a dim/blurred backdrop of the same
+// footage behind it so the frame is never a flat color.
 export const FinalDaysCard: React.FC<{ durationInFrames: number }> = ({ durationInFrames }) => {
   const frame = useCurrentFrame();
+  const clip = CLIPS[HERO_CLIP_INDEX];
+
+  const bgZoom = interpolate(frame, [0, durationInFrames], [1.1, 1.2], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+  });
 
   const labelOpacity = interpolate(frame, [18, 26], [0, 1], {
     extrapolateLeft: "clamp",
@@ -19,12 +26,29 @@ export const FinalDaysCard: React.FC<{ durationInFrames: number }> = ({ duration
   });
 
   return (
-    <AbsoluteFill style={{ backgroundColor: theme.background, justifyContent: "center", alignItems: "center" }}>
+    <AbsoluteFill style={{ backgroundColor: theme.background, justifyContent: "center", alignItems: "center", overflow: "hidden" }}>
+      <OffthreadVideo
+        src={clip.src}
+        startFrom={380}
+        style={{
+          position: "absolute",
+          inset: 0,
+          width: "100%",
+          height: "100%",
+          objectFit: "cover",
+          transform: `scale(${bgZoom})`,
+          filter: "blur(16px) brightness(0.45) saturate(1.15)",
+        }}
+      />
+      <AbsoluteFill
+        style={{ background: "radial-gradient(ellipse at center, transparent 30%, rgba(5,5,5,0.8) 100%)" }}
+      />
+
       <div style={{ textAlign: "center" }}>
         <MaskedVideoNumber
           text={String(DAYS_LEFT)}
-          videoSrc={CLIPS[HERO_CLIP_INDEX].src}
-          videoStartFrom={90}
+          videoSrc={clip.src}
+          videoStartFrom={400}
           durationInFrames={durationInFrames}
           climaxFrame={durationInFrames - 10}
         />

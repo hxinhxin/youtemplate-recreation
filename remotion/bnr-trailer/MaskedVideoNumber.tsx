@@ -15,7 +15,21 @@ export const MaskedVideoNumber: React.FC<{
   videoStartFrom?: number;
   durationInFrames: number;
   climaxFrame?: number;
-}> = ({ text, videoSrc, videoStartFrom = 0, durationInFrames, climaxFrame }) => {
+  // When set, the number surges and its outline/glow/shadow fade away in
+  // the final `breakApartFrames`, leaving just the growing video — so the
+  // cut into the next (full-bleed) scene reads as pushing THROUGH the
+  // number into the footage, not a static card cutting away.
+  breakApart?: boolean;
+  breakApartFrames?: number;
+}> = ({
+  text,
+  videoSrc,
+  videoStartFrom = 0,
+  durationInFrames,
+  climaxFrame,
+  breakApart = false,
+  breakApartFrames = 16,
+}) => {
   const frame = useCurrentFrame();
   const clipId = "days-hero-clip";
   const boxW = WIDTH;
@@ -76,7 +90,23 @@ export const MaskedVideoNumber: React.FC<{
     extrapolateRight: "clamp",
   });
 
-  const scale = revealScale * pushIn * breathe * climaxPunch;
+  // The "push through" surge: only active when breakApart is set, in the
+  // final breakApartFrames. Scale surges hard; the outline/glow/shadow
+  // fade out faster than the video so only the growing footage remains by
+  // the time the cut lands, selling "moving through the number."
+  const breakStart = durationInFrames - breakApartFrames;
+  const breakProgress = breakApart
+    ? interpolate(frame, [breakStart, durationInFrames], [0, 1], {
+        extrapolateLeft: "clamp",
+        extrapolateRight: "clamp",
+        easing: Easing.in(Easing.cubic),
+      })
+    : 0;
+  const breakScale = 1 + breakProgress * 1.6;
+  const chromeOpacity = 1 - Math.min(breakProgress * 1.6, 1); // outline/glow/shadow fade first
+  const breakBlur = breakProgress * 6;
+
+  const scale = revealScale * pushIn * breathe * climaxPunch * breakScale;
 
   const textProps = {
     x: boxW / 2,
@@ -96,7 +126,7 @@ export const MaskedVideoNumber: React.FC<{
         height: boxH,
         transform: `scale(${scale}) rotate(${wobble}deg) translate(${shakeX}px, ${shakeY}px)`,
         opacity: revealOpacity,
-        filter: `blur(${revealBlur}px)`,
+        filter: `blur(${revealBlur + breakBlur}px)`,
       }}
     >
       <svg width={0} height={0} style={{ position: "absolute" }}>
@@ -108,7 +138,7 @@ export const MaskedVideoNumber: React.FC<{
       </svg>
 
       {/* Soft shadow duplicate for a slight 3D lift off the background */}
-      <svg width={boxW} height={boxH} style={{ position: "absolute", top: 8, left: 5, opacity: 0.45 }}>
+      <svg width={boxW} height={boxH} style={{ position: "absolute", top: 8, left: 5, opacity: 0.45 * chromeOpacity }}>
         <text {...textProps} fill="#000000">
           {text}
         </text>
@@ -118,7 +148,13 @@ export const MaskedVideoNumber: React.FC<{
       <svg
         width={boxW}
         height={boxH}
-        style={{ position: "absolute", top: 0, left: 0, filter: `drop-shadow(0 0 ${beatPulse}px ${theme.red}66)` }}
+        style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          opacity: chromeOpacity,
+          filter: `drop-shadow(0 0 ${beatPulse}px ${theme.red}66)`,
+        }}
       >
         <text {...textProps} fill={theme.red}>
           {text}
@@ -132,7 +168,15 @@ export const MaskedVideoNumber: React.FC<{
         <OffthreadVideo
           src={videoSrc}
           startFrom={videoStartFrom}
-          style={{ width: "100%", height: "100%", objectFit: "cover", transform: `scale(${footageZoom})` }}
+          style={{
+            width: "100%",
+            height: "100%",
+            objectFit: "cover",
+            transform: `scale(${footageZoom})`,
+            // Bright and contrasty on purpose — the footage inside the
+            // glyph needs to read clearly, not as a dark texture.
+            filter: "contrast(1.2) saturate(1.15) brightness(1.25)",
+          }}
         />
 
         {/* Glass sheen */}
@@ -159,12 +203,13 @@ export const MaskedVideoNumber: React.FC<{
           }}
         />
 
-        {/* Depth shading at the base */}
+        {/* Depth shading at the base — kept light so the footage stays
+            clearly visible, not a dark texture */}
         <div
           style={{
             position: "absolute",
             inset: 0,
-            background: "linear-gradient(to top, rgba(0,0,0,0.5) 0%, transparent 28%)",
+            background: "linear-gradient(to top, rgba(0,0,0,0.22) 0%, transparent 22%)",
           }}
         />
 
@@ -174,7 +219,7 @@ export const MaskedVideoNumber: React.FC<{
       </div>
 
       {/* Thin white glass outline, drawn last so it stays crisp */}
-      <svg width={boxW} height={boxH} style={{ position: "absolute", top: 0, left: 0 }}>
+      <svg width={boxW} height={boxH} style={{ position: "absolute", top: 0, left: 0, opacity: chromeOpacity }}>
         <text {...textProps} fill="none" stroke="rgba(255,255,255,0.8)" strokeWidth={2}>
           {text}
         </text>

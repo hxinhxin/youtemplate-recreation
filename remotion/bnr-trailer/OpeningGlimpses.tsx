@@ -4,31 +4,42 @@ import { theme } from "./theme";
 import { concertInfo } from "./concertInfo";
 import { ENERGY_ORDER } from "./energyOrder";
 
-type Glimpse = { start: number; duration: number; clipIndex: number };
-
-// Sparse at first, getting closer together as the section builds —
-// brief flashes of footage against near-total black, like memories
-// rather than a bright montage. Not simultaneous shots; only one glimpse
-// is ever on screen at once. Cycles through the most energetic clips
-// first (ENERGY_ORDER) so the earliest glimpses are the most alive ones.
-const GLIMPSE_STARTS = [14, 34, 52, 68, 82, 94, 104, 112];
+// Footage plays continuously throughout — cutting between the most
+// energetic clips at these frames, never dropping to black between cuts.
+// Each cut gets a quick brightness pulse for a "flash of memory" feel,
+// with the base grade dark/moody for tension, but the video is always on
+// screen. Cycles through ENERGY_ORDER so the earliest cuts are the most
+// alive footage.
+const CUT_STARTS = [0, 20, 38, 54, 68, 80, 90, 98, 104];
 
 export const OpeningGlimpses: React.FC<{ durationInFrames: number }> = ({ durationInFrames }) => {
   const frame = useCurrentFrame();
 
-  const glimpses: Glimpse[] = GLIMPSE_STARTS.filter((s) => s < durationInFrames - 4).map((start, i) => ({
-    start,
-    duration: 5 + (i % 2),
-    clipIndex: ENERGY_ORDER[i % ENERGY_ORDER.length],
-  }));
+  const cuts = CUT_STARTS.filter((s) => s < durationInFrames);
+  let cutIndex = 0;
+  for (let i = 0; i < cuts.length; i++) {
+    if (frame >= cuts[i]) cutIndex = i;
+  }
+  const cutStart = cuts[cutIndex];
+  const localFrame = frame - cutStart;
+  const clipIndex = ENERGY_ORDER[cutIndex % ENERGY_ORDER.length];
 
-  const active = glimpses.find((g) => frame >= g.start && frame < g.start + g.duration);
-  const glimpseOpacity = active
-    ? interpolate(frame - active.start, [0, 1, active.duration - 1, active.duration], [0, 1, 1, 0], {
-        extrapolateLeft: "clamp",
-        extrapolateRight: "clamp",
-      })
-    : 0;
+  // Quick blur-to-sharp snap + brightness pulse on every cut.
+  const cutBlur = interpolate(localFrame, [0, 4], [10, 0], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+  });
+  const flashPulse = interpolate(localFrame, [0, 1, 6], [0.55, 0.2, 0], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+  });
+
+  // Base darkness eases up slightly as the section builds (tension ->
+  // anticipation), but never goes fully black.
+  const darkness = interpolate(frame, [0, durationInFrames], [0.6, 0.4], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+  });
 
   // A low rumble-shake builds in over the last stretch, like tension
   // right before the reveal.
@@ -37,6 +48,11 @@ export const OpeningGlimpses: React.FC<{ durationInFrames: number }> = ({ durati
     extrapolateRight: "clamp",
   });
   const shakeX = Math.sin(frame * 6) * rumble;
+
+  const zoom = interpolate(localFrame, [0, 20], [1.08, 1.16], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+  });
 
   // A minimal "BNR" flash near the very end, per the brief.
   const brandWindow = durationInFrames - 16;
@@ -54,27 +70,31 @@ export const OpeningGlimpses: React.FC<{ durationInFrames: number }> = ({ durati
 
   return (
     <AbsoluteFill style={{ backgroundColor: theme.background, overflow: "hidden" }}>
-      {active && (
-        <OffthreadVideo
-          src={CLIPS[active.clipIndex].src}
-          startFrom={active.clipIndex * 15}
-          style={{
-            width: "100%",
-            height: "100%",
-            objectFit: "cover",
-            opacity: glimpseOpacity,
-            filter: "contrast(1.15) saturate(0.85) brightness(0.8)",
-            transform: `translateX(${shakeX}px) scale(1.05)`,
-          }}
-        />
-      )}
-
-      {/* Deep vignette keeps the frame mostly dark even during a glimpse */}
-      <AbsoluteFill
+      <OffthreadVideo
+        src={CLIPS[clipIndex].src}
+        startFrom={150 + clipIndex * 15}
         style={{
-          background: "radial-gradient(ellipse at center, transparent 15%, rgba(5,5,5,0.92) 85%)",
+          width: "100%",
+          height: "100%",
+          objectFit: "cover",
+          // The darkness overlay below does the "moody" reduction — the
+          // source itself stays bright so there's real footage to dim,
+          // not a source that's already dark.
+          filter: `blur(${cutBlur}px) contrast(1.2) saturate(0.85) brightness(1.15)`,
+          transform: `translateX(${shakeX}px) scale(${zoom})`,
         }}
       />
+
+      {/* Moody dark grade — never fully opaque, footage always reads through */}
+      <AbsoluteFill style={{ backgroundColor: "#000000", opacity: darkness }} />
+      <AbsoluteFill
+        style={{
+          background: "radial-gradient(ellipse at center, transparent 25%, rgba(5,5,5,0.75) 100%)",
+        }}
+      />
+
+      {/* Brightness pulse on every cut */}
+      <AbsoluteFill style={{ backgroundColor: "#ffffff", opacity: flashPulse }} />
 
       <AbsoluteFill style={{ justifyContent: "center", alignItems: "center" }}>
         <div

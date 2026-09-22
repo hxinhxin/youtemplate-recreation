@@ -1,17 +1,23 @@
-import { AbsoluteFill, Easing, interpolate, useCurrentFrame } from "remotion";
+import { AbsoluteFill, Easing, interpolate, OffthreadVideo, useCurrentFrame } from "remotion";
 import { theme } from "./theme";
 import type { TextVariant } from "./typographyBeats";
 
-// Minimal, powerful single-word reveal card. Each of the 4 typography
-// beats gets its own entrance style (variant) instead of repeating the
-// same animation, so BNR / SOFIA / JOY STATION / SATURDAY each land
-// differently.
+// Single-word reveal card. Crowd footage plays continuously behind the
+// text (Ken Burns zoom + a partial gradient, never a solid color) so the
+// typography reads as overlaid on the event rather than a black card.
 export const TextBeat: React.FC<{
   word: string;
   durationInFrames: number;
   variant?: TextVariant;
-}> = ({ word, durationInFrames, variant = "slam" }) => {
+  videoSrc: string;
+  videoStartFrom?: number;
+}> = ({ word, durationInFrames, variant = "slam", videoSrc, videoStartFrom = 0 }) => {
   const frame = useCurrentFrame();
+
+  const zoom = interpolate(frame, [0, durationInFrames], [1, 1.16], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+  });
 
   const opacity = interpolate(frame, [0, 6], [0, 1], { extrapolateRight: "clamp" });
   const glow = interpolate(frame, [0, 8, 20], [0, 50, 20], {
@@ -33,7 +39,6 @@ export const TextBeat: React.FC<{
     letterSpacing = 4 + interpolate(frame, [0, 12], [0, 4], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
     transform = `scale(${scale})`;
   } else if (variant === "slideLeft") {
-    // Slides in fast from the right, settles with a slight overshoot.
     const x = interpolate(frame, [0, 14, 20], [420, -18, 0], {
       extrapolateLeft: "clamp",
       extrapolateRight: "clamp",
@@ -42,7 +47,6 @@ export const TextBeat: React.FC<{
     blur = interpolate(frame, [0, 10], [16, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
     transform = `translateX(${x}px)`;
   } else if (variant === "dropTop") {
-    // Drops from above with a small bounce, like it fell into place.
     const y = interpolate(frame, [0, 14, 20, 26], [-500, 30, -10, 0], {
       extrapolateLeft: "clamp",
       extrapolateRight: "clamp",
@@ -50,7 +54,6 @@ export const TextBeat: React.FC<{
     });
     transform = `translateY(${y}px)`;
   } else if (variant === "scaleRotate") {
-    // Spins in from tiny, settling with no rotation.
     const scale = interpolate(frame, [0, 16], [0.2, 1], {
       extrapolateLeft: "clamp",
       extrapolateRight: "clamp",
@@ -69,31 +72,47 @@ export const TextBeat: React.FC<{
   const fontSize = word.length > 8 ? 92 : word.length > 5 ? 118 : 140;
 
   return (
-    <AbsoluteFill
-      style={{
-        backgroundColor: theme.background,
-        justifyContent: "center",
-        alignItems: "center",
-      }}
-    >
-      <div
+    <AbsoluteFill style={{ backgroundColor: theme.background, overflow: "hidden" }}>
+      <OffthreadVideo
+        src={videoSrc}
+        startFrom={videoStartFrom}
         style={{
-          transform,
-          opacity,
-          filter: blur ? `blur(${blur}px)` : undefined,
-          fontFamily: theme.headlineFont,
-          fontWeight: 900,
-          color: theme.white,
-          fontSize,
-          letterSpacing,
-          textTransform: "uppercase",
-          textShadow: `0 0 ${glow}px ${theme.red}`,
-          textAlign: "center",
-          padding: "0 40px",
+          width: "100%",
+          height: "100%",
+          objectFit: "cover",
+          transform: `scale(${zoom})`,
+          filter: "contrast(1.2) saturate(1.15) brightness(1.3)",
         }}
-      >
-        {word}
-      </div>
+      />
+
+      {/* Partial gradient for legibility — never fully opaque */}
+      <AbsoluteFill
+        style={{
+          background:
+            "linear-gradient(180deg, rgba(5,5,5,0.6) 0%, rgba(5,5,5,0.25) 40%, rgba(5,5,5,0.65) 100%)",
+        }}
+      />
+
+      <AbsoluteFill style={{ justifyContent: "center", alignItems: "center" }}>
+        <div
+          style={{
+            transform,
+            opacity,
+            filter: blur ? `blur(${blur}px)` : undefined,
+            fontFamily: theme.headlineFont,
+            fontWeight: 900,
+            color: theme.white,
+            fontSize,
+            letterSpacing,
+            textTransform: "uppercase",
+            textShadow: `0 0 ${glow}px ${theme.red}`,
+            textAlign: "center",
+            padding: "0 40px",
+          }}
+        >
+          {word}
+        </div>
+      </AbsoluteFill>
     </AbsoluteFill>
   );
 };

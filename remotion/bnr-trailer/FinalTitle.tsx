@@ -4,8 +4,11 @@ import { concertInfo } from "./concertInfo";
 import { theme } from "./theme";
 import { FINAL_TITLE_DURATION } from "./durations";
 import { FilmGrain } from "./FilmGrain";
+import { HERO_CLIP_INDEX } from "./energyOrder";
 
-const heroClip = CLIPS[0];
+// Was hardcoded to CLIPS[0] (the static DJ-gear clip, no crowd) — switched
+// to the ranked hero clip so the final card's backdrop is actually alive.
+const heroClip = CLIPS[HERO_CLIP_INDEX];
 
 export const FinalTitle: React.FC = () => {
   const frame = useCurrentFrame();
@@ -42,18 +45,19 @@ export const FinalTitle: React.FC = () => {
     <AbsoluteFill style={{ backgroundColor: theme.background, overflow: "hidden" }}>
       <OffthreadVideo
         src={heroClip.src}
-        startFrom={40}
+        startFrom={340}
         style={{
           width: "100%",
           height: "100%",
           objectFit: "cover",
           transform: `scale(${heroZoom})`,
+          filter: "contrast(1.12) saturate(1.1) brightness(1.1)",
         }}
       />
 
       <AbsoluteFill
         style={{
-          background: `linear-gradient(to top, rgba(5,5,5,0.92) 0%, rgba(5,5,5,0.55) 55%, rgba(5,5,5,0.85) 100%)`,
+          background: `linear-gradient(to top, rgba(5,5,5,0.78) 0%, rgba(5,5,5,0.35) 55%, rgba(5,5,5,0.72) 100%)`,
         }}
       />
 
