@@ -1,6 +1,7 @@
 import {
   BUILDUP_DURATION,
   DAYS_HERO_DURATION,
+  DRONE_OPEN_DURATION,
   FINAL_DAYS_CARD_DURATION,
   FINAL_TITLE_DURATION,
   JOY_STATION_DURATION,
@@ -26,6 +27,7 @@ const buildTimeline = (durations: number[]): TimelineEntry[] => {
 };
 
 const itemDurations = [
+  DRONE_OPEN_DURATION,
   OPENING_DURATION,
   DAYS_HERO_DURATION,
   BUILDUP_DURATION,
@@ -38,11 +40,12 @@ const itemDurations = [
 
 const timeline = buildTimeline(itemDurations);
 
-export const openingTimeline = timeline[0];
-export const daysHeroTimeline = timeline[1];
-export const buildupTimeline = timeline[2];
-export const joyStationTimeline = timeline[3];
-export const revealPauseTimeline = timeline[4];
-export const typographyTimelines = timeline.slice(5, 5 + TYPOGRAPHY_BEATS.length);
-export const finalDaysCardTimeline = timeline[5 + TYPOGRAPHY_BEATS.length];
-export const finalTitleTimeline = timeline[6 + TYPOGRAPHY_BEATS.length];
+export const droneOpenTimeline = timeline[0];
+export const openingTimeline = timeline[1];
+export const daysHeroTimeline = timeline[2];
+export const buildupTimeline = timeline[3];
+export const joyStationTimeline = timeline[4];
+export const revealPauseTimeline = timeline[5];
+export const typographyTimelines = timeline.slice(6, 6 + TYPOGRAPHY_BEATS.length);
+export const finalDaysCardTimeline = timeline[6 + TYPOGRAPHY_BEATS.length];
+export const finalTitleTimeline = timeline[7 + TYPOGRAPHY_BEATS.length];

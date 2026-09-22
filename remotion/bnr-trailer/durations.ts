@@ -6,6 +6,11 @@ export const HEIGHT = 1920;
 
 export const TRANSITION_DURATION = 8;
 
+// Scene 0 — drone establishing shot: a wide aerial of the crowd pouring
+// into the venue, as the very first thing the viewer sees. Source clip is
+// only ~2.8s (84 frames), so this stays short rather than freezing/looping.
+export const DRONE_OPEN_DURATION = 70;
+
 // Scene 1 — opening tension (0-4s target): near-black glimpses.
 export const OPENING_DURATION = 110;
 
@@ -34,12 +39,13 @@ const TYPOGRAPHY_TOTAL_DURATION = TYPOGRAPHY_BEATS.reduce((a, b) => a + b.durati
 export const FINAL_DAYS_CARD_DURATION = 34;
 export const FINAL_TITLE_DURATION = 85;
 
-// Total item count in the top-level TransitionSeries: opening(1) +
-// daysHero(1) + buildup(1) + joyStation(1) + revealPause(1) +
+// Total item count in the top-level TransitionSeries: droneOpen(1) +
+// opening(1) + daysHero(1) + buildup(1) + joyStation(1) + revealPause(1) +
 // typography(4) + finalDaysCard(1) + finalTitle(1).
-const TOTAL_ITEM_COUNT = 1 + 1 + 1 + 1 + 1 + TYPOGRAPHY_BEATS.length + 1 + 1;
+const TOTAL_ITEM_COUNT = 1 + 1 + 1 + 1 + 1 + 1 + TYPOGRAPHY_BEATS.length + 1 + 1;
 const numTransitions = TOTAL_ITEM_COUNT - 1;
 const ALL_DURATIONS_SUM =
+  DRONE_OPEN_DURATION +
   OPENING_DURATION +
   DAYS_HERO_DURATION +
   BUILDUP_DURATION +

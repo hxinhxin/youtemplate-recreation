@@ -8,4 +8,5 @@ export const concertInfo = {
   targetDate: "2026-09-26T23:00:00+03:00",
   venue: "JOY STATION",
   cta: "TICKETS AVAILABLE NOW",
+  ticketSite: "TICKORA.EU",
 };

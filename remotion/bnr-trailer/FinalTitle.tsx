@@ -36,6 +36,11 @@ export const FinalTitle: React.FC = () => {
   });
   const ctaGlow = 22 + Math.sin(frame / 6) * 12;
 
+  const siteOpacity = interpolate(frame, [40, 50], [0, 1], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+  });
+
   const glow = interpolate(frame, [0, 10, 30], [0, 55, 22], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
@@ -117,6 +122,22 @@ export const FinalTitle: React.FC = () => {
             }}
           >
             {concertInfo.cta}
+          </div>
+
+          <div
+            style={{
+              marginTop: 14,
+              opacity: siteOpacity,
+              fontFamily: theme.bodyFont,
+              fontWeight: 900,
+              color: theme.red,
+              fontSize: 30,
+              letterSpacing: 3,
+              textDecoration: "underline",
+              textUnderlineOffset: 6,
+            }}
+          >
+            {concertInfo.ticketSite}
           </div>
         </div>
       </AbsoluteFill>

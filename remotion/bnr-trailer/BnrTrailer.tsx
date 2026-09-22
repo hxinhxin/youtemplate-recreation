@@ -4,6 +4,7 @@ import { TransitionSeries, linearTiming } from "@remotion/transitions";
 import { pushCut } from "@remotion/transitions/push-cut";
 import { BNR_CLIPS as CLIPS } from "./clips";
 import { audioConfig } from "../concert-promo/audioConfig";
+import { DroneOpen, droneClipSrc } from "./DroneOpen";
 import { OpeningGlimpses } from "./OpeningGlimpses";
 import { DaysHero } from "./DaysHero";
 import { QuickCutMontage } from "./QuickCutMontage";
@@ -19,6 +20,7 @@ import {
   BUILDUP_DURATION,
   BUILDUP_SLICE_DURATIONS,
   DAYS_HERO_DURATION,
+  DRONE_OPEN_DURATION,
   FINAL_DAYS_CARD_DURATION,
   FINAL_TITLE_DURATION,
   JOY_STATION_DURATION,
@@ -31,6 +33,7 @@ import { TYPOGRAPHY_BEATS } from "./typographyBeats";
 import {
   buildupTimeline,
   daysHeroTimeline,
+  droneOpenTimeline,
   finalDaysCardTimeline,
   finalTitleTimeline,
   joyStationTimeline,
@@ -81,7 +84,8 @@ const finalSectionDuration = finalTitleTimeline.start + FINAL_TITLE_DURATION - f
 // avoids the overlap math going wrong.
 const { frames: volumeFrames, values: volumeValues } = buildVolumeCurve([
   [0, 0],
-  [90, 0.85],
+  [droneOpenTimeline.start + 20, 0.25], // stay low under the drone shot's own crowd sound
+  [openingTimeline.start + 90, 0.85],
   [daysHeroClimax - 30, 0.85],
   [daysHeroClimax, 0.5],
   [daysHeroClimax + 9, 0.9],
@@ -113,6 +117,9 @@ export const BnrTrailer: React.FC = () => {
           (see CrowdAudio's default) and near-continuous coverage across
           scenes, rather than a few isolated windows, so the crowd swells
           up/down instead of abruptly cutting. */}
+      <Sequence from={droneOpenTimeline.start} durationInFrames={DRONE_OPEN_DURATION}>
+        <CrowdAudio src={droneClipSrc} durationInFrames={DRONE_OPEN_DURATION} volume={0.4} />
+      </Sequence>
       <Sequence from={openingTimeline.start} durationInFrames={OPENING_DURATION}>
         <CrowdAudio src={CLIPS[HERO_CLIP_INDEX].src} durationInFrames={OPENING_DURATION} volume={0.3} />
       </Sequence>
@@ -150,6 +157,15 @@ export const BnrTrailer: React.FC = () => {
       </Sequence>
 
       <TransitionSeries>
+        {/* SCENE 0 — drone establishing shot: the crowd pouring into the
+            venue, wide and alive, before the trailer tightens into the
+            darker opening glimpses. */}
+        <TransitionSeries.Sequence durationInFrames={DRONE_OPEN_DURATION}>
+          <DroneOpen durationInFrames={DRONE_OPEN_DURATION} />
+        </TransitionSeries.Sequence>
+
+        {strobeCut("drone-to-opening")}
+
         {/* SCENE 1 — opening tension: near-black glimpses, not a bright
             montage. Builds toward "something is coming." */}
         <TransitionSeries.Sequence durationInFrames={OPENING_DURATION}>
