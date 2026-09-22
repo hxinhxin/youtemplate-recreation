@@ -17,17 +17,16 @@
 //     source (~4.3s)
 //   clip-03           — performer on mic, some hands/phone lights visible
 //   clip-02           — packed crowd but calmer, mostly wide/venue shots
-//   clip-01           — static DJ-gear close-up, no crowd at all
 //
-// clip-09 (index 7) was pulled from the ranking entirely — a specific shot
-// from it was flagged and needed to come out of the trailer everywhere,
-// not just one scene.
+// clip-09 (index 7) and clip-01 (index 0) were pulled from the ranking
+// entirely — specific shots from each were flagged and needed to come out
+// of the trailer everywhere, not just one scene.
 //
 // bnr-clip-02 & bnr-clip-03 (indices 11/12) aren't in this ranking either —
 // they get their own dedicated full-bleed scenes (SpidermanFeature.tsx /
 // ConfettiFeature.tsx) right after the buildup montage instead, so they
 // hold on screen well over a second rather than a quick-cut flash.
-export const ENERGY_ORDER = [3, 5, 10, 6, 9, 4, 8, 2, 1, 0];
+export const ENERGY_ORDER = [3, 5, 10, 6, 9, 4, 8, 2, 1];
 
 // clip-04 — the single most energetic clip, used for the hero countdown
 // number and the final countdown card.
@@ -35,7 +34,3 @@ export const HERO_CLIP_INDEX = 3;
 
 // clip-06 — strong wide stage/crowd shot, used as the venue reveal backdrop.
 export const VENUE_CLIP_INDEX = 5;
-
-// clip-01 — static DJ-gear shot, good only for a brief cutaway, never a
-// hero or crowd moment.
-export const DJ_CUTAWAY_INDEX = 0;
