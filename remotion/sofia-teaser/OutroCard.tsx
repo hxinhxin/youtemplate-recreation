@@ -1,15 +1,29 @@
-import { AbsoluteFill, interpolate, useCurrentFrame } from "remotion";
+import { AbsoluteFill, Easing, interpolate, useCurrentFrame } from "remotion";
 import { concertInfo } from "./concertInfo";
 import { theme } from "../concert-promo/theme";
 import { OUTRO_DURATION } from "./durations";
+import { LightBurst } from "./LightBurst";
 
 export const OutroCard: React.FC = () => {
   const frame = useCurrentFrame();
-  const opacity = interpolate(frame, [0, 15], [0, 1], { extrapolateRight: "clamp" });
-  const scale = interpolate(frame, [0, 15, OUTRO_DURATION], [0.92, 1, 1.03], {
+  const opacity = interpolate(frame, [0, 10], [0, 1], { extrapolateRight: "clamp" });
+  const scale = interpolate(frame, [0, 12, 18, OUTRO_DURATION], [0.6, 1.15, 1, 1.04], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+    easing: Easing.out(Easing.back(2.5)),
+  });
+
+  // CTA line gets its own delayed pop and a pulsing glow to draw the eye.
+  const ctaPop = interpolate(frame, [22, 30], [0.7, 1], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+    easing: Easing.out(Easing.back(3)),
+  });
+  const ctaOpacity = interpolate(frame, [22, 30], [0, 1], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
   });
+  const ctaGlow = 20 + Math.sin(frame / 6) * 10;
 
   return (
     <AbsoluteFill
@@ -19,13 +33,15 @@ export const OutroCard: React.FC = () => {
         alignItems: "center",
       }}
     >
+      <LightBurst triggerFrame={0} />
+
       <div style={{ opacity, transform: `scale(${scale})`, textAlign: "center", padding: "0 60px" }}>
         <div
           style={{
             fontFamily: theme.headlineFont,
             fontWeight: 900,
             color: theme.text,
-            fontSize: 64,
+            fontSize: 68,
             lineHeight: 1.1,
             textTransform: "uppercase",
           }}
@@ -38,7 +54,7 @@ export const OutroCard: React.FC = () => {
             marginTop: 20,
             fontFamily: theme.bodyFont,
             color: theme.textMuted,
-            fontSize: 32,
+            fontSize: 34,
             fontWeight: 500,
             textTransform: "uppercase",
           }}
@@ -48,13 +64,16 @@ export const OutroCard: React.FC = () => {
 
         <div
           style={{
-            marginTop: 48,
+            marginTop: 52,
             fontFamily: theme.headlineFont,
             fontWeight: 900,
             color: theme.accent,
-            fontSize: 44,
+            fontSize: 48,
             letterSpacing: 2,
             textTransform: "uppercase",
+            opacity: ctaOpacity,
+            transform: `scale(${ctaPop})`,
+            textShadow: `0 0 ${ctaGlow}px ${theme.accent}`,
           }}
         >
           {concertInfo.cta}

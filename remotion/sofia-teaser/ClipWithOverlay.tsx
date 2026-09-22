@@ -1,4 +1,4 @@
-import { AbsoluteFill, interpolate, OffthreadVideo, spring, useCurrentFrame, useVideoConfig } from "remotion";
+import { AbsoluteFill, Easing, interpolate, OffthreadVideo, spring, useCurrentFrame, useVideoConfig } from "remotion";
 import type { ClipConfig } from "../concert-promo/clips";
 import { concertInfo } from "./concertInfo";
 import { theme } from "../concert-promo/theme";
@@ -10,16 +10,27 @@ export const ClipWithOverlay: React.FC<{ clip: ClipConfig; index: number }> = ({
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
 
+  // Wider Ken Burns drift for a bigger sense of motion.
   const zoomingIn = index % 2 === 0;
-  const scale = interpolate(
+  const drift = interpolate(
     frame,
     [0, clip.durationInFrames],
-    zoomingIn ? [1, 1.12] : [1.12, 1],
+    zoomingIn ? [1, 1.2] : [1.2, 1],
     { extrapolateLeft: "clamp", extrapolateRight: "clamp" },
   );
 
-  const textIn = spring({ frame, fps, config: { damping: 14, stiffness: 160 } });
-  const textY = interpolate(textIn, [0, 1], [40, 0]);
+  // Punch-in on entry: the clip slams in slightly oversized then settles,
+  // stacked on top of the slow drift above.
+  const impact = interpolate(frame, [0, 10], [1.1, 1], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+    easing: Easing.out(Easing.cubic),
+  });
+
+  const scale = drift * impact;
+
+  const textIn = spring({ frame, fps, config: { damping: 12, stiffness: 200 } });
+  const textY = interpolate(textIn, [0, 1], [50, 0]);
   const textOpacity = interpolate(textIn, [0, 1], [0, 1]);
 
   return (
@@ -33,7 +44,7 @@ export const ClipWithOverlay: React.FC<{ clip: ClipConfig; index: number }> = ({
       <AbsoluteFill
         style={{
           justifyContent: "flex-end",
-          background: "linear-gradient(to top, rgba(10,10,15,0.85) 0%, rgba(10,10,15,0) 40%)",
+          background: "linear-gradient(to top, rgba(10,10,15,0.9) 0%, rgba(10,10,15,0) 42%)",
         }}
       >
         <div
@@ -48,8 +59,9 @@ export const ClipWithOverlay: React.FC<{ clip: ClipConfig; index: number }> = ({
               fontFamily: theme.headlineFont,
               fontWeight: 900,
               color: theme.text,
-              fontSize: 44,
+              fontSize: 46,
               textTransform: "uppercase",
+              textShadow: `0 0 24px ${theme.accent}`,
             }}
           >
             {concertInfo.act}
@@ -59,7 +71,7 @@ export const ClipWithOverlay: React.FC<{ clip: ClipConfig; index: number }> = ({
               fontFamily: theme.bodyFont,
               marginTop: 8,
               color: theme.accent,
-              fontSize: 26,
+              fontSize: 27,
               fontWeight: 700,
               letterSpacing: 2,
               textTransform: "uppercase",

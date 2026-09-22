@@ -10,7 +10,9 @@ export const Sticker: React.FC<{
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
 
-  const pop = spring({ frame, fps, config: { damping: 11, stiffness: 200, mass: 0.5 } });
+  // Lower damping so the spring visibly overshoots past 1x before settling
+  // — a punchier bounce-in instead of a soft clamp to full size.
+  const pop = spring({ frame, fps, config: { damping: 8, stiffness: 260, mass: 0.6 } });
   const exitFrames = 12;
   const exit = interpolate(
     frame,
@@ -18,9 +20,9 @@ export const Sticker: React.FC<{
     [1, 0],
     { extrapolateLeft: "clamp", extrapolateRight: "clamp" },
   );
-  const breathe = 1 + Math.sin(frame / 9) * 0.04;
-  const scale = Math.min(pop, 1) * exit * breathe;
-  const wiggle = Math.sin(frame / 5) * 3;
+  const breathe = 1 + Math.sin(frame / 9) * 0.05;
+  const scale = pop * exit * breathe;
+  const wiggle = Math.sin(frame / 5) * 4;
 
   return (
     <div style={{ position: "absolute", ...positionStyle }}>
@@ -30,6 +32,7 @@ export const Sticker: React.FC<{
           width,
           transform: `scale(${scale}) rotate(${rotate + wiggle}deg)`,
           transformOrigin: "center",
+          filter: "drop-shadow(0 6px 18px rgba(0,0,0,0.55))",
         }}
       />
     </div>

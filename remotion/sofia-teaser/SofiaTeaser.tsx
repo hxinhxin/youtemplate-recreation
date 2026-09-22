@@ -25,7 +25,12 @@ const punch = (key: string) => (
   <TransitionSeries.Transition
     key={key}
     timing={linearTiming({ durationInFrames: TRANSITION_DURATION })}
-    presentation={pushCut({ flashOpacity: 0 })}
+    presentation={pushCut({
+      flashOpacity: 0,
+      outgoingScale: 1.1,
+      incomingStartScale: 1.18,
+      incomingEndScale: 1.0,
+    })}
   />
 );
 
