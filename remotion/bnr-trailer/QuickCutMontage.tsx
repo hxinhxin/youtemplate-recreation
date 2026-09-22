@@ -103,7 +103,7 @@ export const QuickCutMontage: React.FC<{
               textShadow: `0 0 40px ${theme.red}`,
             }}
           >
-            BHR
+            BNR
           </div>
         </AbsoluteFill>
       )}

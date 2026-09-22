@@ -1,5 +1,5 @@
 export const concertInfo = {
-  brand: "BHR",
+  brand: "BNR",
   act: "BANDATA NA RUBA",
   city: "SOFIA",
   day: "SATURDAY",

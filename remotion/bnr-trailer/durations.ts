@@ -22,10 +22,10 @@ export const BREAK_APART_FRAMES = 14;
 // Scene 4 — concert reveal (10-17s target): clips only, no text.
 export const REVEAL_CLIP_DURATION = 35;
 
-// Scene 5 — event typography (17-21s target): BHR / SOFIA / SATURDAY,
+// Scene 5 — event typography (17-21s target): BNR / SOFIA / SATURDAY,
 // each its own beat, no footage interleaved.
 export const TYPOGRAPHY_WORD_DURATION = 40;
-export const TYPOGRAPHY_WORDS = ["BHR", "SOFIA", "SATURDAY"] as const;
+export const TYPOGRAPHY_WORDS = ["BNR", "SOFIA", "SATURDAY"] as const;
 
 // Scene 6 — final card (21-25s target).
 export const FINAL_TITLE_DURATION = 120;

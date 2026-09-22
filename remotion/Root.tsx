@@ -4,24 +4,24 @@ import { ConcertPromo } from "./concert-promo/ConcertPromo";
 import { FPS, HEIGHT, TOTAL_DURATION, WIDTH } from "./concert-promo/durations";
 import { SofiaTeaser } from "./sofia-teaser/SofiaTeaser";
 import { TOTAL_DURATION as SOFIA_TOTAL_DURATION } from "./sofia-teaser/durations";
-import { BhrTrailer } from "./bhr-trailer/BhrTrailer";
+import { BnrTrailer } from "./bnr-trailer/BnrTrailer";
 import {
-  FPS as BHR_FPS,
-  HEIGHT as BHR_HEIGHT,
-  TOTAL_DURATION as BHR_TOTAL_DURATION,
-  WIDTH as BHR_WIDTH,
-} from "./bhr-trailer/durations";
+  FPS as BNR_FPS,
+  HEIGHT as BNR_HEIGHT,
+  TOTAL_DURATION as BNR_TOTAL_DURATION,
+  WIDTH as BNR_WIDTH,
+} from "./bnr-trailer/durations";
 
 export const RemotionRoot: React.FC = () => {
   return (
     <>
       <Composition
-        id="BhrTrailer"
-        component={BhrTrailer}
-        durationInFrames={BHR_TOTAL_DURATION}
-        fps={BHR_FPS}
-        width={BHR_WIDTH}
-        height={BHR_HEIGHT}
+        id="BnrTrailer"
+        component={BnrTrailer}
+        durationInFrames={BNR_TOTAL_DURATION}
+        fps={BNR_FPS}
+        width={BNR_WIDTH}
+        height={BNR_HEIGHT}
       />
       <Composition
         id="ConcertPromo"

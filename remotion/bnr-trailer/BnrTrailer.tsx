@@ -41,7 +41,7 @@ const strobeCut = (key: string) => (
 
 const countdownDigits = ["3", "2", "1"];
 
-export const BhrTrailer: React.FC = () => {
+export const BnrTrailer: React.FC = () => {
   return (
     <AbsoluteFill>
       <Audio
@@ -58,7 +58,7 @@ export const BhrTrailer: React.FC = () => {
 
       <TransitionSeries>
         {/* SCENE 1 — intro montage. No literal tournament footage exists,
-            so it runs on the concert clips per your call; "BHR" flashes
+            so it runs on the concert clips per your call; "BNR" flashes
             briefly near the end. */}
         <TransitionSeries.Sequence
           durationInFrames={OPENING_SLICE_DURATIONS.reduce((a, b) => a + b, 0)}
@@ -105,7 +105,7 @@ export const BhrTrailer: React.FC = () => {
 
         {strobeCut("reveal-to-typography")}
 
-        {/* SCENE 5 — event typography: BHR / SOFIA / SATURDAY, one at a time. */}
+        {/* SCENE 5 — event typography: BNR / SOFIA / SATURDAY, one at a time. */}
         {TYPOGRAPHY_WORDS.map((word, i) => (
           <Fragment key={word}>
             <TransitionSeries.Sequence durationInFrames={TYPOGRAPHY_WORD_DURATION}>
