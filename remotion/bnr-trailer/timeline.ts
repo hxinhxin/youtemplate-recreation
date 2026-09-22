@@ -28,17 +28,16 @@ const buildTimeline = (durations: number[]): TimelineEntry[] => {
   });
 };
 
-// DaysHero (the "4 DAYS LEFT" countdown reveal) moved up to be the very
-// second scene, right after the drone open — the countdown number is the
-// headline beat and shouldn't wait behind the opening-glimpses tension
-// build. OpeningGlimpses now follows it instead of leading into it.
+// JoyStationReveal (the dedicated "JOY STATION / SOFIA" venue scene)
+// moved up to be the second scene, right after the drone open and before
+// the first "DAYS LEFT" countdown — establish where before the countdown
+// urgency. DaysHero (the "3 DAYS LEFT" countdown reveal) follows it.
 // Reveal-pause + typography beats (the "Bandata na Ruba / Sofia / Joy
-// Station / Saturday" text reveal) sit right after the buildup montage
-// — instead of after the feature clips and venue reveal — so the
-// event's name/venue/date show up much sooner rather than being
-// backloaded near the very end of the trailer.
+// Station / Saturday" text reveal) still sit right after the buildup
+// montage so the event's name/date show up early too, not just the venue.
 const itemDurations = [
   DRONE_OPEN_DURATION,
+  JOY_STATION_DURATION,
   DAYS_HERO_DURATION,
   OPENING_DURATION,
   BUILDUP_DURATION,
@@ -46,7 +45,6 @@ const itemDurations = [
   ...TYPOGRAPHY_BEATS.map((b) => b.duration),
   SPIDERMAN_FEATURE_DURATION,
   CONFETTI_FEATURE_DURATION,
-  JOY_STATION_DURATION,
   FINAL_DAYS_CARD_DURATION,
   FINAL_TITLE_DURATION,
 ];
@@ -54,13 +52,13 @@ const itemDurations = [
 const timeline = buildTimeline(itemDurations);
 
 export const droneOpenTimeline = timeline[0];
-export const daysHeroTimeline = timeline[1];
-export const openingTimeline = timeline[2];
-export const buildupTimeline = timeline[3];
-export const revealPauseTimeline = timeline[4];
-export const typographyTimelines = timeline.slice(5, 5 + TYPOGRAPHY_BEATS.length);
-export const spidermanFeatureTimeline = timeline[5 + TYPOGRAPHY_BEATS.length];
-export const confettiFeatureTimeline = timeline[6 + TYPOGRAPHY_BEATS.length];
-export const joyStationTimeline = timeline[7 + TYPOGRAPHY_BEATS.length];
+export const joyStationTimeline = timeline[1];
+export const daysHeroTimeline = timeline[2];
+export const openingTimeline = timeline[3];
+export const buildupTimeline = timeline[4];
+export const revealPauseTimeline = timeline[5];
+export const typographyTimelines = timeline.slice(6, 6 + TYPOGRAPHY_BEATS.length);
+export const spidermanFeatureTimeline = timeline[6 + TYPOGRAPHY_BEATS.length];
+export const confettiFeatureTimeline = timeline[7 + TYPOGRAPHY_BEATS.length];
 export const finalDaysCardTimeline = timeline[8 + TYPOGRAPHY_BEATS.length];
 export const finalTitleTimeline = timeline[9 + TYPOGRAPHY_BEATS.length];

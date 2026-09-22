@@ -150,13 +150,18 @@ export const BnrTrailer: React.FC = () => {
           <DroneOpen durationInFrames={DRONE_OPEN_DURATION} />
         </TransitionSeries.Sequence>
 
-        {strobeCut("drone-to-hero")}
+        {strobeCut("drone-to-venue")}
 
-        {/* SCENE 2 (moved up) — the signature shot: DAYS_LEFT filled with
-            the most energetic crowd footage, light sweep reveal, bass-hit
-            climax. This is the headline beat, so it's the very next thing
-            after the drone open rather than waiting behind the opening
-            glimpses. */}
+        {/* SCENE 4 (moved up) — JOY STATION / SOFIA venue reveal, now
+            establishing where before the countdown urgency of DaysHero. */}
+        <TransitionSeries.Sequence durationInFrames={JOY_STATION_DURATION}>
+          <JoyStationReveal durationInFrames={JOY_STATION_DURATION} />
+        </TransitionSeries.Sequence>
+
+        {strobeCut("venue-to-hero")}
+
+        {/* SCENE 2 — the signature shot: DAYS_LEFT filled with the most
+            energetic crowd footage, light sweep reveal, bass-hit climax. */}
         <TransitionSeries.Sequence durationInFrames={DAYS_HERO_DURATION}>
           <DaysHero videoSrc={CLIPS[HERO_CLIP_INDEX].src} durationInFrames={DAYS_HERO_DURATION} />
         </TransitionSeries.Sequence>
@@ -228,16 +233,7 @@ export const BnrTrailer: React.FC = () => {
           <RevealClip clip={CLIPS[12]} index={1} durationInFrames={CONFETTI_FEATURE_DURATION} />
         </TransitionSeries.Sequence>
 
-        {strobeCut("confetti-to-venue")}
-
-        {/* SCENE 4 — JOY STATION / SOFIA venue reveal, a major visual
-            element in its own right — now confirms what the typography
-            beats already teased, instead of introducing it. */}
-        <TransitionSeries.Sequence durationInFrames={JOY_STATION_DURATION}>
-          <JoyStationReveal durationInFrames={JOY_STATION_DURATION} />
-        </TransitionSeries.Sequence>
-
-        {strobeCut("venue-to-final")}
+        {strobeCut("confetti-to-final")}
 
         {/* SCENE 6 — the countdown returns as the strongest visual, then
             the ticket card. */}
