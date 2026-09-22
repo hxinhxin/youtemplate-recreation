@@ -53,7 +53,10 @@ export const QuickCutMontage: React.FC<{
     <AbsoluteFill style={{ backgroundColor: theme.background, overflow: "hidden" }}>
       <OffthreadVideo
         src={clip.src}
-        startFrom={(clip.startFrom ?? 0) + activeIndex * 20}
+        // Bounded to a 40-frame window so repeated appearances of the same
+        // clip show different footage without risking an offset that runs
+        // past the end of a short source clip (some are only ~2-3s).
+        startFrom={(clip.startFrom ?? 0) + ((activeIndex * 20) % 40)}
         style={{
           width: "100%",
           height: "100%",
