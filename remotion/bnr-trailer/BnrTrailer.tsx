@@ -2,7 +2,7 @@ import { Fragment } from "react";
 import { AbsoluteFill, Audio, interpolate, Sequence, staticFile, useCurrentFrame } from "remotion";
 import { TransitionSeries, linearTiming } from "@remotion/transitions";
 import { pushCut } from "@remotion/transitions/push-cut";
-import { CLIPS } from "../concert-promo/clips";
+import { BNR_CLIPS as CLIPS } from "./clips";
 import { audioConfig } from "../concert-promo/audioConfig";
 import { OpeningGlimpses } from "./OpeningGlimpses";
 import { DaysHero } from "./DaysHero";

@@ -1,7 +1,12 @@
-// Indices into the shared CLIPS array (concert-promo/clips.ts), ranked by
-// crowd energy from a visual audit of all 10 clips currently in the pool:
-//   clip-04, clip-06 & clip-09 — top tier: dense hands-up crowd, laser/
-//     light beams, phone lights, performer directly engaging the crowd
+// Indices into BNR_CLIPS (bnr-trailer/clips.ts — the shared clip list plus
+// any clips sent specifically for this trailer), ranked by crowd energy
+// from a visual audit of every clip in the pool. Shared CLIPS has 10
+// entries (indices 0-9); bnr-clip-01 is appended after it, so it lands
+// at index 10.
+//   clip-04, clip-06, clip-09 & bnr-clip-01 — top tier: dense hands-up
+//     crowd, laser/light beams, phone lights, performer directly engaging
+//     the crowd. bnr-clip-01 also shows the actual "БАНДАТА НА РЪБА"
+//     branded stage backdrop — strong for brand visibility too.
 //   clip-08           — costumed performer (Spider-Man) dancing energetically,
 //     crowd close in filming with phones — high energy, distinct character
 //   clip-11           — wide shot of a massive crowd with sweeping light
@@ -13,7 +18,7 @@
 //   clip-03           — performer on mic, some hands/phone lights visible
 //   clip-02           — packed crowd but calmer, mostly wide/venue shots
 //   clip-01           — static DJ-gear close-up, no crowd at all
-export const ENERGY_ORDER = [3, 5, 7, 6, 9, 4, 8, 2, 1, 0];
+export const ENERGY_ORDER = [3, 5, 10, 7, 6, 9, 4, 8, 2, 1, 0];
 
 // clip-04 — the single most energetic clip, used for the hero countdown
 // number and the final countdown card.

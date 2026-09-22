@@ -1,5 +1,5 @@
 import { AbsoluteFill, Easing, interpolate, OffthreadVideo, useCurrentFrame } from "remotion";
-import { CLIPS } from "../concert-promo/clips";
+import { BNR_CLIPS as CLIPS } from "./clips";
 import { theme } from "./theme";
 import { concertInfo } from "./concertInfo";
 import { ENERGY_ORDER } from "./energyOrder";
