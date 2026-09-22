@@ -1,4 +1,4 @@
-import { AbsoluteFill, interpolate, OffthreadVideo, useCurrentFrame } from "remotion";
+import { AbsoluteFill, interpolate, OffthreadVideo, Sequence, useCurrentFrame } from "remotion";
 import { BNR_CLIPS as CLIPS } from "./clips";
 import { theme } from "./theme";
 import { ENERGY_ORDER } from "./energyOrder";
@@ -11,19 +11,17 @@ import { ENERGY_ORDER } from "./energyOrder";
 // alive footage.
 const CUT_STARTS = [0, 20, 38, 54, 68, 80, 90, 98, 104];
 
-export const OpeningGlimpses: React.FC<{ durationInFrames: number }> = ({ durationInFrames }) => {
-  const frame = useCurrentFrame();
+// One cut's video, in its own <Sequence> so useCurrentFrame() here is
+// local to this cut (resets to 0 at the cut's start) — needed because
+// OffthreadVideo's `startFrom` is combined with the LOCAL frame of its
+// nearest Sequence, not the whole scene's frame. Without this wrapper,
+// every cut after the first was seeking into the source using the full
+// scene-elapsed frame count added on top of `startFrom`, drifting further
+// wrong with each cut (this was the actual cause of random unrelated
+// footage — e.g. a DJ-deck close-up — flashing during this scene).
+const Cut: React.FC<{ clipIndex: number }> = ({ clipIndex }) => {
+  const localFrame = useCurrentFrame();
 
-  const cuts = CUT_STARTS.filter((s) => s < durationInFrames);
-  let cutIndex = 0;
-  for (let i = 0; i < cuts.length; i++) {
-    if (frame >= cuts[i]) cutIndex = i;
-  }
-  const cutStart = cuts[cutIndex];
-  const localFrame = frame - cutStart;
-  const clipIndex = ENERGY_ORDER[cutIndex % ENERGY_ORDER.length];
-
-  // Quick blur-to-sharp snap + brightness pulse on every cut.
   const cutBlur = interpolate(localFrame, [0, 4], [10, 0], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
@@ -32,6 +30,43 @@ export const OpeningGlimpses: React.FC<{ durationInFrames: number }> = ({ durati
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
   });
+  const zoom = interpolate(localFrame, [0, 20], [1.08, 1.16], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+  });
+
+  return (
+    <AbsoluteFill>
+      <OffthreadVideo
+        src={CLIPS[clipIndex].src}
+        startFrom={150 + clipIndex * 15}
+        style={{
+          width: "100%",
+          height: "100%",
+          objectFit: "cover",
+          // The darkness overlay (rendered by the parent) does the
+          // "moody" reduction — the source itself stays bright so
+          // there's real footage to dim, not a source that's already
+          // dark.
+          filter: `blur(${cutBlur}px) contrast(1.2) saturate(0.85) brightness(1.15)`,
+          transform: `scale(${zoom})`,
+        }}
+      />
+      {/* Brightness pulse on every cut */}
+      <AbsoluteFill style={{ backgroundColor: "#ffffff", opacity: flashPulse }} />
+    </AbsoluteFill>
+  );
+};
+
+export const OpeningGlimpses: React.FC<{ durationInFrames: number }> = ({ durationInFrames }) => {
+  const frame = useCurrentFrame();
+
+  const cutStarts = CUT_STARTS.filter((s) => s < durationInFrames);
+  const cuts = cutStarts.map((start, i) => ({
+    start,
+    duration: (i + 1 < cutStarts.length ? cutStarts[i + 1] : durationInFrames) - start,
+    clipIndex: ENERGY_ORDER[i % ENERGY_ORDER.length],
+  }));
 
   // Base darkness eases up slightly as the section builds (tension ->
   // anticipation), but never goes fully black. Lightened from 0.6/0.4 —
@@ -49,27 +84,15 @@ export const OpeningGlimpses: React.FC<{ durationInFrames: number }> = ({ durati
   });
   const shakeX = Math.sin(frame * 6) * rumble;
 
-  const zoom = interpolate(localFrame, [0, 20], [1.08, 1.16], {
-    extrapolateLeft: "clamp",
-    extrapolateRight: "clamp",
-  });
-
   return (
     <AbsoluteFill style={{ backgroundColor: theme.background, overflow: "hidden" }}>
-      <OffthreadVideo
-        src={CLIPS[clipIndex].src}
-        startFrom={150 + clipIndex * 15}
-        style={{
-          width: "100%",
-          height: "100%",
-          objectFit: "cover",
-          // The darkness overlay below does the "moody" reduction — the
-          // source itself stays bright so there's real footage to dim,
-          // not a source that's already dark.
-          filter: `blur(${cutBlur}px) contrast(1.2) saturate(0.85) brightness(1.15)`,
-          transform: `translateX(${shakeX}px) scale(${zoom})`,
-        }}
-      />
+      <AbsoluteFill style={{ transform: `translateX(${shakeX}px)` }}>
+        {cuts.map((cut, i) => (
+          <Sequence key={i} from={cut.start} durationInFrames={cut.duration} layout="none">
+            <Cut clipIndex={cut.clipIndex} />
+          </Sequence>
+        ))}
+      </AbsoluteFill>
 
       {/* Moody dark grade — never fully opaque, footage always reads through */}
       <AbsoluteFill style={{ backgroundColor: "#000000", opacity: darkness }} />
@@ -78,9 +101,6 @@ export const OpeningGlimpses: React.FC<{ durationInFrames: number }> = ({ durati
           background: "radial-gradient(ellipse at center, transparent 35%, rgba(5,5,5,0.42) 100%)",
         }}
       />
-
-      {/* Brightness pulse on every cut */}
-      <AbsoluteFill style={{ backgroundColor: "#ffffff", opacity: flashPulse }} />
     </AbsoluteFill>
   );
 };
