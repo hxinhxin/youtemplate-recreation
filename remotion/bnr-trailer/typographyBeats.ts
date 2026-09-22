@@ -6,7 +6,6 @@ export type TypographyBeat = {
   word: string;
   duration: number;
   variant: TextVariant;
-  voiceover?: string; // filename under public/audio/
   clipIndex: number; // index into the shared CLIPS array for the background footage
 };
 
@@ -16,13 +15,7 @@ export type TypographyBeat = {
 // keeps moving underneath/around the text.
 export const TYPOGRAPHY_BEATS: TypographyBeat[] = [
   { word: "BNR", duration: 28, variant: "slam", clipIndex: ENERGY_ORDER[0] },
-  { word: "SOFIA", duration: 28, variant: "slam", voiceover: "vo-sofia.wav", clipIndex: ENERGY_ORDER[1] },
-  {
-    word: "JOY STATION",
-    duration: 28,
-    variant: "slam",
-    voiceover: "vo-joystation.wav",
-    clipIndex: ENERGY_ORDER[2],
-  },
+  { word: "SOFIA", duration: 28, variant: "slam", clipIndex: ENERGY_ORDER[1] },
+  { word: "JOY STATION", duration: 28, variant: "slam", clipIndex: ENERGY_ORDER[2] },
   { word: "SATURDAY", duration: 28, variant: "slam", clipIndex: ENERGY_ORDER[3] },
 ];

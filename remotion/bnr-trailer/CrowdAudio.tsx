@@ -9,7 +9,7 @@ export const CrowdAudio: React.FC<{
   durationInFrames: number;
   volume?: number;
   fadeFrames?: number;
-}> = ({ src, startFrom = 0, durationInFrames, volume = 0.55, fadeFrames = 10 }) => {
+}> = ({ src, startFrom = 0, durationInFrames, volume = 0.55, fadeFrames = 24 }) => {
   const frame = useCurrentFrame();
   const envelope = interpolate(
     frame,

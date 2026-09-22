@@ -31,8 +31,10 @@ import { TYPOGRAPHY_BEATS } from "./typographyBeats";
 import {
   buildupTimeline,
   daysHeroTimeline,
+  finalDaysCardTimeline,
   finalTitleTimeline,
   joyStationTimeline,
+  openingTimeline,
   revealPauseTimeline,
   typographyTimelines,
 } from "./timeline";
@@ -61,6 +63,14 @@ const strobeCut = (key: string) => (
 const daysHeroClimax = daysHeroTimeline.start + DAYS_HERO_DURATION - 18;
 const bnrBeat = typographyTimelines[0].start;
 const finalCtaBeat = finalTitleTimeline.start + 26;
+
+// Crowd-audio coverage spans, computed from the timeline so the ambience
+// runs continuously across scenes instead of a few isolated windows —
+// abrupt on/off cuts were reading as the screams getting "cut out."
+const lastTypographyTimeline = typographyTimelines[typographyTimelines.length - 1];
+const revealToTypographyDuration =
+  lastTypographyTimeline.start + lastTypographyTimeline.duration - revealPauseTimeline.start;
+const finalSectionDuration = finalTitleTimeline.start + FINAL_TITLE_DURATION - finalDaysCardTimeline.start;
 
 // One continuous track, not several songs stitched together — we only
 // have the one piece of music. "DJ-style" movement instead comes from
@@ -99,15 +109,27 @@ export const BnrTrailer: React.FC = () => {
       <Audio src={staticFile(audioConfig.src)} volume={trackVolume(frame)} />
 
       {/* Crowd audio beds — the clips' own embedded crowd/DJ sound, ducked
-          under the music so the audience is actually audible. */}
+          under the music so the audience is actually audible. Long fades
+          (see CrowdAudio's default) and near-continuous coverage across
+          scenes, rather than a few isolated windows, so the crowd swells
+          up/down instead of abruptly cutting. */}
+      <Sequence from={openingTimeline.start} durationInFrames={OPENING_DURATION}>
+        <CrowdAudio src={CLIPS[HERO_CLIP_INDEX].src} durationInFrames={OPENING_DURATION} volume={0.3} />
+      </Sequence>
       <Sequence from={daysHeroTimeline.start} durationInFrames={DAYS_HERO_DURATION}>
         <CrowdAudio src={CLIPS[HERO_CLIP_INDEX].src} startFrom={20} durationInFrames={DAYS_HERO_DURATION} volume={0.4} />
       </Sequence>
       <Sequence from={buildupTimeline.start} durationInFrames={BUILDUP_DURATION}>
-        <CrowdAudio src={CLIPS[HERO_CLIP_INDEX].src} durationInFrames={BUILDUP_DURATION} volume={0.6} />
+        <CrowdAudio src={CLIPS[HERO_CLIP_INDEX].src} durationInFrames={BUILDUP_DURATION} volume={0.55} />
       </Sequence>
       <Sequence from={joyStationTimeline.start} durationInFrames={JOY_STATION_DURATION}>
-        <CrowdAudio src={CLIPS[VENUE_CLIP_INDEX].src} startFrom={30} durationInFrames={JOY_STATION_DURATION} volume={0.45} />
+        <CrowdAudio src={CLIPS[VENUE_CLIP_INDEX].src} startFrom={30} durationInFrames={JOY_STATION_DURATION} volume={0.4} />
+      </Sequence>
+      <Sequence from={revealPauseTimeline.start} durationInFrames={revealToTypographyDuration}>
+        <CrowdAudio src={CLIPS[HERO_CLIP_INDEX].src} startFrom={60} durationInFrames={revealToTypographyDuration} volume={0.35} />
+      </Sequence>
+      <Sequence from={finalDaysCardTimeline.start} durationInFrames={finalSectionDuration}>
+        <CrowdAudio src={CLIPS[HERO_CLIP_INDEX].src} startFrom={100} durationInFrames={finalSectionDuration} volume={0.35} />
       </Sequence>
 
       {/* Riser + impact hits at the signature beats. */}
@@ -175,16 +197,13 @@ export const BnrTrailer: React.FC = () => {
         {TYPOGRAPHY_BEATS.map((beat, i) => (
           <Fragment key={beat.word}>
             <TransitionSeries.Sequence durationInFrames={beat.duration}>
-              <>
-                <TextBeat
-                  word={beat.word}
-                  durationInFrames={beat.duration}
-                  variant={beat.variant}
-                  videoSrc={CLIPS[beat.clipIndex].src}
-                  videoStartFrom={150 + beat.clipIndex * 10}
-                />
-                {beat.voiceover && <Audio src={staticFile(`audio/${beat.voiceover}`)} />}
-              </>
+              <TextBeat
+                word={beat.word}
+                durationInFrames={beat.duration}
+                variant={beat.variant}
+                videoSrc={CLIPS[beat.clipIndex].src}
+                videoStartFrom={150 + beat.clipIndex * 10}
+              />
             </TransitionSeries.Sequence>
             {i < TYPOGRAPHY_BEATS.length - 1 && strobeCut(`typography-${i}`)}
           </Fragment>
