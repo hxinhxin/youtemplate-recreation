@@ -25,8 +25,11 @@ export const OPENING_DURATION = 110;
 export const DAYS_HERO_DURATION = 134;
 
 // Scene 3 — build-up / crowd-explosion montage (10-16s target): very
-// short slices (~0.2-0.6s each = 6-18 frames at 30fps).
-export const BUILDUP_SLICE_DURATIONS = [18, 16, 14, 12, 10, 16, 14, 12, 10, 8, 16, 12, 10];
+// short slices (~0.2-0.6s each = 6-18 frames at 30fps). Trimmed from 13
+// slices to 9 — ENERGY_ORDER only has 9 ranked clips, so the extra 4
+// slices were wrapping back around and repeating clips already shown
+// earlier in this same montage.
+export const BUILDUP_SLICE_DURATIONS = [18, 16, 14, 12, 10, 16, 14, 12, 10];
 export const BUILDUP_DURATION = BUILDUP_SLICE_DURATIONS.reduce((a, b) => a + b, 0);
 
 // Scene 3.5 — two dedicated feature shots for bnr-clip-02/03 (the
