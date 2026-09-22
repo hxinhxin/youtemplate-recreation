@@ -17,7 +17,7 @@ export const DroneOpen: React.FC<{ durationInFrames: number }> = ({ durationInFr
     extrapolateRight: "clamp",
   });
 
-  const zoom = interpolate(frame, [0, durationInFrames], [1, 1.32], {
+  const zoom = interpolate(frame, [0, durationInFrames], [1, 1.4], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
   });

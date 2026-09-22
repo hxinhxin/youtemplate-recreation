@@ -13,10 +13,15 @@ export const JoyStationReveal: React.FC<{ durationInFrames: number }> = ({ durat
   const frame = useCurrentFrame();
   const clip = CLIPS[VENUE_CLIP_INDEX];
 
-  const zoom = interpolate(frame, [0, durationInFrames], [1, 1.12], {
+  // Zoom rate roughly matched to the other scenes — was 1 -> 1.12 (by far
+  // the slowest push in the trailer), which measured as long stretches of
+  // near-static frames. A slow drift is added on top so there's motion
+  // even where the zoom curve alone would read as still.
+  const zoom = interpolate(frame, [0, durationInFrames], [1, 1.28], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
   });
+  const drift = Math.sin(frame / 24) * 14;
 
   const venueScale = interpolate(frame, [0, 10, 16, durationInFrames], [0.55, 1.15, 1, 1.04], {
     extrapolateLeft: "clamp",
@@ -55,8 +60,17 @@ export const JoyStationReveal: React.FC<{ durationInFrames: number }> = ({ durat
     <AbsoluteFill style={{ backgroundColor: theme.background, overflow: "hidden" }}>
       <OffthreadVideo
         src={clip.src}
-        startFrom={30}
-        style={{ width: "100%", height: "100%", objectFit: "cover", transform: `scale(${zoom})` }}
+        // Was startFrom=30 (1s in) — that stretch of the source clip is
+        // comparatively dark and calm. Moved to 270 (9s in), a
+        // consistently brighter, more dynamic stretch (lit LED panels,
+        // people dancing) confirmed via a frame scan of the source.
+        startFrom={270}
+        style={{
+          width: "100%",
+          height: "100%",
+          objectFit: "cover",
+          transform: `scale(${zoom}) translateX(${drift}px)`,
+        }}
       />
 
       <AbsoluteFill
