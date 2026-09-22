@@ -11,7 +11,6 @@ import { QuickCutMontage } from "./QuickCutMontage";
 import { JoyStationReveal } from "./JoyStationReveal";
 import { TextBeat } from "./TextBeat";
 import { RevealClip } from "./RevealClip";
-import { FinalDaysCard } from "./FinalDaysCard";
 import { FinalTitle } from "./FinalTitle";
 import { CrowdAudio } from "./CrowdAudio";
 import { AudioHit } from "./AudioHit";
@@ -22,7 +21,6 @@ import {
   CONFETTI_FEATURE_DURATION,
   DAYS_HERO_DURATION,
   DRONE_OPEN_DURATION,
-  FINAL_DAYS_CARD_DURATION,
   FINAL_TITLE_DURATION,
   JOY_STATION_DURATION,
   OPENING_DURATION,
@@ -188,10 +186,11 @@ export const BnrTrailer: React.FC = () => {
         {strobeCut("buildup-to-pause")}
 
         {/* SCENE 5 (moved earlier) — everything slows down: one cinematic
-            pause on the event, then BANDATA NA RUBA / SOFIA / JOY STATION /
-            SATURDAY one at a time. Moved up from after the venue reveal so
-            the event name/venue/date show up much sooner in the trailer
-            instead of being backloaded near the very end. */}
+            pause on the event, then BANDATA NA RUBA / ТАЗИ СЪБОТА one at a
+            time (venue/city dropped — JoyStationReveal already covers
+            them). Moved up from after the venue reveal so the event
+            name/date show up much sooner in the trailer instead of being
+            backloaded near the very end. */}
         <TransitionSeries.Sequence durationInFrames={REVEAL_PAUSE_DURATION}>
           <RevealClip
             clip={{ ...CLIPS[HERO_CLIP_INDEX], startFrom: 270 }}
@@ -237,14 +236,9 @@ export const BnrTrailer: React.FC = () => {
 
         {strobeCut("confetti-to-final")}
 
-        {/* SCENE 6 — the countdown returns as the strongest visual, then
-            the ticket card. */}
-        <TransitionSeries.Sequence durationInFrames={FINAL_DAYS_CARD_DURATION}>
-          <FinalDaysCard durationInFrames={FINAL_DAYS_CARD_DURATION} />
-        </TransitionSeries.Sequence>
-
-        {strobeCut("final-days-to-title")}
-
+        {/* SCENE 6 — the ticket card. The countdown number isn't repeated
+            here anymore — DaysHero already delivers that beat, and
+            bringing it back was one repeat too many. */}
         <TransitionSeries.Sequence durationInFrames={FINAL_TITLE_DURATION}>
           <FinalTitle />
         </TransitionSeries.Sequence>

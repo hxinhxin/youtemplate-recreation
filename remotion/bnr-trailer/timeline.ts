@@ -3,7 +3,6 @@ import {
   CONFETTI_FEATURE_DURATION,
   DAYS_HERO_DURATION,
   DRONE_OPEN_DURATION,
-  FINAL_DAYS_CARD_DURATION,
   FINAL_TITLE_DURATION,
   JOY_STATION_DURATION,
   OPENING_DURATION,
@@ -32,9 +31,10 @@ const buildTimeline = (durations: number[]): TimelineEntry[] => {
 // moved up to be the second scene, right after the drone open and before
 // the first "DAYS LEFT" countdown — establish where before the countdown
 // urgency. DaysHero (the "3 DAYS LEFT" countdown reveal) follows it.
-// Reveal-pause + typography beats (the "Bandata na Ruba / Sofia / Joy
-// Station / Saturday" text reveal) still sit right after the buildup
-// montage so the event's name/date show up early too, not just the venue.
+// Reveal-pause + typography beats (now just "Bandata na Ruba" / "ТАЗИ
+// СЪБОТА" — venue/city dropped from here since JoyStationReveal already
+// covers them) still sit right after the buildup montage so the event's
+// name/date show up early too, not just the venue.
 const itemDurations = [
   DRONE_OPEN_DURATION,
   JOY_STATION_DURATION,
@@ -45,7 +45,6 @@ const itemDurations = [
   ...TYPOGRAPHY_BEATS.map((b) => b.duration),
   SPIDERMAN_FEATURE_DURATION,
   CONFETTI_FEATURE_DURATION,
-  FINAL_DAYS_CARD_DURATION,
   FINAL_TITLE_DURATION,
 ];
 
@@ -60,5 +59,4 @@ export const revealPauseTimeline = timeline[5];
 export const typographyTimelines = timeline.slice(6, 6 + TYPOGRAPHY_BEATS.length);
 export const spidermanFeatureTimeline = timeline[6 + TYPOGRAPHY_BEATS.length];
 export const confettiFeatureTimeline = timeline[7 + TYPOGRAPHY_BEATS.length];
-export const finalDaysCardTimeline = timeline[8 + TYPOGRAPHY_BEATS.length];
-export const finalTitleTimeline = timeline[9 + TYPOGRAPHY_BEATS.length];
+export const finalTitleTimeline = timeline[8 + TYPOGRAPHY_BEATS.length];

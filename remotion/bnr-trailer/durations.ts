@@ -49,20 +49,17 @@ export const REVEAL_PAUSE_DURATION = 16;
 export const TYPOGRAPHY_WORDS = TYPOGRAPHY_BEATS.map((b) => b.word);
 const TYPOGRAPHY_TOTAL_DURATION = TYPOGRAPHY_BEATS.reduce((a, b) => a + b.duration, 0);
 
-// Scene 6 — final card (21-25s target): the countdown returns, then the
-// ticket info. Bumped 34 -> 46: the "DAYS LEFT" label was fading in at
-// frame 18-26 and the scene ended at 34, so it was only on screen for
-// ~8 frames — barely long enough to register before the cut. Bumped
-// again 46 -> 60: the label (fading in at 14-20) was still only held for
-// 26 frames (~0.9s) before the cut to FinalTitle.
-export const FINAL_DAYS_CARD_DURATION = 60;
+// Scene 6 — final title/ticket card. The countdown number used to come
+// back here too ("DAYS LEFT" a second time), but that was one repeat
+// too many — DaysHero already delivers that beat, so this scene was
+// removed and the confetti feature now cuts straight to FinalTitle.
 export const FINAL_TITLE_DURATION = 85;
 
 // Total item count in the top-level TransitionSeries: droneOpen(1) +
 // opening(1) + daysHero(1) + buildup(1) + spidermanFeature(1) +
-// confettiFeature(1) + joyStation(1) + revealPause(1) + typography(4) +
-// finalDaysCard(1) + finalTitle(1).
-const TOTAL_ITEM_COUNT = 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + TYPOGRAPHY_BEATS.length + 1 + 1;
+// confettiFeature(1) + joyStation(1) + revealPause(1) + typography(N) +
+// finalTitle(1).
+const TOTAL_ITEM_COUNT = 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + TYPOGRAPHY_BEATS.length + 1;
 const numTransitions = TOTAL_ITEM_COUNT - 1;
 const ALL_DURATIONS_SUM =
   DRONE_OPEN_DURATION +
@@ -74,7 +71,6 @@ const ALL_DURATIONS_SUM =
   JOY_STATION_DURATION +
   REVEAL_PAUSE_DURATION +
   TYPOGRAPHY_TOTAL_DURATION +
-  FINAL_DAYS_CARD_DURATION +
   FINAL_TITLE_DURATION;
 
 export const TOTAL_DURATION = ALL_DURATIONS_SUM - numTransitions * TRANSITION_DURATION;

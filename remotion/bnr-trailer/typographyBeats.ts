@@ -10,13 +10,12 @@ export type TypographyBeat = {
   logo?: boolean; // show the event logo behind the word
 };
 
-// One consistent "slam" entrance for all 4 words. Each beat carries its own
-// background clip (top of ENERGY_ORDER, so the most energetic footage)
-// so the typography never sits over a plain black screen — the footage
-// keeps moving underneath/around the text.
+// One consistent "slam" entrance. Each beat carries its own background
+// clip (top of ENERGY_ORDER, so the most energetic footage) so the
+// typography never sits over a plain black screen. Dropped the СОФИЯ and
+// JOY STATION beats — the dedicated JoyStationReveal scene already
+// covers both, so repeating them here was redundant text.
 export const TYPOGRAPHY_BEATS: TypographyBeat[] = [
   { word: "Bandata na Ruba", duration: 28, variant: "slam", clipIndex: ENERGY_ORDER[0], logo: true },
-  { word: "СОФИЯ", duration: 28, variant: "slam", clipIndex: ENERGY_ORDER[1] },
-  { word: "JOY STATION", duration: 28, variant: "slam", clipIndex: ENERGY_ORDER[2] },
-  { word: "ТАЗИ СЪБОТА", duration: 28, variant: "slam", clipIndex: ENERGY_ORDER[3] },
+  { word: "ТАЗИ СЪБОТА", duration: 28, variant: "slam", clipIndex: ENERGY_ORDER[1] },
 ];
