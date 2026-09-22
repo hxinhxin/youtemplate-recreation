@@ -16,9 +16,16 @@
 //   clip-10           — performer engaging crowd, moderate energy, short
 //     source (~4.3s)
 //   clip-03           — performer on mic, some hands/phone lights visible
+//   bnr-clip-02 & bnr-clip-03 — both top-tier energy (same costumed
+//     performer crowd-surfing / a chaotic fisheye confetti blast from
+//     inside the crowd), but short sources (5.4s / 7.1s) and, for
+//     bnr-clip-03, heavy spin/motion blur — placed after the OpeningGlimpses
+//     cut list (which only reads the first 9 entries) so they only ever
+//     appear in the buildup montage's bounded, quick-cut sampling, never
+//     risking a startFrom past the end of the clip.
 //   clip-02           — packed crowd but calmer, mostly wide/venue shots
 //   clip-01           — static DJ-gear close-up, no crowd at all
-export const ENERGY_ORDER = [3, 5, 10, 7, 6, 9, 4, 8, 2, 1, 0];
+export const ENERGY_ORDER = [3, 5, 10, 7, 6, 9, 4, 8, 2, 11, 12, 1, 0];
 
 // clip-04 — the single most energetic clip, used for the hero countdown
 // number and the final countdown card.
