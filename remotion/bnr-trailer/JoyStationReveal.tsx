@@ -38,6 +38,19 @@ export const JoyStationReveal: React.FC<{ durationInFrames: number }> = ({ durat
     extrapolateRight: "clamp",
   });
 
+  // "VERY SOON" lands after the venue/city settle, as the closing beat of
+  // this scene — a pulsing glow rather than a static caption.
+  const verySoonOpacity = interpolate(frame, [36, 44], [0, 1], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+  });
+  const verySoonScale = interpolate(frame, [36, 44, 50], [0.8, 1.08, 1], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+    easing: Easing.out(Easing.back(3)),
+  });
+  const verySoonPulse = 18 + Math.sin(frame / 6) * 10;
+
   return (
     <AbsoluteFill style={{ backgroundColor: theme.background, overflow: "hidden" }}>
       <OffthreadVideo
@@ -86,6 +99,23 @@ export const JoyStationReveal: React.FC<{ durationInFrames: number }> = ({ durat
             }}
           >
             {concertInfo.city}
+          </div>
+
+          <div
+            style={{
+              marginTop: 30,
+              opacity: verySoonOpacity,
+              transform: `scale(${verySoonScale})`,
+              fontFamily: theme.headlineFont,
+              fontWeight: 900,
+              color: theme.white,
+              fontSize: 30,
+              letterSpacing: 14,
+              textTransform: "uppercase",
+              textShadow: `0 0 ${verySoonPulse}px ${theme.red}`,
+            }}
+          >
+            Very Soon
           </div>
         </div>
       </AbsoluteFill>
