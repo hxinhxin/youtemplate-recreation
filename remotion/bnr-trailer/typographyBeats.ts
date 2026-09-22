@@ -18,5 +18,5 @@ export const TYPOGRAPHY_BEATS: TypographyBeat[] = [
   { word: "Bandata na Ruba", duration: 28, variant: "slam", clipIndex: ENERGY_ORDER[0], logo: true },
   { word: "СОФИЯ", duration: 28, variant: "slam", clipIndex: ENERGY_ORDER[1] },
   { word: "JOY STATION", duration: 28, variant: "slam", clipIndex: ENERGY_ORDER[2] },
-  { word: "СЪБОТА", duration: 28, variant: "slam", clipIndex: ENERGY_ORDER[3] },
+  { word: "ТАЗИ СЪБОТА", duration: 28, variant: "slam", clipIndex: ENERGY_ORDER[3] },
 ];
