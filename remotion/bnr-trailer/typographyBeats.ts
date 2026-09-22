@@ -17,6 +17,6 @@ export type TypographyBeat = {
 // JoyStationReveal uses clip-06) — index 10 (bnr-clip-01) even shows the
 // actual "БАНДАТА НА РЪБА" branded backdrop, a natural fit for that beat.
 export const TYPOGRAPHY_BEATS: TypographyBeat[] = [
-  { word: "Bandata na Ruba", duration: 28, variant: "slam", clipIndex: 10, logo: true },
+  { word: "Бандата на ръба", duration: 28, variant: "slam", clipIndex: 10, logo: true },
   { word: "ТАЗИ СЪБОТА", duration: 28, variant: "slam", clipIndex: 4 },
 ];

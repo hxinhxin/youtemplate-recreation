@@ -43,8 +43,8 @@ export const JoyStationReveal: React.FC<{ durationInFrames: number }> = ({ durat
     extrapolateRight: "clamp",
   });
 
-  // "VERY SOON" lands after the venue/city settle, as the closing beat of
-  // this scene — a pulsing glow rather than a static caption.
+  // "СЪВСЕМ СКОРО" lands after the venue/city settle, as the closing beat
+  // of this scene — a pulsing glow rather than a static caption.
   const verySoonOpacity = interpolate(frame, [36, 44], [0, 1], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
@@ -129,7 +129,7 @@ export const JoyStationReveal: React.FC<{ durationInFrames: number }> = ({ durat
               textShadow: `0 0 ${verySoonPulse}px ${theme.red}`,
             }}
           >
-            Very Soon
+            Съвсем скоро
           </div>
         </div>
       </AbsoluteFill>

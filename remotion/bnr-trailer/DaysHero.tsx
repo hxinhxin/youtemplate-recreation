@@ -79,7 +79,7 @@ export const DaysHero: React.FC<{ videoSrc: string; durationInFrames: number }> 
             letterSpacing: 10,
           }}
         >
-          DAYS LEFT
+          ДНИ ОСТАВАТ
         </div>
       </div>
 
@@ -104,7 +104,7 @@ export const DaysHero: React.FC<{ videoSrc: string; durationInFrames: number }> 
           textTransform: "uppercase",
         }}
       >
-        UNTIL {concertInfo.brand}
+        ДО {concertInfo.brand}
       </div>
 
       <FilmGrain opacity={0.04} />

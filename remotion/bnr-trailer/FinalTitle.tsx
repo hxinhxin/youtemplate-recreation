@@ -105,7 +105,7 @@ export const FinalTitle: React.FC = () => {
               textShadow: `0 0 ${glow}px ${theme.red}`,
             }}
           >
-            {concertInfo.brand} IN {concertInfo.city}
+            {concertInfo.brand} В {concertInfo.city}
           </div>
 
           <div
