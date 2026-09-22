@@ -9,15 +9,16 @@ import { QuickCutMontage } from "./QuickCutMontage";
 import { TextBeat } from "./TextBeat";
 import { RevealClip } from "./RevealClip";
 import { FinalTitle } from "./FinalTitle";
-import { REVEAL_BEATS } from "./revealBeats";
 import {
   BREAK_APART_FRAMES,
   COUNTDOWN_DURATIONS,
-  FINAL_BURST_SLICE_DURATIONS,
   FINAL_TITLE_DURATION,
   OPENING_SLICE_DURATIONS,
+  REVEAL_CLIP_DURATION,
   TOTAL_DURATION,
   TRANSITION_DURATION,
+  TYPOGRAPHY_WORDS,
+  TYPOGRAPHY_WORD_DURATION,
 } from "./durations";
 
 // Strobe-flash punch-cut — the brief explicitly wants flashes and hard
@@ -56,17 +57,20 @@ export const BhrTrailer: React.FC = () => {
       />
 
       <TransitionSeries>
-        {/* Opening tension-builder, no literal tournament footage available
-            — reuses the concert clips as the intense cold open. */}
+        {/* SCENE 1 — intro montage. No literal tournament footage exists,
+            so it runs on the concert clips per your call; "BHR" flashes
+            briefly near the end. */}
         <TransitionSeries.Sequence
           durationInFrames={OPENING_SLICE_DURATIONS.reduce((a, b) => a + b, 0)}
         >
-          <QuickCutMontage sliceDurations={OPENING_SLICE_DURATIONS} />
+          <QuickCutMontage sliceDurations={OPENING_SLICE_DURATIONS} brandFlash />
         </TransitionSeries.Sequence>
 
         {strobeCut("opening-to-countdown")}
 
-        {/* 3 -> 2 -> 1, each numeral filled with a different clip */}
+        {/* SCENE 2 + 3 — 3 -> 2 -> 1, each numeral filled with a different
+            clip; "1" shatters/expands into the reveal in its own final
+            frames (Scene 3's "zoom through the number"). */}
         {countdownDigits.map((digit, i) => (
           <Fragment key={digit}>
             <TransitionSeries.Sequence durationInFrames={COUNTDOWN_DURATIONS[i]}>
@@ -89,34 +93,31 @@ export const BhrTrailer: React.FC = () => {
 
         {strobeCut("countdown-to-reveal")}
 
-        {/* Concert reveal: clips + BHR / SOFIA / SATURDAY word beats */}
-        {REVEAL_BEATS.map((beat, i) => (
-          <Fragment key={i}>
-            <TransitionSeries.Sequence durationInFrames={beat.duration}>
-              {beat.type === "clip" ? (
-                <RevealClip
-                  clip={CLIPS[beat.clipIndex % CLIPS.length]}
-                  index={beat.clipIndex}
-                  durationInFrames={beat.duration}
-                />
-              ) : (
-                <TextBeat word={beat.word} durationInFrames={beat.duration} />
-              )}
+        {/* SCENE 4 — concert reveal: clips only, no text. */}
+        {CLIPS.map((clip, i) => (
+          <Fragment key={clip.src}>
+            <TransitionSeries.Sequence durationInFrames={REVEAL_CLIP_DURATION}>
+              <RevealClip clip={clip} index={i} durationInFrames={REVEAL_CLIP_DURATION} />
             </TransitionSeries.Sequence>
-            {i < REVEAL_BEATS.length - 1 && strobeCut(`reveal-${i}`)}
+            {i < CLIPS.length - 1 && strobeCut(`reveal-${i}`)}
           </Fragment>
         ))}
 
-        {strobeCut("reveal-to-burst")}
+        {strobeCut("reveal-to-typography")}
 
-        <TransitionSeries.Sequence
-          durationInFrames={FINAL_BURST_SLICE_DURATIONS.reduce((a, b) => a + b, 0)}
-        >
-          <QuickCutMontage sliceDurations={FINAL_BURST_SLICE_DURATIONS} clipOffset={2} />
-        </TransitionSeries.Sequence>
+        {/* SCENE 5 — event typography: BHR / SOFIA / SATURDAY, one at a time. */}
+        {TYPOGRAPHY_WORDS.map((word, i) => (
+          <Fragment key={word}>
+            <TransitionSeries.Sequence durationInFrames={TYPOGRAPHY_WORD_DURATION}>
+              <TextBeat word={word} durationInFrames={TYPOGRAPHY_WORD_DURATION} />
+            </TransitionSeries.Sequence>
+            {i < TYPOGRAPHY_WORDS.length - 1 && strobeCut(`typography-${i}`)}
+          </Fragment>
+        ))}
 
-        {strobeCut("burst-to-title")}
+        {strobeCut("typography-to-final")}
 
+        {/* SCENE 6 — final event card. */}
         <TransitionSeries.Sequence durationInFrames={FINAL_TITLE_DURATION}>
           <FinalTitle />
         </TransitionSeries.Sequence>

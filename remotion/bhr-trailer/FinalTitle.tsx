@@ -56,6 +56,22 @@ export const FinalTitle: React.FC = () => {
         }}
       />
 
+      {/* Subtle red light leak drifting across the frame */}
+      <AbsoluteFill
+        style={{
+          background: `radial-gradient(circle at ${30 + Math.sin(frame / 40) * 20}% ${20 + Math.cos(frame / 55) * 10}%, ${theme.red}22 0%, transparent 45%)`,
+          mixBlendMode: "screen",
+        }}
+      />
+
+      {/* Very subtle film grain */}
+      <svg style={{ position: "absolute", inset: 0, width: "100%", height: "100%", opacity: 0.05 }}>
+        <filter id="grain">
+          <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" stitchTiles="stitch" />
+        </filter>
+        <rect width="100%" height="100%" filter="url(#grain)" />
+      </svg>
+
       <AbsoluteFill style={{ justifyContent: "center", alignItems: "center", padding: "0 50px" }}>
         <div style={{ textAlign: "center" }}>
           <div
@@ -85,7 +101,7 @@ export const FinalTitle: React.FC = () => {
               letterSpacing: 3,
             }}
           >
-            {concertInfo.dateLabel}
+            {concertInfo.day} · {concertInfo.dateLabel}
           </div>
 
           <div

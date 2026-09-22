@@ -3,8 +3,10 @@ import { theme } from "./theme";
 import { WIDTH, HEIGHT } from "./durations";
 
 // A single countdown numeral, filled with concert footage (clipped via SVG
-// text), with a glass sheen highlight, a moving light streak, an edge glow,
-// a camera push-in, and (when `breakApart` is set) a shatter/expand
+// text), with a glass sheen highlight, a static reflection band, a moving
+// light streak, a white glass outline, a red edge glow, pseudo-3D shadow,
+// a brief chromatic-aberration ghost on entry, a motion-blur snap, a
+// camera push-in, and (when `breakApart` is set) a shatter/expand
 // dissolve in the final frames that hands off into the reveal.
 export const GlassNumber: React.FC<{
   digit: string;
@@ -35,6 +37,20 @@ export const GlassNumber: React.FC<{
     easing: Easing.out(Easing.back(3)),
   });
 
+  // Motion-blur snap: sharp-to-blurred-to-sharp on entry, like the number
+  // is slamming into focus.
+  const entryBlur = interpolate(frame, [0, 6, 12], [14, 4, 0], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+  });
+
+  // Chromatic-aberration ghost: red/cyan offset copies of the outline that
+  // converge into the sharp white outline within the first ~10 frames.
+  const chromaSpread = interpolate(frame, [0, 10], [14, 0], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+  });
+
   // Light streak sweeping across the glass, on a loop-ish diagonal.
   const streakOffset = interpolate(frame, [0, durationInFrames], [-60, 160], {
     extrapolateLeft: "clamp",
@@ -56,8 +72,9 @@ export const GlassNumber: React.FC<{
       })
     : 0;
 
-  const breakScale = 1 + breakProgress * 2.2;
+  const breakScale = 1 + breakProgress * 2.5;
   const breakOpacity = 1 - breakProgress;
+  const breakBlur = breakProgress * 18;
   const glitchX = breakProgress > 0 ? Math.sin(frame * 7) * breakProgress * 30 : 0;
 
   const scale = pushIn * entrance * breakScale;
@@ -80,6 +97,7 @@ export const GlassNumber: React.FC<{
         height: boxH,
         transform: `scale(${scale}) translateX(${glitchX}px)`,
         opacity: breakOpacity,
+        filter: `blur(${entryBlur + breakBlur}px)`,
       }}
     >
       <svg width={0} height={0} style={{ position: "absolute" }}>
@@ -91,11 +109,7 @@ export const GlassNumber: React.FC<{
       </svg>
 
       {/* Deep shadow duplicate, offset for pseudo-3D extrusion */}
-      <svg
-        width={boxW}
-        height={boxH}
-        style={{ position: "absolute", top: 10, left: 6, opacity: 0.6 }}
-      >
+      <svg width={boxW} height={boxH} style={{ position: "absolute", top: 10, left: 6, opacity: 0.6 }}>
         <text {...textProps} fill="#000000">
           {digit}
         </text>
@@ -112,8 +126,44 @@ export const GlassNumber: React.FC<{
         </text>
       </svg>
 
+      {/* Chromatic-aberration ghosts (fade to nothing by frame ~10) */}
+      {chromaSpread > 0.5 && (
+        <>
+          <svg
+            width={boxW}
+            height={boxH}
+            style={{ position: "absolute", top: 0, left: -chromaSpread, opacity: 0.5, mixBlendMode: "screen" }}
+          >
+            <text {...textProps} fill="#ff2b4a" fillOpacity={0}>
+              {digit}
+            </text>
+            <text {...textProps} fill="none" stroke="#ff2b4a" strokeWidth={4}>
+              {digit}
+            </text>
+          </svg>
+          <svg
+            width={boxW}
+            height={boxH}
+            style={{ position: "absolute", top: 0, left: chromaSpread, opacity: 0.5, mixBlendMode: "screen" }}
+          >
+            <text {...textProps} fill="none" stroke="#2bd6ff" strokeWidth={4}>
+              {digit}
+            </text>
+          </svg>
+        </>
+      )}
+
+      {/* White glass outline */}
+      <svg width={boxW} height={boxH} style={{ position: "absolute", top: 0, left: 0 }}>
+        <text {...textProps} fill="none" stroke="rgba(255,255,255,0.85)" strokeWidth={3}>
+          {digit}
+        </text>
+      </svg>
+
       {/* Video clipped to the numeral shape */}
-      <div style={{ width: boxW, height: boxH, clipPath: `url(#${clipId})`, overflow: "hidden", position: "relative" }}>
+      <div
+        style={{ width: boxW, height: boxH, clipPath: `url(#${clipId})`, overflow: "hidden", position: "relative" }}
+      >
         <OffthreadVideo
           src={videoSrc}
           startFrom={videoStartFrom}
@@ -130,7 +180,21 @@ export const GlassNumber: React.FC<{
           style={{
             position: "absolute",
             inset: 0,
-            background: "linear-gradient(135deg, rgba(255,255,255,0.35) 0%, transparent 35%)",
+            background: "linear-gradient(135deg, rgba(255,255,255,0.4) 0%, transparent 35%)",
+            mixBlendMode: "screen",
+          }}
+        />
+
+        {/* Static reflection band, like light catching a glass surface */}
+        <div
+          style={{
+            position: "absolute",
+            top: "8%",
+            left: "-10%",
+            width: "45%",
+            height: "22%",
+            background: "linear-gradient(120deg, transparent, rgba(255,255,255,0.5), transparent)",
+            transform: "rotate(-18deg)",
             mixBlendMode: "screen",
           }}
         />
