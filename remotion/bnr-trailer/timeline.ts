@@ -28,15 +28,19 @@ const buildTimeline = (durations: number[]): TimelineEntry[] => {
   });
 };
 
+// DaysHero (the "4 DAYS LEFT" countdown reveal) moved up to be the very
+// second scene, right after the drone open — the countdown number is the
+// headline beat and shouldn't wait behind the opening-glimpses tension
+// build. OpeningGlimpses now follows it instead of leading into it.
 // Reveal-pause + typography beats (the "Bandata na Ruba / Sofia / Joy
-// Station / Saturday" text reveal) moved earlier — right after the
-// buildup montage — instead of after the feature clips and venue
-// reveal, so the event's name/venue/date show up much sooner rather
-// than being backloaded near the very end of the trailer.
+// Station / Saturday" text reveal) sit right after the buildup montage
+// — instead of after the feature clips and venue reveal — so the
+// event's name/venue/date show up much sooner rather than being
+// backloaded near the very end of the trailer.
 const itemDurations = [
   DRONE_OPEN_DURATION,
-  OPENING_DURATION,
   DAYS_HERO_DURATION,
+  OPENING_DURATION,
   BUILDUP_DURATION,
   REVEAL_PAUSE_DURATION,
   ...TYPOGRAPHY_BEATS.map((b) => b.duration),
@@ -50,8 +54,8 @@ const itemDurations = [
 const timeline = buildTimeline(itemDurations);
 
 export const droneOpenTimeline = timeline[0];
-export const openingTimeline = timeline[1];
-export const daysHeroTimeline = timeline[2];
+export const daysHeroTimeline = timeline[1];
+export const openingTimeline = timeline[2];
 export const buildupTimeline = timeline[3];
 export const revealPauseTimeline = timeline[4];
 export const typographyTimelines = timeline.slice(5, 5 + TYPOGRAPHY_BEATS.length);

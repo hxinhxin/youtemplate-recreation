@@ -148,23 +148,27 @@ export const BnrTrailer: React.FC = () => {
           <DroneOpen durationInFrames={DRONE_OPEN_DURATION} />
         </TransitionSeries.Sequence>
 
-        {strobeCut("drone-to-opening")}
+        {strobeCut("drone-to-hero")}
 
-        {/* SCENE 1 — opening tension: near-black glimpses, not a bright
-            montage. Builds toward "something is coming." */}
-        <TransitionSeries.Sequence durationInFrames={OPENING_DURATION}>
-          <OpeningGlimpses durationInFrames={OPENING_DURATION} />
-        </TransitionSeries.Sequence>
-
-        {strobeCut("opening-to-hero")}
-
-        {/* SCENE 2 — the signature shot: DAYS_LEFT filled with the most
-            energetic crowd footage, light sweep reveal, bass-hit climax. */}
+        {/* SCENE 2 (moved up) — the signature shot: DAYS_LEFT filled with
+            the most energetic crowd footage, light sweep reveal, bass-hit
+            climax. This is the headline beat, so it's the very next thing
+            after the drone open rather than waiting behind the opening
+            glimpses. */}
         <TransitionSeries.Sequence durationInFrames={DAYS_HERO_DURATION}>
           <DaysHero videoSrc={CLIPS[HERO_CLIP_INDEX].src} durationInFrames={DAYS_HERO_DURATION} />
         </TransitionSeries.Sequence>
 
-        {strobeCut("hero-to-buildup")}
+        {strobeCut("hero-to-opening")}
+
+        {/* SCENE 1 — opening tension: near-black glimpses, not a bright
+            montage. Now a breather after the countdown reveal, building
+            back up toward the crowd-explosion montage. */}
+        <TransitionSeries.Sequence durationInFrames={OPENING_DURATION}>
+          <OpeningGlimpses durationInFrames={OPENING_DURATION} />
+        </TransitionSeries.Sequence>
+
+        {strobeCut("opening-to-buildup")}
 
         {/* SCENE 3 — crowd-explosion montage: very short, fast-accelerating
             cuts, cycling through the most energetic clips first. */}
