@@ -73,8 +73,11 @@ const finalCtaBeat = finalTitleTimeline.start + 26;
 // A second ticket-CTA flash partway through, not just at the very end.
 // Lands during OpeningGlimpses — near-black, no competing on-screen
 // text — so it reads clearly floating over the rapid-cut footage.
+// Duration bumped 36 -> 64 so it actually holds on screen instead of
+// flashing past (OpeningGlimpses runs 100 frames, so this still ends
+// with room to spare before that scene cuts away).
 const TICKET_POPUP_START = openingTimeline.start + 30;
-const TICKET_POPUP_DURATION = 36;
+const TICKET_POPUP_DURATION = 64;
 
 // Voiceover lines that speak the same words as they land on screen —
 // timed to each word's own fade-in beat rather than the scene start, so

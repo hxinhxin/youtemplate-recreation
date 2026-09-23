@@ -68,8 +68,10 @@ const TYPOGRAPHY_TOTAL_DURATION = TYPOGRAPHY_BEATS.reduce((a, b) => a + b.durati
 // too many — DaysHero already delivers that beat, so this scene was
 // removed and the confetti feature now cuts straight to FinalTitle.
 // Trimmed 85 -> 72 to shorten the overall trailer — the CTA/site lines
-// finish fading in by frame 50, still leaving a solid hold.
-export const FINAL_TITLE_DURATION = 72;
+// finish fading in by frame 50, still leaving a solid hold. Bumped back
+// up to 108 — the ticket CTA needs to actually stay on screen, not just
+// flash in before the hard cut to black.
+export const FINAL_TITLE_DURATION = 108;
 
 // Total item count in the top-level TransitionSeries: droneOpen(1) +
 // opening(1) + daysHero(1) + buildup(1) + spidermanFeature(1) +
