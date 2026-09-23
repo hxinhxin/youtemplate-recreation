@@ -18,6 +18,13 @@ import {
   TOTAL_DURATION as COSMO_TOTAL_DURATION,
   WIDTH as COSMO_WIDTH,
 } from "./cosmo-trailer/durations";
+import { PlovdivTrailer } from "./plovdiv-trailer/PlovdivTrailer";
+import {
+  FPS as PLOVDIV_FPS,
+  HEIGHT as PLOVDIV_HEIGHT,
+  TOTAL_DURATION as PLOVDIV_TOTAL_DURATION,
+  WIDTH as PLOVDIV_WIDTH,
+} from "./plovdiv-trailer/durations";
 
 export const RemotionRoot: React.FC = () => {
   return (
@@ -37,6 +44,14 @@ export const RemotionRoot: React.FC = () => {
         fps={COSMO_FPS}
         width={COSMO_WIDTH}
         height={COSMO_HEIGHT}
+      />
+      <Composition
+        id="PlovdivTrailer"
+        component={PlovdivTrailer}
+        durationInFrames={PLOVDIV_TOTAL_DURATION}
+        fps={PLOVDIV_FPS}
+        width={PLOVDIV_WIDTH}
+        height={PLOVDIV_HEIGHT}
       />
       <Composition
         id="ConcertPromo"
