@@ -12,6 +12,7 @@ import { JoyStationReveal } from "./JoyStationReveal";
 import { TextBeat } from "./TextBeat";
 import { RevealClip } from "./RevealClip";
 import { FinalTitle } from "./FinalTitle";
+import { TicketPopup } from "./TicketPopup";
 import { CrowdAudio } from "./CrowdAudio";
 import { AudioHit } from "./AudioHit";
 import { HERO_CLIP_INDEX } from "./energyOrder";
@@ -68,6 +69,12 @@ const strobeCut = (key: string) => (
 const daysHeroClimax = daysHeroTimeline.start + DAYS_HERO_DURATION - 18;
 const bnrBeat = typographyTimelines[0].start;
 const finalCtaBeat = finalTitleTimeline.start + 26;
+
+// A second ticket-CTA flash partway through, not just at the very end.
+// Lands during OpeningGlimpses — near-black, no competing on-screen
+// text — so it reads clearly floating over the rapid-cut footage.
+const TICKET_POPUP_START = openingTimeline.start + 30;
+const TICKET_POPUP_DURATION = 36;
 
 // Voiceover lines that speak the same words as they land on screen —
 // timed to each word's own fade-in beat rather than the scene start, so
@@ -307,6 +314,12 @@ export const BnrTrailer: React.FC = () => {
           <FinalTitle />
         </TransitionSeries.Sequence>
       </TransitionSeries>
+
+      {/* Floats on top of whatever's playing (OpeningGlimpses) without
+          touching that scene's own timing — see TICKET_POPUP_START. */}
+      <Sequence from={TICKET_POPUP_START} durationInFrames={TICKET_POPUP_DURATION}>
+        <TicketPopup durationInFrames={TICKET_POPUP_DURATION} />
+      </Sequence>
     </AbsoluteFill>
   );
 };
