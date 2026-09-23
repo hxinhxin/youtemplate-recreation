@@ -25,10 +25,10 @@ export const COSMO: Venue = {
   logoSrc: staticFile("images/cosmo-logo.png"),
   logoWidth: 360,
   clips: [
-    { src: staticFile("videos/cosmo-clip-01.mov"), startFrom: 90, durationInFrames: 50 },
-    { src: staticFile("videos/cosmo-clip-02.mov"), startFrom: 15, durationInFrames: 42 },
-    { src: staticFile("videos/cosmo-clip-04.mov"), startFrom: 210, durationInFrames: 42 },
-    { src: staticFile("videos/cosmo-clip-05.mov"), startFrom: 70, durationInFrames: 46 },
+    { src: staticFile("videos/cosmo-clip-01.mov"), startFrom: 90, durationInFrames: 36 },
+    { src: staticFile("videos/cosmo-clip-02.mov"), startFrom: 15, durationInFrames: 30 },
+    { src: staticFile("videos/cosmo-clip-04.mov"), startFrom: 210, durationInFrames: 30 },
+    { src: staticFile("videos/cosmo-clip-05.mov"), startFrom: 70, durationInFrames: 33 },
   ],
 };
 
@@ -39,14 +39,14 @@ export const PLOVDIV: Venue = {
   logoSrc: staticFile("images/plovdiv-logo.png"),
   logoWidth: 260,
   clips: [
-    { src: staticFile("videos/plovdiv-clip-02.mov"), startFrom: 30, durationInFrames: 50 },
-    { src: staticFile("videos/plovdiv-clip-01.mov"), startFrom: 200, durationInFrames: 42 },
-    { src: staticFile("videos/plovdiv-clip-04.mov"), startFrom: 60, durationInFrames: 42 },
-    { src: staticFile("videos/plovdiv-clip-06.mov"), startFrom: 100, durationInFrames: 42 },
-    { src: staticFile("videos/plovdiv-clip-07.mov"), startFrom: 10, durationInFrames: 46 },
-    { src: staticFile("videos/plovdiv-clip-08.mov"), startFrom: 90, durationInFrames: 42 },
-    { src: staticFile("videos/plovdiv-clip-09.mov"), startFrom: 120, durationInFrames: 42 },
-    { src: staticFile("videos/plovdiv-clip-10.mov"), startFrom: 20, durationInFrames: 42 },
+    { src: staticFile("videos/plovdiv-clip-02.mov"), startFrom: 30, durationInFrames: 36 },
+    { src: staticFile("videos/plovdiv-clip-01.mov"), startFrom: 200, durationInFrames: 30 },
+    { src: staticFile("videos/plovdiv-clip-04.mov"), startFrom: 60, durationInFrames: 30 },
+    { src: staticFile("videos/plovdiv-clip-06.mov"), startFrom: 100, durationInFrames: 30 },
+    { src: staticFile("videos/plovdiv-clip-07.mov"), startFrom: 10, durationInFrames: 33 },
+    { src: staticFile("videos/plovdiv-clip-08.mov"), startFrom: 90, durationInFrames: 30 },
+    { src: staticFile("videos/plovdiv-clip-09.mov"), startFrom: 120, durationInFrames: 30 },
+    { src: staticFile("videos/plovdiv-clip-10.mov"), startFrom: 20, durationInFrames: 30 },
   ],
 };
 
@@ -59,8 +59,8 @@ export const BUSHIDO: Venue = {
   logoSrc: staticFile("images/bushido-logo.png"),
   logoWidth: 420,
   clips: [
-    { src: staticFile("videos/bushido-clip-01.mov"), startFrom: 120, durationInFrames: 50 },
-    { src: staticFile("videos/bushido-clip-02.mov"), startFrom: 200, durationInFrames: 42 },
+    { src: staticFile("videos/bushido-clip-01.mov"), startFrom: 120, durationInFrames: 36 },
+    { src: staticFile("videos/bushido-clip-02.mov"), startFrom: 200, durationInFrames: 30 },
   ],
 };
 

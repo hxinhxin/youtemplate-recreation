@@ -4,15 +4,15 @@ export const FPS = 30;
 export const WIDTH = 1080;
 export const HEIGHT = 1920;
 
-export const TRANSITION_DURATION = 6;
+export const TRANSITION_DURATION = 5;
 
 // Title card: "ЕДНА ВЕЧЕР" / "3 КЛУБА" — once, for the whole night, not
 // per venue.
-export const TITLE_DURATION = 74;
+export const TITLE_DURATION = 62;
 
 // Outro: every venue's logo together, tagline repeated small beneath —
 // this is now the only place a logo appears, at the very end.
-export const OUTRO_DURATION = 60;
+export const OUTRO_DURATION = 50;
 
 // Total TransitionSeries item count: title(1) + one item per mixed clip
 // + outro(1). Computed from MIXED_CLIPS so adding a clip to venues.ts
