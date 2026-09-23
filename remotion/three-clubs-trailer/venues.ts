@@ -44,7 +44,18 @@ export const PLOVDIV: Venue = {
   ],
 };
 
-// Chapter 3 is pending — slot the next venue's clips + logo in here
-// (same shape as COSMO/PLOVDIV above) once they're sent, and add it to
-// the VENUES array below.
-export const VENUES: Venue[] = [COSMO, PLOVDIV];
+// Chapter 3 — BUSHIDO. Big-room DJ set: dense crowd, blue/purple beams,
+// DJ booth with ring light fixtures visible in the second clip. Only
+// two source clips were sent (vs. three for the other venues), so this
+// chapter runs two highlight cuts instead of three.
+export const BUSHIDO: Venue = {
+  key: "bushido",
+  logoSrc: staticFile("images/bushido-logo.png"),
+  logoWidth: 420,
+  clips: [
+    { src: staticFile("videos/bushido-clip-01.mov"), startFrom: 120, durationInFrames: 66 },
+    { src: staticFile("videos/bushido-clip-02.mov"), startFrom: 200, durationInFrames: 55 },
+  ],
+};
+
+export const VENUES: Venue[] = [COSMO, PLOVDIV, BUSHIDO];
