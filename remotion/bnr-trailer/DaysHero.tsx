@@ -103,13 +103,34 @@ export const DaysHero: React.FC<{ videoSrc: string; durationInFrames: number }> 
           a plain in-flow sibling here was mysteriously never painting,
           seemingly a layout/compositing quirk with this scene's
           transform-heavy content; an absolutely-positioned element right
-          under the "DAYS LEFT" label renders reliably. Sized and treated
-          as a hero word (same fontSize/weight/glow family as JOY
-          STATION), not a small subtitle. */}
+          under the "DAYS LEFT" label renders reliably. A small "ДО"
+          kicker restores the "3 ДНИ ОСТАВАТ ДО ЗАВРЪЩАНЕТО" phrase
+          without shrinking the hero word back down to a subtitle size. */}
       <div
         style={{
           position: "absolute",
-          top: 1480,
+          top: 1470,
+          left: 0,
+          right: 0,
+          textAlign: "center",
+          opacity: heroWordOpacity,
+          fontFamily: theme.bodyFont,
+          fontWeight: 700,
+          color: theme.white,
+          fontSize: 26,
+          letterSpacing: 8,
+          textTransform: "uppercase",
+        }}
+      >
+        ДО
+      </div>
+
+      {/* Sized and treated as a hero word (same fontSize/weight/glow
+          family as JOY STATION), not a small subtitle. */}
+      <div
+        style={{
+          position: "absolute",
+          top: 1518,
           left: 0,
           right: 0,
           textAlign: "center",
