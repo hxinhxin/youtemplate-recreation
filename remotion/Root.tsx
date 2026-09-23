@@ -11,6 +11,13 @@ import {
   TOTAL_DURATION as BNR_TOTAL_DURATION,
   WIDTH as BNR_WIDTH,
 } from "./bnr-trailer/durations";
+import { CosmoTrailer } from "./cosmo-trailer/CosmoTrailer";
+import {
+  FPS as COSMO_FPS,
+  HEIGHT as COSMO_HEIGHT,
+  TOTAL_DURATION as COSMO_TOTAL_DURATION,
+  WIDTH as COSMO_WIDTH,
+} from "./cosmo-trailer/durations";
 
 export const RemotionRoot: React.FC = () => {
   return (
@@ -22,6 +29,14 @@ export const RemotionRoot: React.FC = () => {
         fps={BNR_FPS}
         width={BNR_WIDTH}
         height={BNR_HEIGHT}
+      />
+      <Composition
+        id="CosmoTrailer"
+        component={CosmoTrailer}
+        durationInFrames={COSMO_TOTAL_DURATION}
+        fps={COSMO_FPS}
+        width={COSMO_WIDTH}
+        height={COSMO_HEIGHT}
       />
       <Composition
         id="ConcertPromo"
