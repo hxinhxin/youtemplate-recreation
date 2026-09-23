@@ -12,15 +12,17 @@ export const ClipScene: React.FC<{ clip: VenueClip; index: number; volume?: numb
   const durationInFrames = clip.durationInFrames;
 
   const zoomingIn = index % 2 === 0;
-  const drift = interpolate(frame, [0, durationInFrames], zoomingIn ? [1, 1.22] : [1.22, 1], {
+  const drift = interpolate(frame, [0, durationInFrames], zoomingIn ? [1, 1.24] : [1.24, 1], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
   });
 
-  const impact = interpolate(frame, [0, 8], [1.12, 1], {
+  // Harder punch-in on every cut — bigger overshoot, snappier settle —
+  // so each clip lands with more force instead of just fading up.
+  const impact = interpolate(frame, [0, 11], [1.32, 1], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
-    easing: Easing.out(Easing.cubic),
+    easing: Easing.out(Easing.back(1.4)),
   });
 
   const audioFade = interpolate(
@@ -29,6 +31,13 @@ export const ClipScene: React.FC<{ clip: VenueClip; index: number; volume?: numb
     [0, 1, 1, 0],
     { extrapolateLeft: "clamp", extrapolateRight: "clamp" },
   );
+
+  // A quick white flash riding in with the punch-in reinforces the hit
+  // beyond what the transition's own flash already gives.
+  const hitFlash = interpolate(frame, [0, 3, 9], [0.35, 0.12, 0], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+  });
 
   return (
     <AbsoluteFill style={{ backgroundColor: theme.background, overflow: "hidden" }}>
@@ -41,14 +50,17 @@ export const ClipScene: React.FC<{ clip: VenueClip; index: number; volume?: numb
           height: "100%",
           objectFit: "cover",
           transform: `scale(${drift * impact})`,
+          filter: "contrast(1.12) saturate(1.25) brightness(1.02)",
         }}
       />
 
       <AbsoluteFill
-        style={{ background: "radial-gradient(ellipse at center, transparent 55%, rgba(3,3,3,0.45) 100%)" }}
+        style={{ background: "radial-gradient(ellipse at center, transparent 42%, rgba(0,0,0,0.6) 100%)" }}
       />
 
-      <FilmGrain opacity={0.04} />
+      <AbsoluteFill style={{ backgroundColor: "#ffffff", opacity: hitFlash }} />
+
+      <FilmGrain opacity={0.05} />
     </AbsoluteFill>
   );
 };

@@ -8,7 +8,7 @@ export const TRANSITION_DURATION = 8;
 
 // Title card: "ЕДНА ВЕЧЕР" / "3 КЛУБА" — once, for the whole night, not
 // per venue.
-export const TITLE_DURATION = 70;
+export const TITLE_DURATION = 85;
 
 // Outro: every venue's logo together, tagline repeated small beneath —
 // this is now the only place a logo appears, at the very end.

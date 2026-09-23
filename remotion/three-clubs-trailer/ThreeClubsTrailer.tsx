@@ -5,20 +5,23 @@ import { pushCut } from "@remotion/transitions/push-cut";
 import { TitleCard } from "./TitleCard";
 import { ClipScene } from "./ClipScene";
 import { OutroCard } from "./OutroCard";
+import { CinematicBars } from "./CinematicBars";
 import { MIXED_CLIPS } from "./venues";
 import { OUTRO_DURATION, TITLE_DURATION, TRANSITION_DURATION } from "./durations";
 import { theme } from "./theme";
 
+// Harder, brighter flash and a bigger push on every cut than a subtle
+// trailer would use — this is the rhythm the whole edit is built around.
 const strobeCut = (key: string) => (
   <TransitionSeries.Transition
     key={key}
     timing={linearTiming({ durationInFrames: TRANSITION_DURATION })}
     presentation={pushCut({
       flashColor: "#ffffff",
-      flashOpacity: 0.22,
-      flashFrames: 2,
-      outgoingScale: 1.05,
-      incomingStartScale: 1.1,
+      flashOpacity: 0.4,
+      flashFrames: 3,
+      outgoingScale: 1.1,
+      incomingStartScale: 1.22,
       incomingEndScale: 1.0,
     })}
   />
@@ -54,6 +57,8 @@ export const ThreeClubsTrailer: React.FC = () => {
           <OutroCard durationInFrames={OUTRO_DURATION} />
         </TransitionSeries.Sequence>
       </TransitionSeries>
+
+      <CinematicBars />
     </AbsoluteFill>
   );
 };

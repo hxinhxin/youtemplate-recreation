@@ -14,17 +14,18 @@ export const OutroCard: React.FC<{ durationInFrames: number }> = ({ durationInFr
   const lastVenue = VENUES[VENUES.length - 1];
   const bgClip = lastVenue.clips[lastVenue.clips.length - 1];
 
-  const bgZoom = interpolate(frame, [0, durationInFrames], [1.15, 1.3], {
+  const bgZoom = interpolate(frame, [0, durationInFrames], [1.2, 1.38], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
   });
   const bgOpacity = interpolate(frame, [0, 12], [0, 1], { extrapolateRight: "clamp" });
+  const flash = interpolate(frame, [0, 4, 11], [0.8, 0.3, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
 
-  const logosOpacity = interpolate(frame, [0, 10], [0, 1], { extrapolateRight: "clamp" });
-  const logosScale = interpolate(frame, [0, 10, 16, durationInFrames], [0.7, 1.06, 1, 1.02], {
+  const logosOpacity = interpolate(frame, [0, 9], [0, 1], { extrapolateRight: "clamp" });
+  const logosScale = interpolate(frame, [0, 9, 15, durationInFrames], [0.42, 1.14, 1, 1.03], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
-    easing: Easing.out(Easing.back(3)),
+    easing: Easing.out(Easing.back(4)),
   });
 
   const taglineOpacity = interpolate(frame, [14, 24], [0, 1], {
@@ -52,12 +53,13 @@ export const OutroCard: React.FC<{ durationInFrames: number }> = ({ durationInFr
           objectFit: "cover",
           opacity: bgOpacity,
           transform: `scale(${bgZoom})`,
-          filter: "blur(12px) brightness(0.45) saturate(1.1)",
+          filter: "blur(12px) brightness(0.42) saturate(1.3) contrast(1.12)",
         }}
       />
       <AbsoluteFill
-        style={{ background: "radial-gradient(ellipse at center, transparent 25%, rgba(3,3,3,0.6) 100%)" }}
+        style={{ background: "radial-gradient(ellipse at center, transparent 18%, rgba(0,0,0,0.7) 100%)" }}
       />
+      <AbsoluteFill style={{ backgroundColor: "#ffffff", opacity: flash }} />
 
       <AbsoluteFill style={{ justifyContent: "center", alignItems: "center" }}>
         <div style={{ textAlign: "center", padding: "0 60px" }}>
