@@ -24,8 +24,11 @@ export const OPENING_DURATION = 100;
 // number was holding on screen too long), then bumped to 134: the "UNTIL
 // BANDATA NA RUBA" subtitle fades in at frame 42, so at 110 it was only
 // visible for 68 frames (~2.3s) before the cut — now visible for at
-// least 90 frames (3s).
-export const DAYS_HERO_DURATION = 134;
+// least 90 frames (3s). Bumped again to 160: the new trailer-style
+// "ЗАВРЪЩАНЕТО" voice line runs longer than the old one, and it needs to
+// finish before the climax riser starts (see ZAVRASHTANETO_VO_DURATION
+// in BnrTrailer.tsx) so the voice doesn't talk over the bass drop.
+export const DAYS_HERO_DURATION = 160;
 
 // Scene 3 — build-up / crowd-explosion montage (10-16s target): very
 // short slices (~0.2-0.6s each = 6-18 frames at 30fps). Trimmed from 13

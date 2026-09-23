@@ -72,13 +72,19 @@ const finalCtaBeat = finalTitleTimeline.start + 26;
 // Voiceover lines that speak the same words as they land on screen —
 // timed to each word's own fade-in beat rather than the scene start, so
 // the voice and the text arrive together. Durations are the actual
-// rendered clip lengths (rounded up to whole frames at 30fps).
+// rendered clip lengths (rounded up to whole frames at 30fps). Re-cut to
+// a more trailer-like read (slower, more deliberate delivery), so sofia
+// and zavrashtaneto are lightly time-compressed (~1.25-1.28x, pitch
+// preserved) to fit their windows — zavrashtaneto's window was also
+// widened (see DAYS_HERO_DURATION) since it still needs to land clear of
+// the climax bass hit. tazi_sabota has room to breathe into the next
+// scenes uncompressed, same as before.
 const SOFIA_VO_START = joyStationTimeline.start + 16; // city text fade-in
-const SOFIA_VO_DURATION = 58;
+const SOFIA_VO_DURATION = 72;
 const ZAVRASHTANETO_VO_START = daysHeroTimeline.start + 34; // hero word fade-in
-const ZAVRASHTANETO_VO_DURATION = 58;
+const ZAVRASHTANETO_VO_DURATION = 72;
 const TAZI_SABOTA_VO_START = typographyTimelines[1].start; // "ТАЗИ СЪБОТА" beat
-const TAZI_SABOTA_VO_DURATION = 68;
+const TAZI_SABOTA_VO_DURATION = 128;
 
 // Ducks the main music track under each voiceover line so the words stay
 // intelligible, then recovers once the line finishes — mirrors the
