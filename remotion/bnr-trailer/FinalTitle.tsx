@@ -39,10 +39,22 @@ export const FinalTitle: React.FC = () => {
   });
   const ctaGlow = 22 + Math.sin(frame / 6) * 12;
 
-  const siteOpacity = interpolate(frame, [40, 50], [0, 1], {
+  // The ticket link is the whole point of this card — it gets its own
+  // punchy entrance (overshoot scale, not just a fade) and a continuous
+  // pulse afterward so it keeps drawing the eye like a real CTA button
+  // rather than sitting flat once it's landed.
+  const siteOpacity = interpolate(frame, [40, 48], [0, 1], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
   });
+  const siteEntranceScale = interpolate(frame, [40, 48, 54], [0.5, 1.12, 1], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+    easing: Easing.out(Easing.back(3)),
+  });
+  const sitePulse = frame > 54 ? 1 + Math.sin((frame - 54) / 9) * 0.035 : 1;
+  const siteScale = siteEntranceScale * sitePulse;
+  const siteGlow = 36 + Math.sin(frame / 9) * 16;
 
   const glow = interpolate(frame, [0, 10, 30], [0, 55, 22], {
     extrapolateLeft: "clamp",
@@ -128,12 +140,12 @@ export const FinalTitle: React.FC = () => {
             style={{
               opacity: ctaOpacity,
               fontFamily: theme.bodyFont,
-              fontWeight: 700,
+              fontWeight: 900,
               color: theme.white,
-              fontSize: 34,
-              letterSpacing: 4,
+              fontSize: 52,
+              letterSpacing: 6,
               textTransform: "uppercase",
-              textShadow: `0 0 ${ctaGlow}px ${theme.red}`,
+              textShadow: `0 0 ${ctaGlow}px ${theme.red}, 0 0 ${ctaGlow * 2}px ${theme.red}`,
             }}
           >
             {concertInfo.cta}
@@ -141,15 +153,20 @@ export const FinalTitle: React.FC = () => {
 
           <div
             style={{
-              marginTop: 14,
+              marginTop: 22,
               opacity: siteOpacity,
+              transform: `scale(${siteScale})`,
+              display: "inline-block",
               fontFamily: theme.bodyFont,
               fontWeight: 900,
               color: theme.white,
-              fontSize: 30,
-              letterSpacing: 3,
-              textDecoration: "underline",
-              textUnderlineOffset: 6,
+              fontSize: 58,
+              letterSpacing: 2,
+              textTransform: "uppercase",
+              backgroundColor: theme.red,
+              padding: "14px 42px",
+              borderRadius: 100,
+              boxShadow: `0 0 ${siteGlow}px ${theme.red}, 0 0 ${siteGlow * 2.5}px ${theme.red}88, 0 10px 30px rgba(0,0,0,0.5)`,
             }}
           >
             {concertInfo.ticketSite}
