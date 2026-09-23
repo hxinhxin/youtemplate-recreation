@@ -20,6 +20,12 @@ export const OutroCard: React.FC<{ durationInFrames: number }> = ({ durationInFr
   });
   const bgOpacity = interpolate(frame, [0, 12], [0, 1], { extrapolateRight: "clamp" });
   const flash = interpolate(frame, [0, 4, 11], [0.8, 0.3, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+  // A second, smaller flash pulse right as the tagline lands — a
+  // "boom-boom" one-two for the finale instead of a single hit.
+  const flash2 = interpolate(frame, [13, 16, 21], [0, 0.28, 0], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+  });
 
   const logosOpacity = interpolate(frame, [0, 9], [0, 1], { extrapolateRight: "clamp" });
   const logosScale = interpolate(frame, [0, 9, 15, durationInFrames], [0.42, 1.14, 1, 1.03], {
@@ -60,6 +66,7 @@ export const OutroCard: React.FC<{ durationInFrames: number }> = ({ durationInFr
         style={{ background: "radial-gradient(ellipse at center, transparent 18%, rgba(0,0,0,0.7) 100%)" }}
       />
       <AbsoluteFill style={{ backgroundColor: "#ffffff", opacity: flash }} />
+      <AbsoluteFill style={{ backgroundColor: "#ffffff", opacity: flash2 }} />
 
       <AbsoluteFill style={{ justifyContent: "center", alignItems: "center" }}>
         <div style={{ textAlign: "center", padding: "0 60px" }}>

@@ -4,11 +4,11 @@ export const FPS = 30;
 export const WIDTH = 1080;
 export const HEIGHT = 1920;
 
-export const TRANSITION_DURATION = 8;
+export const TRANSITION_DURATION = 6;
 
 // Title card: "ЕДНА ВЕЧЕР" / "3 КЛУБА" — once, for the whole night, not
 // per venue.
-export const TITLE_DURATION = 85;
+export const TITLE_DURATION = 74;
 
 // Outro: every venue's logo together, tagline repeated small beneath —
 // this is now the only place a logo appears, at the very end.

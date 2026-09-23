@@ -12,18 +12,25 @@ export const ClipScene: React.FC<{ clip: VenueClip; index: number; volume?: numb
   const durationInFrames = clip.durationInFrames;
 
   const zoomingIn = index % 2 === 0;
-  const drift = interpolate(frame, [0, durationInFrames], zoomingIn ? [1, 1.24] : [1.24, 1], {
+  const drift = interpolate(frame, [0, durationInFrames], zoomingIn ? [1, 1.3] : [1.3, 1], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
   });
 
   // Harder punch-in on every cut — bigger overshoot, snappier settle —
   // so each clip lands with more force instead of just fading up.
-  const impact = interpolate(frame, [0, 11], [1.32, 1], {
+  const impact = interpolate(frame, [0, 10], [1.4, 1], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
-    easing: Easing.out(Easing.back(1.4)),
+    easing: Easing.out(Easing.back(1.6)),
   });
+
+  // A quick handheld-style jolt on landing — direction alternates by
+  // index so it doesn't read as a repeating tic — settling out fast.
+  const shakeSign = index % 2 === 0 ? 1 : -1;
+  const shakeDecay = interpolate(frame, [0, 8], [1, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+  const shakeX = shakeSign * 16 * shakeDecay;
+  const shakeY = -shakeSign * 10 * shakeDecay;
 
   const audioFade = interpolate(
     frame,
@@ -34,7 +41,7 @@ export const ClipScene: React.FC<{ clip: VenueClip; index: number; volume?: numb
 
   // A quick white flash riding in with the punch-in reinforces the hit
   // beyond what the transition's own flash already gives.
-  const hitFlash = interpolate(frame, [0, 3, 9], [0.35, 0.12, 0], {
+  const hitFlash = interpolate(frame, [0, 3, 9], [0.42, 0.14, 0], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
   });
@@ -49,13 +56,13 @@ export const ClipScene: React.FC<{ clip: VenueClip; index: number; volume?: numb
           width: "100%",
           height: "100%",
           objectFit: "cover",
-          transform: `scale(${drift * impact})`,
-          filter: "contrast(1.12) saturate(1.25) brightness(1.02)",
+          transform: `translate(${shakeX}px, ${shakeY}px) scale(${drift * impact})`,
+          filter: "contrast(1.15) saturate(1.32) brightness(1.03)",
         }}
       />
 
       <AbsoluteFill
-        style={{ background: "radial-gradient(ellipse at center, transparent 42%, rgba(0,0,0,0.6) 100%)" }}
+        style={{ background: "radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.62) 100%)" }}
       />
 
       <AbsoluteFill style={{ backgroundColor: "#ffffff", opacity: hitFlash }} />
