@@ -87,9 +87,9 @@ const { frames: volumeFrames, values: volumeValues } = buildVolumeCurve([
   [daysHeroClimax, 0.2], // duck hard so the impact cuts through clean
   [daysHeroClimax + 18, 0.78], // recover strong, leads into the next scene
   [openingTimeline.start + 26, 0.45], // pull back for the quiet tension scene
-  [buildupTimeline.start - 6, 0.52], // lean into the crowd-explosion a beat early
-  [buildupTimeline.start + 14, 0.62], // ducked a little — this is the crowd's moment
-  [buildupTimeline.start + 100, 0.68],
+  [buildupTimeline.start - 6, 0.55], // lean into the crowd-explosion a beat early
+  [buildupTimeline.start + 14, 0.72], // no crowd layer here anymore, music carries it
+  [buildupTimeline.start + 100, 0.72],
   [revealPauseTimeline.start - 4, 0.48], // breathe out for the cinematic pause
   [bnrBeat + 6, 0.55],
   [typographyTimelines[1].start + 4, 0.62],
@@ -114,18 +114,14 @@ export const BnrTrailer: React.FC = () => {
           rather than crossfaded between multiple songs (we only have one). */}
       <Audio src={staticFile(audioConfig.src)} volume={trackVolume(frame)} />
 
-      {/* Crowd audio — no longer a continuous bed under the whole trailer.
-          Playing it the entire time meant it was ALWAYS competing with the
-          music, which was a real part of what made the mix feel
-          cacophonic. Now it only surges at two key crowd moments, silent
-          everywhere else: the crowd-explosion montage (moderate), and the
-          final drop (the strongest scream, reserved for the trailer's
-          biggest visual moment instead of spread throughout). */}
-      <Sequence from={buildupTimeline.start - 6} durationInFrames={120}>
-        <CrowdAudio src={CLIPS[HERO_CLIP_INDEX].src} startFrom={120} durationInFrames={120} volume={0.3} fadeFrames={24} />
-      </Sequence>
+      {/* Crowd audio — down to ONE moment now, not two. The buildup-montage
+          surge was cut entirely (that scene already carries plenty of
+          energy from the music + fast cuts alone, and stacking a crowd
+          layer on top of that was still reading as too busy). What's left
+          is a single, quieter scream reserved for the biggest visual
+          moment — the final drop — rather than any use of it elsewhere. */}
       <Sequence from={finalCtaBeat - 4} durationInFrames={44}>
-        <CrowdAudio src={CLIPS[HERO_CLIP_INDEX].src} startFrom={480} durationInFrames={44} volume={0.55} fadeFrames={16} />
+        <CrowdAudio src={CLIPS[HERO_CLIP_INDEX].src} startFrom={480} durationInFrames={44} volume={0.35} fadeFrames={16} />
       </Sequence>
 
       {/* Riser + impact hits — only at the two real climaxes now. There
