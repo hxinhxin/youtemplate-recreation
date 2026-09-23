@@ -184,9 +184,13 @@ export const BnrTrailer: React.FC = () => {
         {strobeCut("opening-to-buildup")}
 
         {/* SCENE 3 — crowd-explosion montage: very short, fast-accelerating
-            cuts, cycling through the most energetic clips first. */}
+            cuts, cycling through the most energetic clips first. Custom
+            clipOrder (ENERGY_ORDER with clip-10 dropped) — clip-10 also
+            appears in OpeningGlimpses just ~3s earlier in the trailer, so
+            using the default order flashed the same shot twice in quick
+            succession. */}
         <TransitionSeries.Sequence durationInFrames={BUILDUP_DURATION}>
-          <QuickCutMontage sliceDurations={BUILDUP_SLICE_DURATIONS} />
+          <QuickCutMontage sliceDurations={BUILDUP_SLICE_DURATIONS} clipOrder={[3, 5, 10, 6, 9, 4, 2, 1]} />
         </TransitionSeries.Sequence>
 
         {strobeCut("buildup-to-pause")}

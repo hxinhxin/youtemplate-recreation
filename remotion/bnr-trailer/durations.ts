@@ -31,8 +31,13 @@ export const DAYS_HERO_DURATION = 134;
 // short slices (~0.2-0.6s each = 6-18 frames at 30fps). Trimmed from 13
 // slices to 9 — ENERGY_ORDER only has 9 ranked clips, so the extra 4
 // slices were wrapping back around and repeating clips already shown
-// earlier in this same montage.
-export const BUILDUP_SLICE_DURATIONS = [18, 16, 14, 12, 10, 16, 14, 12, 10];
+// earlier in this same montage. Trimmed again 9 -> 8: clip-10 (ranked
+// position 6) also appears in OpeningGlimpses just ~3s earlier in the
+// trailer, so the same shot was flashing twice in quick succession —
+// dropped its slice here and passed a matching 8-entry clipOrder
+// (below, in BnrTrailer.tsx) rather than reusing another clip already
+// used once in this same montage.
+export const BUILDUP_SLICE_DURATIONS = [18, 16, 14, 12, 10, 16, 12, 10];
 export const BUILDUP_DURATION = BUILDUP_SLICE_DURATIONS.reduce((a, b) => a + b, 0);
 
 // Scene 3.5 — two dedicated feature shots for bnr-clip-02/03 (the
