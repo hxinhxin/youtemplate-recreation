@@ -28,6 +28,7 @@ export const COSMO: Venue = {
     { src: staticFile("videos/cosmo-clip-01.mov"), startFrom: 90, durationInFrames: 66 },
     { src: staticFile("videos/cosmo-clip-02.mov"), startFrom: 15, durationInFrames: 55 },
     { src: staticFile("videos/cosmo-clip-04.mov"), startFrom: 210, durationInFrames: 55 },
+    { src: staticFile("videos/cosmo-clip-05.mov"), startFrom: 70, durationInFrames: 60 },
   ],
 };
 
@@ -41,6 +42,7 @@ export const PLOVDIV: Venue = {
     { src: staticFile("videos/plovdiv-clip-02.mov"), startFrom: 30, durationInFrames: 66 },
     { src: staticFile("videos/plovdiv-clip-01.mov"), startFrom: 200, durationInFrames: 55 },
     { src: staticFile("videos/plovdiv-clip-04.mov"), startFrom: 60, durationInFrames: 55 },
+    { src: staticFile("videos/plovdiv-clip-06.mov"), startFrom: 100, durationInFrames: 55 },
   ],
 };
 
@@ -59,3 +61,21 @@ export const BUSHIDO: Venue = {
 };
 
 export const VENUES: Venue[] = [COSMO, PLOVDIV, BUSHIDO];
+
+// Logos moved to the shared outro (see OutroCard), so the body of the
+// video no longer needs to play each venue as its own contiguous block —
+// clips are round-robined across venues instead, so the cut bounces
+// COSMO / Plovdiv / BUSHIDO / COSMO / ... rather than grouping by venue.
+// Adding a clip to any venue above, or a whole new venue, folds into the
+// mix automatically.
+export const MIXED_CLIPS: (VenueClip & { venueKey: string })[] = (() => {
+  const maxClips = Math.max(...VENUES.map((v) => v.clips.length));
+  const mixed: (VenueClip & { venueKey: string })[] = [];
+  for (let i = 0; i < maxClips; i++) {
+    for (const venue of VENUES) {
+      const clip = venue.clips[i];
+      if (clip) mixed.push({ ...clip, venueKey: venue.key });
+    }
+  }
+  return mixed;
+})();
