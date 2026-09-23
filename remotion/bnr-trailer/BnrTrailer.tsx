@@ -69,6 +69,39 @@ const daysHeroClimax = daysHeroTimeline.start + DAYS_HERO_DURATION - 18;
 const bnrBeat = typographyTimelines[0].start;
 const finalCtaBeat = finalTitleTimeline.start + 26;
 
+// Voiceover lines that speak the same words as they land on screen —
+// timed to each word's own fade-in beat rather than the scene start, so
+// the voice and the text arrive together. Durations are the actual
+// rendered clip lengths (rounded up to whole frames at 30fps).
+const SOFIA_VO_START = joyStationTimeline.start + 16; // city text fade-in
+const SOFIA_VO_DURATION = 58;
+const ZAVRASHTANETO_VO_START = daysHeroTimeline.start + 34; // hero word fade-in
+const ZAVRASHTANETO_VO_DURATION = 58;
+const TAZI_SABOTA_VO_START = typographyTimelines[1].start; // "ТАЗИ СЪБОТА" beat
+const TAZI_SABOTA_VO_DURATION = 68;
+
+// Ducks the main music track under each voiceover line so the words stay
+// intelligible, then recovers once the line finishes — mirrors the
+// riser/impact ducking already used at the two climaxes.
+const { frames: duckFrames, values: duckValues } = buildVolumeCurve([
+  [0, 1],
+  [SOFIA_VO_START - 8, 1],
+  [SOFIA_VO_START, 0.4],
+  [SOFIA_VO_START + SOFIA_VO_DURATION, 0.4],
+  [SOFIA_VO_START + SOFIA_VO_DURATION + 10, 1],
+  [ZAVRASHTANETO_VO_START - 8, 1],
+  [ZAVRASHTANETO_VO_START, 0.4],
+  [ZAVRASHTANETO_VO_START + ZAVRASHTANETO_VO_DURATION, 0.4],
+  [ZAVRASHTANETO_VO_START + ZAVRASHTANETO_VO_DURATION + 10, 1],
+  [TAZI_SABOTA_VO_START - 8, 1],
+  [TAZI_SABOTA_VO_START, 0.4],
+  [TAZI_SABOTA_VO_START + TAZI_SABOTA_VO_DURATION, 0.4],
+  [TAZI_SABOTA_VO_START + TAZI_SABOTA_VO_DURATION + 10, 1],
+  [TOTAL_DURATION, 1],
+]);
+const musicDuck = (f: number) =>
+  interpolate(f, duckFrames, duckValues, { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+
 // Redesigned for a clean, "one thing at a time" cinematic mix instead of
 // everything playing simultaneously. Only TWO moments get a full
 // riser+impact+crowd-reaction stack (the DaysHero climax and the final
@@ -111,8 +144,23 @@ export const BnrTrailer: React.FC = () => {
   return (
     <AbsoluteFill>
       {/* Main track — one continuous piece, ducked/risen at the beats
-          rather than crossfaded between multiple songs (we only have one). */}
-      <Audio src={staticFile(audioConfig.src)} volume={trackVolume(frame)} />
+          rather than crossfaded between multiple songs (we only have one).
+          Also ducked under each voiceover line via musicDuck. */}
+      <Audio src={staticFile(audioConfig.src)} volume={trackVolume(frame) * musicDuck(frame)} />
+
+      {/* Voiceover — speaks the same words as they land on screen, in a
+          voice cloned from the reference the client sent. Each line is
+          timed to that word's own fade-in beat (see the VO constants
+          above), not the scene start, so voice and text arrive together. */}
+      <Sequence from={SOFIA_VO_START} durationInFrames={SOFIA_VO_DURATION}>
+        <Audio src={staticFile("audio/vo/vo_sofia.mp3")} volume={1} />
+      </Sequence>
+      <Sequence from={ZAVRASHTANETO_VO_START} durationInFrames={ZAVRASHTANETO_VO_DURATION}>
+        <Audio src={staticFile("audio/vo/vo_zavrashtaneto.mp3")} volume={1} />
+      </Sequence>
+      <Sequence from={TAZI_SABOTA_VO_START} durationInFrames={TAZI_SABOTA_VO_DURATION}>
+        <Audio src={staticFile("audio/vo/vo_tazi_sabota.mp3")} volume={1} />
+      </Sequence>
 
       {/* Crowd audio — down to ONE moment now, not two. The buildup-montage
           surge was cut entirely (that scene already carries plenty of
