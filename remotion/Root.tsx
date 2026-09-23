@@ -25,6 +25,13 @@ import {
   TOTAL_DURATION as PLOVDIV_TOTAL_DURATION,
   WIDTH as PLOVDIV_WIDTH,
 } from "./plovdiv-trailer/durations";
+import { ThreeClubsTrailer } from "./three-clubs-trailer/ThreeClubsTrailer";
+import {
+  FPS as THREE_CLUBS_FPS,
+  HEIGHT as THREE_CLUBS_HEIGHT,
+  TOTAL_DURATION as THREE_CLUBS_TOTAL_DURATION,
+  WIDTH as THREE_CLUBS_WIDTH,
+} from "./three-clubs-trailer/durations";
 
 export const RemotionRoot: React.FC = () => {
   return (
@@ -52,6 +59,14 @@ export const RemotionRoot: React.FC = () => {
         fps={PLOVDIV_FPS}
         width={PLOVDIV_WIDTH}
         height={PLOVDIV_HEIGHT}
+      />
+      <Composition
+        id="ThreeClubsTrailer"
+        component={ThreeClubsTrailer}
+        durationInFrames={THREE_CLUBS_TOTAL_DURATION}
+        fps={THREE_CLUBS_FPS}
+        width={THREE_CLUBS_WIDTH}
+        height={THREE_CLUBS_HEIGHT}
       />
       <Composition
         id="ConcertPromo"
