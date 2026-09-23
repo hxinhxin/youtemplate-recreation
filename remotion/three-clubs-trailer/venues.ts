@@ -43,6 +43,10 @@ export const PLOVDIV: Venue = {
     { src: staticFile("videos/plovdiv-clip-01.mov"), startFrom: 200, durationInFrames: 55 },
     { src: staticFile("videos/plovdiv-clip-04.mov"), startFrom: 60, durationInFrames: 55 },
     { src: staticFile("videos/plovdiv-clip-06.mov"), startFrom: 100, durationInFrames: 55 },
+    { src: staticFile("videos/plovdiv-clip-07.mov"), startFrom: 10, durationInFrames: 60 },
+    { src: staticFile("videos/plovdiv-clip-08.mov"), startFrom: 90, durationInFrames: 55 },
+    { src: staticFile("videos/plovdiv-clip-09.mov"), startFrom: 120, durationInFrames: 55 },
+    { src: staticFile("videos/plovdiv-clip-10.mov"), startFrom: 20, durationInFrames: 55 },
   ],
 };
 
@@ -64,18 +68,22 @@ export const VENUES: Venue[] = [COSMO, PLOVDIV, BUSHIDO];
 
 // Logos moved to the shared outro (see OutroCard), so the body of the
 // video no longer needs to play each venue as its own contiguous block —
-// clips are round-robined across venues instead, so the cut bounces
-// COSMO / Plovdiv / BUSHIDO / COSMO / ... rather than grouping by venue.
-// Adding a clip to any venue above, or a whole new venue, folds into the
-// mix automatically.
+// clips are interleaved across venues instead, so the cut bounces
+// between COSMO / Plovdiv / BUSHIDO rather than grouping by venue. Each
+// venue's clips are spread evenly across the full timeline in proportion
+// to how many it has (rather than a naive round-robin), so a venue with
+// more clips than the others doesn't end up clustered at the end. Adding
+// a clip to any venue above, or a whole new venue, folds into the mix
+// automatically.
 export const MIXED_CLIPS: (VenueClip & { venueKey: string })[] = (() => {
-  const maxClips = Math.max(...VENUES.map((v) => v.clips.length));
-  const mixed: (VenueClip & { venueKey: string })[] = [];
-  for (let i = 0; i < maxClips; i++) {
-    for (const venue of VENUES) {
-      const clip = venue.clips[i];
-      if (clip) mixed.push({ ...clip, venueKey: venue.key });
-    }
-  }
-  return mixed;
+  const totalClips = VENUES.reduce((sum, v) => sum + v.clips.length, 0);
+  const withSortKey = VENUES.flatMap((venue) =>
+    venue.clips.map((clip, i) => ({
+      ...clip,
+      venueKey: venue.key,
+      sortKey: (i + 0.5) * (totalClips / venue.clips.length),
+    })),
+  );
+  withSortKey.sort((a, b) => a.sortKey - b.sortKey);
+  return withSortKey.map(({ sortKey: _sortKey, ...clip }) => clip);
 })();
